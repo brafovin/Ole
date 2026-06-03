@@ -125,10 +125,42 @@ nav a:hover { color: var(--green); }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(0,165,80,0.15), transparent);
+  background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(0,165,80,0.08), transparent);
+  z-index: 1;
 }
 
-.hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+.sponsor-tiles {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  justify-items: center;
+  gap: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.sponsor-tiles img {
+  width: 120px;
+  height: 60px;
+  object-fit: contain;
+  opacity: 0.07;
+  filter: grayscale(1) invert(1);
+  padding: 0.5rem;
+}
+
+.sponsor-text {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fff;
+  opacity: 0.07;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
 
 .countdown-label {
   font-size: 1.7rem;

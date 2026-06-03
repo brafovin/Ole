@@ -371,6 +371,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 }
 
 .card-body { padding: 1.2rem; }
+.card-featured .card-body { padding-top: 3rem; }
 
 .tag {
   display: inline-block;

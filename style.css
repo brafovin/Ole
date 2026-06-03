@@ -132,9 +132,10 @@ nav a:hover { color: var(--green); }
 .hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
 
 .countdown-label {
-  font-size: 0.85rem;
+  font-size: 1.7rem;
   letter-spacing: 0.15em;
-  color: var(--muted);
+  color: #ffffff;
+  font-weight: 900;
   text-transform: uppercase;
   margin-bottom: 0.75rem;
 }

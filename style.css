@@ -189,7 +189,7 @@ nav a:hover { color: var(--green); }
 
 /* === TICKER === */
 .ticker-bar {
-  background: #ffffff;
+  background: var(--red);
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -197,8 +197,8 @@ nav a:hover { color: var(--green); }
 }
 
 .ticker-label {
-  background: #e0e0e0;
-  color: #000;
+  background: #b91c1c;
+  color: #fff;
   padding: 0 1rem;
   font-size: 0.7rem;
   font-weight: 800;

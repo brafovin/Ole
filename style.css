@@ -173,13 +173,13 @@ nav a:hover { color: var(--green); }
 .stat span {
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--accent);
+  color: #ffffff;
   line-height: 1;
 }
 
 .stat small {
   font-size: 0.75rem;
-  color: var(--muted);
+  color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-top: 0.2rem;

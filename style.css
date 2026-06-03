@@ -348,7 +348,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 }
 
 .group-card {
-  background: var(--card-bg);
+  background: #000000;
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.25rem;

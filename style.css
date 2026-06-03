@@ -35,9 +35,8 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-image: url('https://image.stern.de/35897070/t/g2/v1/w1440/r1.3333/-/fussball-wm-2026-pokal.jpg');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(135deg, #0a0f1e, #0d2137, #0a1628);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
 

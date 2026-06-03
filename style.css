@@ -129,37 +129,6 @@ nav a:hover { color: var(--green); }
   z-index: 1;
 }
 
-.sponsor-tiles {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  align-items: center;
-  justify-items: center;
-  gap: 0;
-  overflow: hidden;
-  z-index: 0;
-}
-
-.sponsor-tiles img {
-  width: 140px;
-  height: 70px;
-  object-fit: contain;
-  opacity: 0.25;
-  filter: grayscale(1) invert(1);
-  padding: 0.5rem;
-}
-
-.sponsor-text {
-  font-size: 1rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  color: #fff;
-  opacity: 0.25;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 .hero-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
 
 .countdown-label {

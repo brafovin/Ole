@@ -480,7 +480,15 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
   border-color: var(--accent);
 }
 
-.stadium-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.stadium-photo {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+  margin: -1.25rem -1.25rem 0.75rem -1.25rem;
+  width: calc(100% + 2.5rem);
+  display: block;
+}
 
 .stadium-card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; }
 

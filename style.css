@@ -522,7 +522,13 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
 .fav-card:first-child .fav-rank { color: var(--accent); }
 
-.fav-flag { font-size: 2rem; }
+.fav-flag {
+  width: 48px;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+}
 
 .fav-card > div:nth-child(3) { flex: 1; }
 

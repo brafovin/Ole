@@ -189,7 +189,7 @@ nav a:hover { color: var(--green); }
 
 /* === TICKER === */
 .ticker-bar {
-  background: var(--red);
+  background: #ffffff;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -197,7 +197,8 @@ nav a:hover { color: var(--green); }
 }
 
 .ticker-label {
-  background: #b91c1c;
+  background: #e0e0e0;
+  color: #000;
   padding: 0 1rem;
   font-size: 0.7rem;
   font-weight: 800;
@@ -213,9 +214,9 @@ nav a:hover { color: var(--green); }
 .ticker-track {
   display: inline-flex;
   white-space: nowrap;
-  animation: ticker 30s linear infinite;
+  animation: ticker 30s linear infinite, rgb-text 6s ease-in-out infinite;
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 @keyframes ticker {

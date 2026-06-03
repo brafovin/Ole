@@ -142,20 +142,20 @@ nav a:hover { color: var(--green); }
 }
 
 .sponsor-tiles img {
-  width: 120px;
-  height: 60px;
+  width: 140px;
+  height: 70px;
   object-fit: contain;
-  opacity: 0.07;
+  opacity: 0.25;
   filter: grayscale(1) invert(1);
   padding: 0.5rem;
 }
 
 .sponsor-text {
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: #fff;
-  opacity: 0.07;
+  opacity: 0.25;
   text-transform: uppercase;
   white-space: nowrap;
 }

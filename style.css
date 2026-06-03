@@ -152,8 +152,9 @@ nav a:hover { color: var(--green); }
 }
 
 .hero-sub {
-  color: var(--muted);
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: 700;
   margin-bottom: 2.5rem;
 }
 

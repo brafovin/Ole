@@ -129,7 +129,11 @@ nav a:hover { color: var(--green); }
 
 /* === HERO === */
 .hero {
-  background: transparent;
+  background-image: url('https://image.stern.de/35897070/t/g2/v1/w1440/r1.3333/-/fussball-wm-2026-pokal.jpg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--dark);
   padding: 5rem 1.5rem 4rem;
   text-align: center;
   position: relative;

@@ -35,8 +35,9 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(10, 15, 30, 0.95);
-  backdrop-filter: blur(10px);
+  background-image: url('https://image.stern.de/35897070/t/g2/v1/w1440/r1.3333/-/fussball-wm-2026-pokal.jpg');
+  background-size: cover;
+  background-position: center;
   border-bottom: 1px solid var(--border);
 }
 
@@ -95,13 +96,15 @@ header {
 .logo h1 {
   font-size: 1.5rem;
   font-weight: 800;
-  animation: rgb-text 6s ease-in-out infinite;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
 }
 
 .tagline {
   font-size: 0.7rem;
-  color: var(--muted);
+  color: #ffffff;
   letter-spacing: 0.05em;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
 }
 
 nav {
@@ -110,10 +113,11 @@ nav {
 }
 
 nav a {
-  color: var(--muted);
+  color: #ffffff;
   text-decoration: none;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   transition: color 0.2s;
 }
 

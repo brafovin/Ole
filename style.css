@@ -362,8 +362,11 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 0.75rem;
+  color: #ffffff;
+  background: #000000;
+  margin: -1.25rem -1.25rem 0.75rem -1.25rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 12px 12px 0 0;
 }
 
 .group-card ul { list-style: none; }

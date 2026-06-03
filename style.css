@@ -145,9 +145,9 @@ nav a:hover { color: var(--green); }
   font-weight: 900;
   color: #fff;
   background: transparent;
-  border: 3px solid var(--green);
+  border: 1px solid rgba(0, 165, 80, 0.4);
   padding: 0.4rem 2rem;
-  border-radius: 50px;
+  border-radius: 10px;
   margin-bottom: 1.2rem;
 }
 

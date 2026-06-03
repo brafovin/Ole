@@ -85,6 +85,12 @@ header {
   100% { color: #ff2222; }
 }
 
+@keyframes blue-green {
+  0%   { color: #2222ff; }
+  50%  { color: #22ff22; }
+  100% { color: #2222ff; }
+}
+
 .logo h1 {
   font-size: 1.5rem;
   font-weight: 800;
@@ -214,7 +220,7 @@ nav a:hover { color: var(--green); }
 .ticker-track {
   display: inline-flex;
   white-space: nowrap;
-  animation: ticker 30s linear infinite, rgb-text 6s ease-in-out infinite;
+  animation: ticker 30s linear infinite, blue-green 3s ease-in-out infinite;
   font-size: 0.85rem;
   font-weight: 600;
 }

@@ -379,7 +379,13 @@ main { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 4rem; }
 
 .group-card li:last-child { border-bottom: none; }
 
-.flag { font-size: 2rem; }
+.flag {
+  width: 40px;
+  height: auto;
+  border-radius: 3px;
+  vertical-align: middle;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
 
 /* === STADIEN === */
 .stadiums-grid {

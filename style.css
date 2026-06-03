@@ -12,11 +12,20 @@
   --red:     #ef4444;
 }
 
+/* RGB Background */
+@keyframes rgb-bg {
+  0%   { background-color: #3a0000; }
+  33%  { background-color: #003a00; }
+  66%  { background-color: #00003a; }
+  100% { background-color: #3a0000; }
+}
+
 html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Segoe UI', system-ui, sans-serif;
-  background: var(--dark);
+  background: #3a0000;
+  animation: rgb-bg 6s ease-in-out infinite;
   color: var(--text);
   line-height: 1.6;
 }
@@ -81,7 +90,7 @@ nav a:hover { color: var(--green); }
 
 /* === HERO === */
 .hero {
-  background: linear-gradient(160deg, #0a0f1e 0%, #0d2137 50%, #0a1628 100%);
+  background: transparent;
   padding: 5rem 1.5rem 4rem;
   text-align: center;
   position: relative;

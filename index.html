@@ -90,6 +90,16 @@
   .lobby-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
   #result .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
   #result .act.alt{background:#475569}
+  .btns{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .cta.up{width:auto;background:#7c3aed;padding:10px 14px}
+  .cta.up:disabled{background:#334155}
+  .lvl{display:grid;gap:4px;font-size:12px;font-weight:700;color:var(--yellow)}
+  .lvl i{display:block;height:6px;border-radius:3px;background:#0f172a;overflow:hidden;position:relative}
+  .lvl i::after{content:'';position:absolute;inset:0 auto 0 0;width:var(--p);background:linear-gradient(90deg,#a855f7,#facc15)}
+  .lvl-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .lvl-row span{font-weight:800;color:var(--yellow)}
+  .upg{background:#7c3aed}
+  .upg:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -110,6 +120,7 @@
         <div class="mini" id="hero-stats"></div>
         <div class="move" id="hero-atk"></div>
         <div class="move" id="hero-sup"></div>
+        <div class="lvl-row"><span id="hero-lvl"></span><button class="act upg" id="upgrade-btn"></button></div>
       </div>
     </div>
     <button class="start" id="start-btn">▶ Start</button>
@@ -719,18 +730,24 @@
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
   const DIFF_IDS = ['leicht', 'normal', 'schwer'];
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal' };
+  const MAX_LEVEL = 11;
+  // Kosten für Power-Level 2..11
+  const UPGRADE_COST = [0, 0, 30, 50, 100, 160, 260, 400, 600, 900, 1300, 1900];
+  const powerMult = lv => 1 + .05 * (lv - 1); // +5 % Leben & Schaden pro Level
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', levels: { shelly: 1 } };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
       const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
       save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
         selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id,
-        diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal' };
+        diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal',
+        levels: Object.fromEntries([...unlocked].map(id => [id, Math.max(1, Math.min(MAX_LEVEL, Math.floor(Number(s.levels && s.levels[id])) || 1))])) };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
   const isOwned = id => save.unlocked.includes(id);
+  const levelOf = id => (save.levels && save.levels[id]) || 1;
   let menuOpen = false;
 
   function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
@@ -775,20 +792,28 @@
       sec.innerHTML = `<h2><i class="dot" style="--c:${R.color}"></i>${R.name}<span>${R.info}${cost ? ` · ${cost} 🪙 pro Brawler` : ''}</span></h2><div class="grid"></div>`;
       const grid = sec.querySelector('.grid');
       for (const b of BRAWLERS.filter(x => x.rarity === R.id)) {
-        const owned = isOwned(b.id), current = b.id === save.selected;
+        const owned = isOwned(b.id), current = b.id === save.selected, lv = levelOf(b.id);
         const el = document.createElement('div');
         el.className = 'brawler' + (owned ? ' owned' : ' locked') + (current ? ' sel' : '');
         el.dataset.id = b.id; el.style.setProperty('--c', R.color);
         el.innerHTML = `<div class="pic"><canvas width="300" height="120"></canvas><span class="lock">🔒</span></div>
           <h3>${b.name}<small>${b.role}</small></h3>
-          <div class="mini"><div>Leben<b>${b.hp}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div></div>
+          <div class="mini"><div>Leben<b>${Math.round(b.hp * powerMult(owned ? lv : 1))}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div></div>
           <div class="move"><strong>${b.atkName}:</strong> ${b.atkText}</div>
           <div class="move"><strong>${b.supName}:</strong> ${b.supText}</div>
-          <button class="cta"></button>`;
+          ${owned ? `<div class="lvl"><span>⚡ Power ${lv}/${MAX_LEVEL} · +${Math.round((powerMult(lv) - 1) * 100)} % Leben & Schaden</span><i style="--p:${(lv - 1) / (MAX_LEVEL - 1) * 100}%"></i></div>` : ''}
+          <div class="btns"><button class="cta main"></button></div>`;
         const pc = el.querySelector('canvas').getContext('2d');
         pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 120);
         drawBrawler(pc, b, 150, 70, 0.35, 0, 2.2);
-        const btn = el.querySelector('.cta');
+        const btn = el.querySelector('.cta.main');
+        if (owned) {
+          const up = document.createElement('button'); up.className = 'cta up';
+          if (lv >= MAX_LEVEL) { up.textContent = 'MAX'; up.disabled = true; }
+          else { const uc = UPGRADE_COST[lv + 1]; up.textContent = `⬆ ${uc} 🪙`; up.title = `Auf Power ${lv + 1} verbessern`; up.disabled = save.coins < uc; }
+          up.addEventListener('click', e => { e.stopPropagation(); upgrade(b.id); });
+          btn.parentNode.appendChild(up);
+        }
         if (!owned) {
           btn.classList.add('buy'); btn.textContent = `🔓 ${cost} 🪙`; btn.title = 'Freischalten'; btn.disabled = save.coins < cost;
           btn.addEventListener('click', () => buy(b.id));
@@ -808,7 +833,14 @@
   function buy(id) {
     const cost = COST[byId[id].rarity];
     if (isOwned(id) || save.coins < cost) return;
-    save.coins -= cost; save.unlocked.push(id); persist(); showCoins(); renderMenu();
+    save.coins -= cost; save.unlocked.push(id); save.levels[id] = 1; persist(); showCoins(); renderMenu();
+  }
+  function upgrade(id) {
+    const lv = levelOf(id);
+    if (!isOwned(id) || lv >= MAX_LEVEL || save.coins < UPGRADE_COST[lv + 1]) return;
+    save.coins -= UPGRADE_COST[lv + 1]; save.levels[id] = lv + 1; persist(); showCoins();
+    if (menuOpen) renderMenu();
+    renderLobby();
   }
   function choose(id) {
     if (!isOwned(id)) return;
@@ -827,6 +859,7 @@
   document.getElementById('open-menu').addEventListener('click', () => openMenu('brawler'));
   document.getElementById('brawler-btn').addEventListener('click', () => openMenu('brawler'));
   document.getElementById('start-btn').addEventListener('click', () => openMenu('map'));
+  document.getElementById('upgrade-btn').addEventListener('click', () => upgrade(save.selected));
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
 
@@ -887,8 +920,9 @@
   const foes = o => fighters.filter(f => f.alive && f !== o);
 
   /* ----- Kämpfer ----- */
-  function makeFighter(Bd, isPlayer, color) {
-    return { B: Bd, isPlayer, color, name: Bd.name, r: 18 * Bd.size, hp: Bd.hp, max: Bd.hp, kills: 0, alive: false,
+  function makeFighter(Bd, isPlayer, color, level = 1) {
+    const mult = powerMult(level), hp = Math.round(Bd.hp * mult);
+    return { B: Bd, isPlayer, color, name: Bd.name, level, mult, r: 18 * Bd.size, hp, max: hp, kills: 0, alive: false,
       x: 0, y: 0, vx: 0, vy: 0, aim: 0, ptr: { x: 0, y: 0 }, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, buff: null, invis: 0, flash: 0, dead: 0, ai: null };
   }
   function spawnSpot(f, center) {
@@ -916,9 +950,12 @@
     shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = []; floaters = []; fx = [];
     matchOver = false; matchT = 0; gasTick = 0; resultEl.hidden = true;
     const pb = byId[id || save.selected];
-    P = makeFighter(pb, true, '#38bdf8');
+    P = makeFighter(pb, true, '#38bdf8', levelOf(pb.id));
     const pool = BRAWLERS.filter(b => b.id !== pb.id).sort(() => Math.random() - .5).slice(0, 3);
-    fighters = [P, ...pool.map((b, i) => makeFighter(b, false, BOT_COLORS[i]))];
+    // Bot-Level richten sich nach deinem Power-Level und der Schwierigkeit
+    const off = { leicht: [-2, 0], normal: [-1, 1], schwer: [0, 2] }[save.diff];
+    const botLv = () => clamp(P.level + off[0] + Math.floor(Math.random() * (off[1] - off[0] + 1)), 1, MAX_LEVEL);
+    fighters = [P, ...pool.map((b, i) => makeFighter(b, false, BOT_COLORS[i], botLv()))];
     fighters.forEach((f, i) => respawn(f, i === 0));
     whoEl.textContent = pb.name;
   }
@@ -943,8 +980,12 @@
     const b = byId[save.selected];
     document.getElementById('hero-name').textContent = b.name;
     document.getElementById('hero-role').textContent = b.role + ' · ' + RARITIES.find(r => r.id === b.rarity).name;
+    const lv = levelOf(b.id), nextCost = UPGRADE_COST[lv + 1], upBtn = document.getElementById('upgrade-btn');
+    document.getElementById('hero-lvl').textContent = `⚡ Power ${lv}/${MAX_LEVEL}`;
+    if (lv >= MAX_LEVEL) { upBtn.textContent = 'MAX'; upBtn.disabled = true; }
+    else { upBtn.textContent = `⬆ Power ${lv + 1} · ${nextCost} 🪙`; upBtn.disabled = save.coins < nextCost; }
     document.getElementById('hero-stats').innerHTML =
-      `<div>Leben<b>${b.hp}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div>`;
+      `<div>Leben<b>${Math.round(b.hp * powerMult(lv))}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div>`;
     document.getElementById('hero-atk').innerHTML = `<strong>${b.atkName}:</strong> ${b.atkText}`;
     document.getElementById('hero-sup').innerHTML = `<strong>${b.supName}:</strong> ${b.supText}`;
   }
@@ -984,6 +1025,7 @@
     if (!t.alive || matchOver) return;
     if (!o.isPlayer) dmg *= DIFF.dmg;
     if (o.buff) dmg *= o.buff.dmg;
+    dmg *= o.mult;
     t.invis = 0; // getroffene Tarnung fliegt auf
     if (t.shield > 0) dmg *= .5;
     t.hp -= dmg; t.flash = .12;
@@ -1360,7 +1402,7 @@
     ctx.fillStyle = '#1e293b'; ctx.fillRect(f.x - w / 2 - 1, top, w + 2, 9);
     ctx.fillStyle = f.isPlayer ? '#22c55e' : f.color; ctx.fillRect(f.x - w / 2, top + 1, w * Math.max(0, f.hp / f.max), 7);
     ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText((f.isPlayer ? 'DU · ' : '') + f.name.toUpperCase(), f.x, top - 4);
+    ctx.fillText((f.isPlayer ? 'DU · ' : '') + f.name.toUpperCase() + ' ⚡' + f.level, f.x, top - 4);
   }
   function drawGas() {
     if (matchT <= GAS_START - 10) return;

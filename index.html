@@ -126,13 +126,17 @@
     <button class="start" id="start-btn">▶ Start</button>
     <div class="lobby-row">
       <button class="menu-btn" id="brawler-btn">☰ Brawler wählen</button>
+      <select id="mode" aria-label="Spielmodus">
+        <option value="solo">Modus: Solo</option>
+        <option value="duo">Modus: Duo</option>
+      </select>
       <select id="diff" aria-label="Schwierigkeit der Bots">
         <option value="leicht">Bots: Leicht</option>
         <option value="normal">Bots: Normal</option>
         <option value="schwer">Bots: Schwer</option>
       </select>
     </div>
-    <p class="note" style="margin-top:12px">Drück auf Start und wähle eine Map. Dann kämpfst du gegen 3 Bots: Jeder hat 3 Leben, wer das dritte verliert, ist raus. Der letzte Überlebende gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Platzierung geben 🪙 Münzen für neue Brawler.</p>
+    <p class="note" style="margin-top:12px">Drück auf Start und wähle eine Map. Solo: du gegen 3 Bots. Duo: du und ein Bot als Teamkamerad gegen zwei gegnerische Teams. Jeder hat 3 Leben, wer das dritte verliert, ist raus. Der letzte Überlebende (bzw. das letzte Team) gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Platzierung geben 🪙 Münzen für neue Brawler.</p>
   </section>
 
   <section class="panel" id="game" hidden>
@@ -734,14 +738,14 @@
   // Kosten für Power-Level 2..11
   const UPGRADE_COST = [0, 0, 30, 50, 100, 160, 260, 400, 600, 900, 1300, 1900];
   const powerMult = lv => 1 + .05 * (lv - 1); // +5 % Leben & Schaden pro Level
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', levels: { shelly: 1 } };
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 } };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
       const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
       save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
         selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id,
-        diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal',
+        diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal', mode: s.mode === 'duo' ? 'duo' : 'solo',
         levels: Object.fromEntries([...unlocked].map(id => [id, Math.max(1, Math.min(MAX_LEVEL, Math.floor(Number(s.levels && s.levels[id])) || 1))])) };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
@@ -880,6 +884,8 @@
   };
   let DIFF = DIFFS[save.diff];
   const BOT_COLORS = ['#ef4444', '#fb923c', '#f472b6'];
+  const TEAM_COLORS = ['#38bdf8', '#ef4444', '#fb923c']; // Duo: Team 0 = du + Teamkamerad
+  let duoMatch = false;
 
   // Giftwolke: zieht nach GAS_START Sekunden von außen zur Mitte zu
   const GAS_START = 45, GAS_SHRINK = 60, ZONE_MAX = 480, ZONE_MIN = 90;
@@ -918,16 +924,22 @@
     for (let i = 1; i < n; i++) if (wallHit(ax + (bx - ax) * i / n, ay + (by - ay) * i / n, 3)) return false;
     return true;
   }
-  const foes = o => fighters.filter(f => f.alive && f !== o);
+  const foes = o => fighters.filter(f => f.alive && f.team !== o.team); // Gegner = alle außerhalb des eigenen Teams
 
   /* ----- Kämpfer ----- */
   function makeFighter(Bd, isPlayer, color, level = 1) {
     const mult = powerMult(level), hp = Math.round(Bd.hp * mult);
-    return { B: Bd, isPlayer, color, name: Bd.name, level, mult, r: 18 * Bd.size, hp, max: hp, kills: 0, lives: LIVES, out: false, alive: false,
+    return { B: Bd, isPlayer, color, name: Bd.name, team: 0, slot: 0, level, mult, r: 18 * Bd.size, hp, max: hp, kills: 0, lives: LIVES, out: false, alive: false,
       x: 0, y: 0, vx: 0, vy: 0, aim: 0, ptr: { x: 0, y: 0 }, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, buff: null, invis: 0, flash: 0, dead: 0, ai: null };
   }
   function spawnSpot(f, center) {
     if (center && !inSolid(W / 2, H / 2, f.r + 4)) return { x: W / 2, y: H / 2 };
+    // Duo: beim Teamkameraden spawnen
+    const mate = fighters.find(o => o !== f && o.alive && o.team === f.team);
+    if (mate) for (let i = 0; i < 30; i++) {
+      const a = rnd(0, TAU), d = rnd(40, 80), x = clamp(mate.x + Math.cos(a) * d, 40, W - 40), y = clamp(mate.y + Math.sin(a) * d, 40, H - 40);
+      if (!inSolid(x, y, f.r + 6) && (zoneR() >= 400 || Math.hypot(x - W / 2, y - H / 2) < zoneR() - 30)) return { x, y };
+    }
     let best = null, bd = -1;
     for (let i = 0; i < 30; i++) {
       let x, y;
@@ -952,11 +964,19 @@
     matchOver = false; matchT = 0; gasTick = 0; resultEl.hidden = true;
     const pb = byId[id || save.selected];
     P = makeFighter(pb, true, '#38bdf8', levelOf(pb.id));
-    const pool = BRAWLERS.filter(b => b.id !== pb.id).sort(() => Math.random() - .5).slice(0, 3);
+    duoMatch = save.mode === 'duo';
+    const pool = BRAWLERS.filter(b => b.id !== pb.id).sort(() => Math.random() - .5).slice(0, duoMatch ? 5 : 3);
     // Bot-Level richten sich nach deinem Power-Level und der Schwierigkeit
     const off = { leicht: [-2, 0], normal: [-1, 1], schwer: [0, 2] }[save.diff];
     const botLv = () => clamp(P.level + off[0] + Math.floor(Math.random() * (off[1] - off[0] + 1)), 1, MAX_LEVEL);
-    fighters = [P, ...pool.map((b, i) => makeFighter(b, false, BOT_COLORS[i], botLv()))];
+    if (!duoMatch) {
+      fighters = [P, ...pool.map((b, i) => { const f = makeFighter(b, false, BOT_COLORS[i], botLv()); f.team = i + 1; return f; })];
+    } else {
+      const ally = makeFighter(pool[0], false, TEAM_COLORS[0], P.level); // Teamkamerad: so stark wie du
+      const enemies = pool.slice(1).map((b, i) => { const f = makeFighter(b, false, TEAM_COLORS[1 + (i >> 1)], botLv()); f.team = 1 + (i >> 1); return f; });
+      fighters = [P, ally, ...enemies];
+    }
+    const seen = {}; fighters.forEach(f => { f.slot = seen[f.team] = (seen[f.team] ?? -1) + 1; });
     fighters.forEach((f, i) => respawn(f, i === 0));
     whoEl.textContent = pb.name;
   }
@@ -965,7 +985,7 @@
     M = MAPS.find(m => m.id === mapId) || MAPS[0];
     save.map = M.id; persist();
     screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false;
-    whereEl.textContent = '· ' + M.name;
+    whereEl.textContent = '· ' + (save.mode === 'duo' ? 'Duo · ' : '') + M.name;
     newMatch(save.selected);
     gameEl.scrollIntoView({ block: 'center' });
   }
@@ -1017,16 +1037,18 @@
   }
   // Rundenende: du bist raus (Niederlage) oder alle Bots sind raus (Sieg)
   function checkEnd() {
-    const left = fighters.filter(f => !f.out);
-    if (P.out) endMatch(false, left.length + 1);
-    else if (left.length === 1) endMatch(true, 1);
+    const teams = new Set(fighters.filter(f => !f.out).map(f => f.team));
+    if (!teams.has(P.team)) endMatch(false, teams.size + 1);
+    else if (teams.size === 1) endMatch(true, 1);
   }
   function endMatch(win, place) {
     matchOver = true;
     const coins = win ? WIN_COINS : PLACE_COINS[place] || 20;
     addCoins(coins);
     resultEl.innerHTML = `<h2>${win ? 'Sieg!' : 'Niederlage'}</h2>
-      <p>${win ? 'Du bist der letzte Überlebende!' : 'Du hast alle 3 Leben verloren – Platz ' + place + ' von ' + fighters.length + '.'}</p>
+      <p>${duoMatch
+        ? (win ? 'Dein Team ist das letzte im Spiel!' : 'Dein Team ist ausgeschieden – Platz ' + place + ' von ' + new Set(fighters.map(f => f.team)).size + '.')
+        : (win ? 'Du bist der letzte Überlebende!' : 'Du hast alle 3 Leben verloren – Platz ' + place + ' von ' + fighters.length + '.')}</p>
       <p>Deine Kills: ${P.kills} · +${coins} 🪙</p>
       <div class="row"><button class="act" id="again">Nochmal</button><button class="act alt" id="to-home">Hauptmenü</button></div>`;
     resultEl.hidden = false;
@@ -1035,7 +1057,7 @@
   }
   function hit(t, dmg, src, o) {
     if (!t.alive || matchOver) return;
-    if (!o.isPlayer) dmg *= DIFF.dmg;
+    if (!o.isPlayer && o.team !== P.team) dmg *= DIFF.dmg;
     if (o.buff) dmg *= o.buff.dmg;
     dmg *= o.mult;
     t.invis = 0; // getroffene Tarnung fliegt auf
@@ -1149,6 +1171,9 @@
   atkBtn.addEventListener('click', () => attack());
   supBtn.addEventListener('click', () => superAttack());
   document.getElementById('home').addEventListener('click', goHome);
+  const modeEl = document.getElementById('mode');
+  modeEl.value = save.mode;
+  modeEl.addEventListener('change', () => { save.mode = modeEl.value; persist(); modeEl.blur(); });
   diffEl.value = save.diff;
   diffEl.addEventListener('change', () => { save.diff = diffEl.value; DIFF = DIFFS[save.diff]; persist(); diffEl.blur(); });
 
@@ -1176,6 +1201,7 @@
   }
   function think(f, dt) {
     const A = f.ai, a = f.B.atk;
+    const D = f.team === P.team ? DIFFS.normal : DIFF; // Teamkamerad zielt wie ein normaler Bot
     const en = foes(f);
     if (!en.length) return { dx: 0, dy: 0 };
     A.tt -= dt;
@@ -1185,7 +1211,7 @@
       A.target = best;
     }
     if (A.target && A.target.invis > 0 && Math.hypot(A.target.x - f.x, A.target.y - f.y) > 110) A.target = null;
-    if (!A.target) { const gx = W / 2 - f.x, gy = H / 2 - f.y, gd = Math.hypot(gx, gy) || 1; return { dx: gd > 80 ? gx / gd : 0, dy: gd > 80 ? gy / gd : 0 }; }
+    if (!A.target) { const ally = f.team === P.team && P.alive, gx = (ally ? P.x : W / 2) - f.x, gy = (ally ? P.y : H / 2) - f.y, gd = Math.hypot(gx, gy) || 1; return { dx: gd > 80 ? gx / gd : 0, dy: gd > 80 ? gy / gd : 0 }; }
     const t = A.target, ex = t.x - f.x, ey = t.y - f.y, dist = Math.hypot(ex, ey) || 1, nx = ex / dist, ny = ey / dist;
     const range = rangeOf(a), sup = f.B.sup;
     let want = clamp(range * .7, 40, 300);
@@ -1200,6 +1226,8 @@
     A.st -= dt; if (A.st <= 0) { A.st = rnd(.8, 1.8); A.dir = Math.random() < .5 ? -1 : 1; }
     const side = dist < want + 60 ? .8 : .25;
     mx += -ny * A.dir * side; my += nx * A.dir * side;
+    // Teamkamerad bleibt in deiner Nähe
+    if (f.team === P.team && P.alive) { const px = P.x - f.x, py = P.y - f.y, pd = Math.hypot(px, py) || 1; if (pd > 260) { mx += px / pd * 1.3; my += py / pd * 1.3; } }
     A.ct += dt;
     if (A.ct > .5) {
       if ((mx || my) && Math.hypot(f.x - A.cx, f.y - A.cy) < 18) { A.esc = .7; A.eang = rnd(0, TAU); }
@@ -1220,9 +1248,9 @@
     A.cd -= dt; A.sd -= dt;
     if (!blocked(f)) {
       if (A.cd <= 0 && f.ammo >= 1 && dist <= range + 10 && los(f.x, f.y, t.x, t.y)) {
-        ang += rnd(-DIFF.err, DIFF.err);
+        ang += rnd(-D.err, D.err);
         f.aim = ang; f.ptr = { x: f.x + Math.cos(ang) * dist, y: f.y + Math.sin(ang) * dist };
-        attack(f); A.cd = rnd(DIFF.gap[0], DIFF.gap[1]);
+        attack(f); A.cd = rnd(D.gap[0], D.gap[1]);
       }
       if (A.sd <= 0 && f.charge >= 1) { if (superFits(f, t, dist)) superAttack(f); A.sd = .5; }
     }
@@ -1245,7 +1273,7 @@
       }
       if (d.t <= 0) f.dash = null;
     } else {
-      const len = Math.hypot(dx, dy), sp = f.B.speed * (f.shield > 0 ? 1.4 : 1) * (f.buff ? f.buff.speed : 1) * (f.invis > 0 ? 1.2 : 1) * (f.isPlayer ? 1 : DIFF.speed);
+      const len = Math.hypot(dx, dy), sp = f.B.speed * (f.shield > 0 ? 1.4 : 1) * (f.buff ? f.buff.speed : 1) * (f.invis > 0 ? 1.2 : 1) * (f.team === P.team ? 1 : DIFF.speed);
       if (len) { f.vx = dx / len * sp; f.vy = dy / len * sp; f.x += f.vx * dt; f.y += f.vy * dt; }
     }
     pushOut(f, f.r);
@@ -1414,7 +1442,7 @@
     ctx.fillStyle = '#1e293b'; ctx.fillRect(f.x - w / 2 - 1, top, w + 2, 9);
     ctx.fillStyle = f.isPlayer ? '#22c55e' : f.color; ctx.fillRect(f.x - w / 2, top + 1, w * Math.max(0, f.hp / f.max), 7);
     ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText((f.isPlayer ? 'DU · ' : '') + f.name.toUpperCase() + ' ⚡' + f.level, f.x, top - 4);
+    ctx.fillText((f.isPlayer ? 'DU · ' : f.team === P.team ? 'TEAM · ' : '') + f.name.toUpperCase() + ' ⚡' + f.level, f.x, top - 4);
   }
   function drawGas() {
     if (matchT <= GAS_START - 10) return;
@@ -1450,14 +1478,15 @@
   function drawScore() {
     ctx.font = '800 12px system-ui,sans-serif';
     fighters.forEach((f, i) => {
-      const x = 8 + i * 196, y = 8;
+      const x = duoMatch ? 8 + f.team * 262 : 8 + i * 196, y = duoMatch ? 8 + f.slot * 27 : 8, w = duoMatch ? 254 : 188;
       ctx.globalAlpha = f.out ? .45 : 1;
-      ctx.fillStyle = 'rgba(15,23,42,.78)'; rr(ctx, x, y, 188, 24, 12); ctx.fill();
+      ctx.fillStyle = 'rgba(15,23,42,.78)'; rr(ctx, x, y, w, 24, 12); ctx.fill();
       ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(x + 13, y + 12, 6, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.fillText((f.isPlayer ? 'Du' : f.name).slice(0, 10), x + 26, y + 16);
-      if (f.out) { ctx.fillStyle = '#fca5a5'; ctx.fillText('RAUS', x + 108, y + 16); }
-      else for (let k = 0; k < LIVES; k++) { ctx.fillStyle = k < f.lives ? '#f87171' : '#475569'; ctx.fillText('♥', x + 108 + k * 13, y + 16); }
-      ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText('⚔' + f.kills, x + 180, y + 16);
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.fillText((f.isPlayer ? 'Du' : f.name).slice(0, duoMatch ? 14 : 10), x + 26, y + 16);
+      const hx = x + w - 80;
+      if (f.out) { ctx.fillStyle = '#fca5a5'; ctx.fillText('RAUS', hx, y + 16); }
+      else for (let k = 0; k < LIVES; k++) { ctx.fillStyle = k < f.lives ? '#f87171' : '#475569'; ctx.fillText('♥', hx + k * 13, y + 16); }
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'right'; ctx.fillText('⚔' + f.kills, x + w - 8, y + 16);
       ctx.globalAlpha = 1;
     });
     ctx.textAlign = 'center';
@@ -1522,7 +1551,12 @@
 
     drawGas();
     drawScore(); drawGasInfo();
-    if (!P.alive && !matchOver) {
+    if (P.out && !matchOver) { // Duo: du bist raus, der Teamkamerad kämpft weiter
+      ctx.font = '800 14px system-ui,sans-serif'; ctx.textAlign = 'center';
+      const txt = 'Du bist raus – dein Teamkamerad kämpft weiter!', tw = ctx.measureText(txt).width + 28;
+      ctx.fillStyle = 'rgba(15,23,42,.8)'; rr(ctx, W / 2 - tw / 2, 74, tw, 28, 14); ctx.fill();
+      ctx.fillStyle = '#fca5a5'; ctx.fillText(txt, W / 2, 93);
+    } else if (!P.alive && !matchOver) {
       ctx.fillStyle = 'rgba(15,23,42,.55)'; ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#fff'; ctx.font = '800 34px system-ui,sans-serif'; ctx.textAlign = 'center';
       ctx.fillText('Besiegt!', W / 2, H / 2 - 6);

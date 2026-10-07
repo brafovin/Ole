@@ -52,7 +52,7 @@
     <div class="group"><label>Punkte</label><button class="opt" data-to="7">7</button><button class="opt" data-to="11">11</button><button class="opt" data-to="21">21</button></div>
     <button class="big" id="start">Start</button>
     <div class="stats" id="stats"></div>
-    <p class="muted">Maus / Finger ziehen oder W·S / ↑↓ · Leertaste: Aufschlag · P: Pause · F: Vollbild · M: Ton</p>
+    <p class="muted">Maus (bleibt im Feld) / Finger ziehen oder W·S / ↑↓ · Leertaste: Aufschlag · Esc / P: Pause · F: Vollbild · M: Ton</p>
   </div>
 
   <div id="pause" class="overlay" hidden>
@@ -160,7 +160,7 @@
     state = 'point'; pointT = 1.05; banner = who === 'p' ? 'Punkt für dich!' : 'Punkt für den Bot';
   }
   function endMatch(win) {
-    state = 'over'; save.played++; if (win) save.wins++; else save.losses++; save.best = Math.max(save.best, bestRally); persist();
+    state = 'over'; unlockMouse(); save.played++; if (win) save.wins++; else save.losses++; save.best = Math.max(save.best, bestRally); persist();
     $('rtitle').textContent = win ? 'Sieg!' : 'Niederlage'; $('rtitle').style.color = win ? '#facc15' : '#fca5a5';
     $('rscore').textContent = score.p + ' : ' + score.b;
     $('rinfo').textContent = `Bot: ${D.name} · längster Ballwechsel: ${bestRally} · Siege ${save.wins} / Niederlagen ${save.losses}`;
@@ -313,8 +313,20 @@
 
   /* ---------- Eingabe & Oberfläche ---------- */
   function setY(clientY) { const r = cv.getBoundingClientRect(); P.target = clamp((clientY - r.top) / r.height * H, TB.t + PH / 2, TB.b - PH / 2); }
-  cv.addEventListener('pointermove', e => setY(e.clientY));
-  cv.addEventListener('pointerdown', e => { setY(e.clientY); if (e.pointerType === 'touch') cv.setPointerCapture(e.pointerId); serveNow(); });
+  // Maus bleibt im Spiel: Pointer-Lock (Cursor verschwindet, relative Bewegung); Esc gibt ihn frei und pausiert
+  const locked = () => document.pointerLockElement === cv;
+  function lockMouse() { try { if (!locked() && cv.requestPointerLock) { const r = cv.requestPointerLock(); if (r && r.catch) r.catch(() => {}); } } catch (e) { /* ignorieren */ } }
+  function unlockMouse() { try { if (locked()) document.exitPointerLock(); } catch (e) { /* ignorieren */ } }
+  document.addEventListener('pointerlockchange', () => { if (!locked() && (state === 'serve' || state === 'play' || state === 'point')) setPause(true); });
+  cv.addEventListener('pointermove', e => {
+    if (locked()) { const r = cv.getBoundingClientRect(); P.target = clamp(P.target + e.movementY * H / r.height, TB.t + PH / 2, TB.b - PH / 2); }
+    else setY(e.clientY);
+  });
+  cv.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') cv.setPointerCapture(e.pointerId); else if (!locked() && !paused) lockMouse();
+    if (!locked()) setY(e.clientY);
+    serveNow();
+  });
   function serveNow() { if (state === 'serve' && server === 'p' && !paused) launch(); }
   addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
@@ -323,17 +335,17 @@
     if (k === 'arrowdown' || k === 's') keys.down = true;
     if (e.repeat) return;
     if (k === ' ') { if (state === 'menu') startGame(); else serveNow(); }
-    if (k === 'p' || k === 'escape') togglePause();
+    if (k === 'p') togglePause(); else if (k === 'escape') setPause(true);
     if (k === 'm') toggleMute();
     if (k === 'f') toggleFs();
   });
   addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k === 'arrowup' || k === 'w') keys.up = false; if (k === 'arrowdown' || k === 's') keys.down = false; });
   addEventListener('blur', () => { if (state === 'serve' || state === 'play' || state === 'point') setPause(true); });
 
-  function setPause(v) { if (state === 'menu' || state === 'over') return; paused = v; $('pause').hidden = !v; }
+  function setPause(v) { if (state === 'menu' || state === 'over') return; paused = v; $('pause').hidden = !v; if (v) unlockMouse(); else lockMouse(); }
   function togglePause() { setPause(!paused); }
-  function startGame() { $('menu').hidden = true; $('result').hidden = true; $('pause').hidden = true; paused = false; $('pausebtn').hidden = false; newMatch(); }
-  function toMenu() { state = 'menu'; paused = false; $('pause').hidden = true; $('result').hidden = true; $('menu').hidden = false; $('pausebtn').hidden = true; renderMenu(); }
+  function startGame() { $('menu').hidden = true; $('result').hidden = true; $('pause').hidden = true; paused = false; $('pausebtn').hidden = false; lockMouse(); newMatch(); }
+  function toMenu() { unlockMouse(); state = 'menu'; paused = false; $('pause').hidden = true; $('result').hidden = true; $('menu').hidden = false; $('pausebtn').hidden = true; renderMenu(); }
   function renderMenu() {
     document.querySelectorAll('[data-diff]').forEach(b => b.classList.toggle('on', b.dataset.diff === save.diff));
     document.querySelectorAll('[data-to]').forEach(b => b.classList.toggle('on', +b.dataset.to === save.to));

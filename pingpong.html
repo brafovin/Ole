@@ -52,7 +52,7 @@
 
   <div id="menu" class="overlay">
     <h1>Ping <span>Pong</span></h1>
-    <p class="muted">Spiele 3D-Tischtennis gegen einen Bot – gewinne mit zwei Punkten Vorsprung!</p>
+    <p class="muted">Spiele 3D-Tischtennis gegen einen Bot – Ball seitlich vom Tisch = Punkt für den anderen!</p>
     <div class="group"><label>Bot</label><button class="opt" data-diff="leicht">Leicht</button><button class="opt" data-diff="normal">Normal</button><button class="opt" data-diff="schwer">Schwer</button></div>
     <div class="group"><label>Punkte</label><button class="opt" data-to="7">7</button><button class="opt" data-to="11">11</button><button class="opt" data-to="21">21</button></div>
     <button class="big" id="start">Start</button>
@@ -79,13 +79,13 @@
   /* ---------- Maße (logische Einheiten, Bild 800 x 500) ---------- */
   const W = 800, H = 500, TAU = Math.PI * 2;
   const TB = { l: 36, r: 764, t: 84, b: 462 };            // Tischfläche
-  const BR = 9, PW = 14, PH = 92, PXP = 66, PXB = 734;    // Ballradius, Schläger
-  const SERVE_SPEED = 340, HIT_BOOST = 38, MAX_SPEED = 1120, MAX_ANGLE = 58 * Math.PI / 180;
+  const BR = 9, PW = 14, PH = 64, PXP = 66, PXB = 734;    // Ballradius, Schläger
+  const SERVE_SPEED = 340, HIT_BOOST = 38, MAX_SPEED = 1120, MAX_ANGLE = 30 * Math.PI / 180;
   const DIFFS = {
     // miss: Chance, sich bei einem Ball zu verschätzen; missSpeed: zusätzlich bei hohem Balltempo
-    leicht: { name: 'Leicht', spd: 300, react: .26,  err: 52, miss: .18, missSpeed: .35, aim: 0,   predict: false, serve: 1.3 },
-    normal: { name: 'Normal', spd: 440, react: .15,  err: 38, miss: .17, missSpeed: .30, aim: .25, predict: true,  serve: 1.0 },
-    schwer: { name: 'Schwer', spd: 880, react: .04,  err: 6,  miss: .015, missSpeed: .10, aim: .85, predict: true, serve: .8 },
+    leicht: { name: 'Leicht', spd: 300, react: .26,  err: 52, miss: .18, missSpeed: .35, aim: 0,   predict: false, serve: 1.3, shotErr: 230 },
+    normal: { name: 'Normal', spd: 440, react: .15,  err: 38, miss: .17, missSpeed: .30, aim: .25, predict: true,  serve: 1.0, shotErr: 190 },
+    schwer: { name: 'Schwer', spd: 880, react: .04,  err: 6,  miss: .015, missSpeed: .10, aim: .85, predict: true, serve: .8, shotErr: 55 },
   };
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const rnd = (a, b) => a + Math.random() * (b - a);
@@ -130,7 +130,6 @@
     } catch (e) { /* kein Ton möglich */ }
   }
   const sndHit = s => beep(520 + s * .25, .07, 'square', .09, -200);
-  const sndWall = () => beep(260, .06, 'triangle', .1, -80);
   const sndBounce = () => beep(700, .035, 'sine', .08, -260);
   const sndScore = win => { beep(win ? 660 : 220, .12, 'sine', .12); setTimeout(() => beep(win ? 880 : 165, .18, 'sine', .12), 110); };
 
@@ -154,7 +153,8 @@
     ball.x = server === 'p' ? PXP + PW / 2 + BR + 2 : PXB - PW / 2 - BR - 2; ball.y = server === 'p' ? P.y : B.y;
   }
   function launch() {
-    const dir = server === 'p' ? 1 : -1, ang = rnd(-.28, .28);
+    const dir = server === 'p' ? 1 : -1, tc = (TB.t + TB.b) / 2;
+    const ang = clamp(Math.atan2(tc + rnd(-70, 70) - ball.y, PXB - PXP), -MAX_ANGLE, MAX_ANGLE);   // Aufschlag Richtung Tischmitte
     ball.speed = SERVE_SPEED; ball.vx = dir * Math.cos(ang) * ball.speed; ball.vy = Math.sin(ang) * ball.speed;
     hit.x = ball.x; hit.dir = dir; hit.landed = false; (server === 'p' ? P : B).swing = 1;
     state = 'play'; sndHit(0);
@@ -171,12 +171,12 @@
   function spark(x, y, n, color, sp = 160, h = ballH()) {
     for (let i = 0; i < n; i++) { const a = rnd(0, TAU), s = rnd(40, sp); parts.push({ x, y, h, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vh: rnd(.6, 2.6), life: rnd(.25, .5), max: .5, color }); }
   }
-  function endPoint(who) {
+  function endPoint(who, why) {
     score[who]++; sndScore(who === 'p');
     if (rally > bestRally) bestRally = rally;
     const lead = score[who] - score[who === 'p' ? 'b' : 'p'];
     if (score[who] >= WIN && lead >= 2) return endMatch(who === 'p');
-    state = 'point'; pointT = 1.05; banner = who === 'p' ? 'Punkt für dich!' : 'Punkt für den Bot';
+    state = 'point'; pointT = 1.05; banner = (why === 'out' ? 'Aus! ' : '') + (who === 'p' ? 'Punkt für dich!' : 'Punkt für den Bot');
   }
   function endMatch(win) {
     state = 'over'; unlockMouse(); save.played++; if (win) save.wins++; else save.losses++; save.best = Math.max(save.best, bestRally); persist();
@@ -194,13 +194,15 @@
     if (!crossed) return false;
     const t = (face - prevEdge) / (edge - prevEdge), yc = py + (ball.y - py) * t;
     if (Math.abs(yc - pad.y) > PH / 2 + BR * .8) return false;           // daneben
-    const rel = clamp((yc - pad.y) / (PH / 2 + BR), -1, 1), ang = rel * MAX_ANGLE, dir = side === 'p' ? 1 : -1;
+    const rel = clamp((yc - pad.y) / (PH / 2 + BR), -1, 1), dir = side === 'p' ? 1 : -1;
     // Ab 24 Schlägen im selben Ballwechsel wird der Ball weiter schneller, damit lange Ballwechsel enden
     const cap = Math.min(1500, MAX_SPEED + Math.max(0, rally - 24) * 24);
-    let sp = Math.min(cap, ball.speed + HIT_BOOST + Math.min(70, Math.abs(pad.vy) * .06));
-    let vx = dir * Math.cos(ang) * sp, vy = Math.sin(ang) * sp + pad.vy * .2;
-    const m = Math.hypot(vx, vy); vx *= sp / m; vy *= sp / m;
-    if (Math.abs(vx) < sp * .38) { vx = dir * sp * .38; vy = Math.sign(vy || 1) * Math.sqrt(sp * sp - vx * vx); }
+    const sp = Math.min(cap, ball.speed + HIT_BOOST + Math.min(70, Math.abs(pad.vy) * .06));
+    // Du: Treffpunkt auf dem Schläger + Schlägerbewegung bestimmen den Winkel. Bot: zielt auf einen Punkt am Tischende.
+    const lim = MAX_ANGLE * 1.25;
+    const ang = side === 'p' ? clamp(rel * MAX_ANGLE + pad.vy * .0003, -lim, lim)
+      : clamp(Math.atan2(botAim() - yc, PXB - PXP), -lim, lim);
+    const vx = dir * Math.cos(ang) * sp, vy = Math.sin(ang) * sp;
     ball.speed = sp; ball.vx = vx; ball.vy = vy; ball.x = face + dir * BR; ball.y = yc;
     rally++; sndHit(sp); spark(face, yc, 8 + (sp > 650 ? 8 : 0), '#fde68a', 160, HP);
     hit.x = face; hit.dir = dir; hit.landed = false; pad.swing = 1;
@@ -210,8 +212,7 @@
   function stepBall(dt) {
     const px = ball.x, py = ball.y;
     ball.x += ball.vx * dt; ball.y += ball.vy * dt;
-    if (ball.y < TB.t + BR) { ball.y = TB.t + BR + (TB.t + BR - ball.y); ball.vy = Math.abs(ball.vy); sndWall(); spark(ball.x, TB.t, 4, '#bfdbfe', 90); }
-    else if (ball.y > TB.b - BR) { ball.y = TB.b - BR - (ball.y - (TB.b - BR)); ball.vy = -Math.abs(ball.vy); sndWall(); spark(ball.x, TB.b, 4, '#bfdbfe', 90); }
+    if (ball.y < TB.t - 2 || ball.y > TB.b + 2) return endPoint(hit.dir > 0 ? 'b' : 'p', 'out');   // seitlich vom Tisch geflogen
     if (!hit.landed) {                                  // Aufsetzer auf dem Tisch (Ton + Funken)
       const lx = TB.l + (hit.dir > 0 ? .72 : .28) * (TB.r - TB.l);
       if (hit.dir > 0 ? ball.x >= lx : ball.x <= lx) { hit.landed = true; sndBounce(); spark(ball.x, ball.y, 3, '#dbeafe', 60, .06); }
@@ -219,13 +220,16 @@
     if (ball.vx < 0) paddleHit('p', px, py); else paddleHit('b', px, py);
     if (ball.x < TB.l - 40) endPoint('b'); else if (ball.x > TB.r + 40) endPoint('p');
   }
-  // Wohin fliegt der Ball auf Höhe des Bot-Schlägers (mit Banden-Abprallern)?
+  // Wohin fliegt der Ball auf Höhe des Bot-Schlägers?
   function predictY() {
     const face = PXB - PW / 2 - BR;
     if (ball.vx <= 0) return null;
-    const t = (face - ball.x) / ball.vx, L = TB.b - TB.t - 2 * BR, y0 = ball.y - (TB.t + BR) + ball.vy * t;
-    const m = ((y0 % (2 * L)) + 2 * L) % (2 * L);
-    return TB.t + BR + (m > L ? 2 * L - m : m);
+    return ball.y + ball.vy * (face - ball.x) / ball.vx;
+  }
+  // Zielpunkt des Bots am Tischende: weg von dir (je nach Stufe), mit Zielfehler – ein zu großer Fehler fliegt ins Aus
+  function botAim() {
+    const tc = (TB.t + TB.b) / 2;
+    return tc - (P.y - tc) * D.aim + rnd(-1, 1) * D.shotErr;
   }
 
   /* ---------- Bot ---------- */
@@ -314,6 +318,7 @@
     const sl = new THREE.Mesh(new THREE.CylinderGeometry(.16, .13, 2.2, 18), std(sleeve, .9)); sl.position.y = -1.6;
     arm.add(forearm, sl); arm.position.set(0, -R - .42, -.04); arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir);
     arm.traverse(o => { o.castShadow = true; }); g.add(arm);
+    g.scale.setScalar(.66);                                   // kleiner Schläger: man sieht, wohin der Ball fliegt
     return g;
   }
 
@@ -347,10 +352,6 @@
     const net = new THREE.Mesh(new THREE.PlaneGeometry(th + .3, .38), new THREE.MeshBasicMaterial({ map: netTex, transparent: true, side: THREE.DoubleSide, depthWrite: false })); net.position.set(0, .2, 0); scene.add(net);
     scene.add(box(th + .3, .035, .02, white, 0, .385, 0));
     [-1, 1].forEach(sd => { const post = new THREE.Mesh(new THREE.CylinderGeometry(.03, .03, .46, 12), dark); post.position.set(sd * (th / 2 + .14), .23, 0); post.castShadow = true; scene.add(post); });
-    // Glaswände an den Längsseiten (hier prallt der Ball ab)
-    const glass = new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: .09, side: THREE.DoubleSide, depthWrite: false });
-    [-1, 1].forEach(sd => { const w = new THREE.Mesh(new THREE.PlaneGeometry(tw + .6, 1.9), glass); w.rotation.y = Math.PI / 2; w.position.set(sd * (th / 2 + .02), .95, 0); scene.add(w);
-      const rail = box(.04, .04, tw + .6, new THREE.MeshBasicMaterial({ color: 0x7dd3fc }), sd * (th / 2 + .02), 1.9, 0); rail.castShadow = false; scene.add(rail); });
     // Halle: Boden, Matte, Banden, Rückwand
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), new THREE.MeshStandardMaterial({ color: 0x0f1a2e, roughness: .9 })); floor.rotation.x = -Math.PI / 2; floor.position.y = FLOOR_Y - .01; floor.receiveShadow = true; scene.add(floor);
     const matTex = canvasTex(512, 512, (g, w, h) => { g.fillStyle = '#17623f'; g.fillRect(0, 0, w, h); g.strokeStyle = '#f8fafc'; g.lineWidth = 10; g.strokeRect(14, 14, w - 28, h - 28); g.strokeStyle = 'rgba(255,255,255,.07)'; g.lineWidth = 2; for (let i = 0; i < w; i += 32) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, h); g.stroke(); } });
@@ -381,7 +382,7 @@
   function visualBall(dt) {
     if (state === 'menu' || state === 'over') { vis.x = W / 2; vis.y = H / 2; vis.h = .9 + Math.sin(time * 2) * .12; vis.vh = 0; return; }
     if (state === 'point') {                                          // verfehlter Ball fliegt weiter und fällt
-      vis.x += ball.vx * dt * .7; vis.y = clamp(vis.y + ball.vy * dt * .7, TB.t - 80, TB.b + 80);
+      vis.x += ball.vx * dt * .7; vis.y += ball.vy * dt * .7;
       vis.vh -= 9 * dt; vis.h += vis.vh * dt;
       if (vis.h < FLOOR_Y + BALL_R) { vis.h = FLOOR_Y + BALL_R; vis.vh = Math.abs(vis.vh) > 1.5 ? -vis.vh * .5 : 0; }
     } else { vis.x = ball.x; vis.y = ball.y; vis.h = state === 'serve' ? ballH() : vis.h + (ballH() - vis.h) * (1 - Math.exp(-dt * 24)); vis.vh = 0; }

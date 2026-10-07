@@ -162,6 +162,7 @@
     { id: 'super', name: 'Super Selten', color: '#38bdf8', info: '8 Brawler' },
     { id: 'episch', name: 'Episch', color: '#a855f7', info: '20 Brawler' },
     { id: 'mythisch', name: 'Mythisch', color: '#ef4444', info: '10 Brawler' },
+    { id: 'legendaer', name: 'Legendär', color: '#facc15', info: '8 Brawler' },
   ];
 
   const BRAWLERS = [
@@ -493,6 +494,66 @@
       supName:'Dreh-Szene', supText:'Dreht sich dreimal und trifft alles rundherum.',
       atk:{ type:'boom', range:260, dmg:800, dur:.6 },
       sup:{ type:'spin', r:100, dmg:800, hits:3 } },
+
+    { id:'spike', rarity:'legendaer', name:'Spike', role:'Schadensausteiler', hp:3200, speed:190, size:.95,
+      look:{ skin:'#86efac', hair:null, body:'#16a34a', accent:'#f43f5e', weapon:'gun', wc:'#15803d', len:14, hat:'#ec4899' },
+      atkName:'Kaktusstacheln', atkText:'6 Stacheln im weiten Fächer.',
+      supName:'Kaktusfeld', supText:'Ein Dornenfeld, das 5 Sekunden lang schadet.',
+      atk:{ type:'pellets', n:6, spread:.5, dmg:320, sp:700, life:.4, color:'#bbf7d0' },
+      sup:{ type:'lob', range:340, dmg:500, puddle:{ r:85, time:5, tick:200, color:'#4ade80' } } },
+
+    { id:'crow', rarity:'legendaer', name:'Crow', role:'Assassine', hp:3360, speed:230, size:.95,
+      look:{ skin:'#cbd5e1', hair:'#111827', body:'#1e1b4b', accent:'#a78bfa', weapon:'gun', wc:'#4b5563', len:18, hat:'#111827' },
+      atkName:'Giftdolche', atkText:'3 schnelle Dolche, weit und sehr präzise.',
+      supName:'Sprung', supText:'Springt weit nach vorn und landet mit Druckwelle.',
+      atk:{ type:'pellets', n:3, spread:.12, dmg:380, sp:1000, life:.55, color:'#c084fc' },
+      sup:{ type:'blink', dist:300, r:70, dmg:700 } },
+
+    { id:'leon', rarity:'legendaer', name:'Leon', role:'Assassin', hp:3400, speed:220, size:1,
+      look:{ skin:'#a7f3d0', hair:null, body:'#16a34a', accent:'#fde047', weapon:'gun', wc:'#14532d', len:16, hat:'#15803d' },
+      atkName:'Klingenwirbel', atkText:'4 Klingen im Fächer, 450 Schaden je Klinge.',
+      supName:'Tarnung', supText:'5 Sekunden unsichtbar und schneller, bis du angreifst.',
+      atk:{ type:'pellets', n:4, spread:.35, dmg:450, sp:800, life:.3, color:'#bbf7d0' },
+      sup:{ type:'stealth', time:5 } },
+
+    { id:'sandy', rarity:'legendaer', name:'Sandy', role:'Kontrolle', hp:3200, speed:190, size:1,
+      look:{ skin:'#fcd34d', hair:'#92400e', body:'#b45309', accent:'#fde68a', weapon:'none', hat:'#a16207' },
+      atkName:'Sandwurf', atkText:'Fächer aus Sandkörnern.',
+      supName:'Sandsturm', supText:'Ein Sturm um dich herum, der 8 Sekunden lang schadet.',
+      atk:{ type:'pellets', n:5, spread:.5, dmg:280, sp:650, life:.35, color:'#e7c27d' },
+      sup:{ type:'zone', r:130, time:8, tick:150, color:'#d6b370' } },
+
+    { id:'amber', rarity:'legendaer', name:'Amber', role:'Schadensausteilerin', hp:3200, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#ef4444', body:'#f97316', accent:'#fde047', weapon:'tube', wc:'#7c2d12', goggles:true },
+      atkName:'Flammenstrahl', atkText:'Durchschlagender Feuerstrahl.',
+      supName:'Ölbrand', supText:'Große Ölpfütze, die lange brennt.',
+      atk:{ type:'pellets', n:5, spread:.1, dmg:250, sp:700, life:.4, pierce:true, color:'#fb923c' },
+      sup:{ type:'lob', range:360, dmg:400, puddle:{ r:95, time:5, tick:220, color:'#f97316' } } },
+
+    { id:'surge', rarity:'legendaer', name:'Surge', role:'Kämpfer', hp:3000, speed:190, size:1,
+      look:{ skin:'#cbd5e1', hair:'#22d3ee', body:'#0891b2', accent:'#fde047', weapon:'gun', wc:'#22d3ee', len:20, antenna:true },
+      atkName:'Stromstoß', atkText:'3 Energiestrahlen im Fächer.',
+      supName:'Upgrade', supText:'10 Sekunden: 40 % mehr Schaden und 30 % mehr Tempo.',
+      atk:{ type:'pellets', n:3, spread:.35, dmg:350, sp:800, life:.4, color:'#67e8f9' },
+      sup:{ type:'buff', time:10, dmg:1.4, speed:1.3 } },
+
+    { id:'meg', rarity:'legendaer', name:'Meg', role:'Tank', hp:4200, speed:190, size:1.05,
+      look:{ skin:'#e8b48a', hair:'#fb7185', body:'#be123c', accent:'#fde047', weapon:'gun', wc:'#f43f5e', len:24, goggles:true },
+      atkName:'Doppelfeuer', atkText:'2 durchschlagende Schüsse.',
+      supName:'Mech-Anzug', supText:'7 Sekunden: halber Schaden, 50 % mehr Schaden, schneller.',
+      atk:{ type:'pellets', n:2, spread:.1, dmg:500, sp:800, life:.45, pierce:true, color:'#fda4af' },
+      sup:{ type:'buff', time:7, dmg:1.5, speed:1.1, shield:7 } },
+
+    { id:'chester', rarity:'legendaer', name:'Chester', role:'Überraschung', hp:4400, speed:190, size:1.15,
+      look:{ skin:'#fde68a', hair:'#7c3aed', body:'#a855f7', accent:'#fde047', weapon:'bottle', wc:'#ec4899', hat:'#facc15' },
+      atkName:'Snackwurf', atkText:'Wirft einen Snack mit Explosion.',
+      supName:'Überraschung', supText:'Ein zufälliger Super: Druckwelle, Raketenregen, Stärkung oder Ansturm.',
+      atk:{ type:'lob', range:340, dmg:700, splash:40, time:.5 },
+      sup:{ type:'random', pool:[
+        { type:'pulse', r:130, range:130, dmg:1000 },
+        { type:'rain', count:5, area:90, aoe:50, dmg:650 },
+        { type:'buff', time:6, dmg:1.4, speed:1.2 },
+        { type:'dash', dist:280, dmg:900 } ] } },
   ];
   const byId = Object.fromEntries(BRAWLERS.map(b => [b.id, b]));
   const TAU = Math.PI * 2;
@@ -654,7 +715,7 @@
   const root = document.getElementById('rarities'), menuEl = document.getElementById('menu');
 
   /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
-  const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000 };
+  const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000, legendaer: 2000 };
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
   const DIFF_IDS = ['leicht', 'normal', 'schwer'];
@@ -828,7 +889,7 @@
   /* ----- Kämpfer ----- */
   function makeFighter(Bd, isPlayer, color) {
     return { B: Bd, isPlayer, color, name: Bd.name, r: 18 * Bd.size, hp: Bd.hp, max: Bd.hp, kills: 0, alive: false,
-      x: 0, y: 0, vx: 0, vy: 0, aim: 0, ptr: { x: 0, y: 0 }, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, flash: 0, dead: 0, ai: null };
+      x: 0, y: 0, vx: 0, vy: 0, aim: 0, ptr: { x: 0, y: 0 }, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, buff: null, invis: 0, flash: 0, dead: 0, ai: null };
   }
   function spawnSpot(f, center) {
     if (center && !inSolid(W / 2, H / 2, f.r + 4)) return { x: W / 2, y: H / 2 };
@@ -847,7 +908,7 @@
   }
   function respawn(f, center) {
     const s = spawnSpot(f, center);
-    Object.assign(f, { x: s.x, y: s.y, vx: 0, vy: 0, hp: f.max, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, flash: 0, dead: 0, alive: true });
+    Object.assign(f, { x: s.x, y: s.y, vx: 0, vy: 0, hp: f.max, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, buff: null, invis: 0, flash: 0, dead: 0, alive: true });
     f.ai = { tt: 0, st: 0, dir: 1, target: null, cd: rnd(.6, 1.2), sd: 1, ct: 0, cx: s.x, cy: s.y, esc: 0, eang: 0 };
     pop(f.x, f.y, f.color, 14);
   }
@@ -899,7 +960,7 @@
     for (let i = 0; i < n; i++) { const a = rnd(0, TAU), s = rnd(40, 160); fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .35, color }); }
   }
   function kill(t, o) {
-    t.alive = false; t.dead = 0; t.dash = null; t.jump = null; t.shield = 0;
+    t.alive = false; t.dead = 0; t.dash = null; t.jump = null; t.shield = 0; t.buff = null; t.invis = 0;
     pop(t.x, t.y, '#f97316', 24);
     if (o && o !== t) {
       o.kills++;
@@ -922,6 +983,8 @@
   function hit(t, dmg, src, o) {
     if (!t.alive || matchOver) return;
     if (!o.isPlayer) dmg *= DIFF.dmg;
+    if (o.buff) dmg *= o.buff.dmg;
+    t.invis = 0; // getroffene Tarnung fliegt auf
     if (t.shield > 0) dmg *= .5;
     t.hp -= dmg; t.flash = .12;
     if (src === 'atk') o.charge = Math.min(1, o.charge + dmg / 5000);
@@ -994,6 +1057,10 @@
       }
       case 'bear': bears.push({ o, x: o.x + Math.cos(o.aim) * 40, y: o.y + Math.sin(o.aim) * 40, t: a.time, cd: 0 }); break;
       case 'shield': o.shield = a.time; break;
+      case 'buff': o.buff = { t: a.time, dmg: a.dmg || 1, speed: a.speed || 1 }; if (a.shield) o.shield = a.shield; pop(o.x, o.y, '#fde047', 14); break;
+      case 'stealth': o.invis = a.time; pop(o.x, o.y, '#e2e8f0', 12); break;
+      case 'zone': puddles.push({ o, x: o.x, y: o.y, r: a.r, t: a.time, max: a.time, tick: 0, dmg: a.tick, src, color: a.color }); break;
+      case 'random': use(o, a.pool[Math.floor(Math.random() * a.pool.length)], src); break;
       case 'blink': {
         const dist = Math.min(a.dist, ptrDist(o));
         rings.push({ x: o.x, y: o.y, r: 30, t: .3 }); pop(o.x, o.y, '#e2e8f0', 12);
@@ -1004,7 +1071,7 @@
     }
   }
   const blocked = o => o.dash || o.jump;
-  function attack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.ammo >= 1) { o.ammo -= 1; use(o, o.B.atk, 'atk'); } }
+  function attack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.ammo >= 1) { o.ammo -= 1; o.invis = 0; use(o, o.B.atk, 'atk'); } }
   function superAttack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.charge >= 1) { o.charge = 0; use(o, o.B.sup, 'sup'); } }
 
   /* ----- Eingabe ----- */
@@ -1046,6 +1113,10 @@
       case 'pulse': case 'spin': return dist < s.r + t.r;
       case 'pull': return dist < s.r * .9;
       case 'shield': return dist < 260 || f.hp < f.max * .6;
+      case 'buff': return dist < 320;
+      case 'stealth': return dist < 420;
+      case 'zone': return dist < s.r + t.r + 20;
+      case 'random': return dist < 260;
       default: return true;
     }
   }
@@ -1056,14 +1127,17 @@
     A.tt -= dt;
     if (A.tt <= 0 || !A.target || !A.target.alive) {
       A.tt = .4; let best = null, bd = 1e9;
-      for (const e of en) { let d = Math.hypot(e.x - f.x, e.y - f.y); if (e.isPlayer) d *= .75; if (d < bd) { bd = d; best = e; } }
+      for (const e of en) { let d = Math.hypot(e.x - f.x, e.y - f.y); if (e.invis > 0 && d > 110) continue; if (e.isPlayer) d *= .75; if (d < bd) { bd = d; best = e; } }
       A.target = best;
     }
+    if (A.target && A.target.invis > 0 && Math.hypot(A.target.x - f.x, A.target.y - f.y) > 110) A.target = null;
+    if (!A.target) { const gx = W / 2 - f.x, gy = H / 2 - f.y, gd = Math.hypot(gx, gy) || 1; return { dx: gd > 80 ? gx / gd : 0, dy: gd > 80 ? gy / gd : 0 }; }
     const t = A.target, ex = t.x - f.x, ey = t.y - f.y, dist = Math.hypot(ex, ey) || 1, nx = ex / dist, ny = ey / dist;
     const range = rangeOf(a), sup = f.B.sup;
     let want = clamp(range * .7, 40, 300);
     // Super mit Nahwirkung bereit: näher ran
-    if (f.charge >= 1 && (sup.type === 'pulse' || sup.type === 'spin')) want = Math.max(30, sup.r * .6);
+    if (f.charge >= 1 && (sup.type === 'pulse' || sup.type === 'spin' || sup.type === 'zone')) want = Math.max(30, sup.r * .6);
+    if (f.invis > 0) want = 50; // Getarnt: direkt zum Gegner
 
     // Bewegung: Abstand halten, seitlich ausweichen, bei wenig Leben zurückweichen
     let mx = 0, my = 0;
@@ -1117,7 +1191,7 @@
       }
       if (d.t <= 0) f.dash = null;
     } else {
-      const len = Math.hypot(dx, dy), sp = f.B.speed * (f.shield > 0 ? 1.4 : 1) * (f.isPlayer ? 1 : DIFF.speed);
+      const len = Math.hypot(dx, dy), sp = f.B.speed * (f.shield > 0 ? 1.4 : 1) * (f.buff ? f.buff.speed : 1) * (f.invis > 0 ? 1.2 : 1) * (f.isPlayer ? 1 : DIFF.speed);
       if (len) { f.vx = dx / len * sp; f.vy = dy / len * sp; f.x += f.vx * dt; f.y += f.vy * dt; }
     }
     pushOut(f, f.r);
@@ -1138,6 +1212,8 @@
         f.ammo = Math.min(3, f.ammo + dt / 1.3);
         f.recoil = Math.max(0, f.recoil - dt * 60);
         f.shield = Math.max(0, f.shield - dt);
+        f.invis = Math.max(0, f.invis - dt);
+        if (f.buff && (f.buff.t -= dt) <= 0) f.buff = null;
         f.flash = Math.max(0, f.flash - dt);
         let dx = 0, dy = 0;
         if (f.isPlayer) {
@@ -1205,7 +1281,7 @@
       l.t += dt;
       if (l.t >= l.dur) {
         const pd = l.a.puddle; explode(l.tx, l.ty, pd ? pd.r : l.a.splash, l.a.dmg, l.src, l.o);
-        if (pd) puddles.push({ o: l.o, x: l.tx, y: l.ty, r: pd.r, t: pd.time, max: pd.time, tick: 0, dmg: pd.tick, src: l.src });
+        if (pd) puddles.push({ o: l.o, x: l.tx, y: l.ty, r: pd.r, t: pd.time, max: pd.time, tick: 0, dmg: pd.tick, src: l.src, color: pd.color });
         l.done = true;
       }
     }
@@ -1265,12 +1341,17 @@
     const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
     ctx.strokeStyle = f.color; ctx.lineWidth = 3; ctx.globalAlpha = .9;
     ctx.beginPath(); ctx.ellipse(f.x, f.y + 17 * f.B.size, 21 * f.B.size, 8 * f.B.size, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
-    if (f.flash > 0) ctx.globalAlpha = .55 + Math.sin(performance.now() / 30) * .25;
+    if (f.invis > 0) ctx.globalAlpha = .32;
+    else if (f.flash > 0) ctx.globalAlpha = .55 + Math.sin(performance.now() / 30) * .25;
     drawBrawler(ctx, f.B, f.x, f.y, f.aim, f.recoil, 1, { z });
     ctx.globalAlpha = 1;
     if (f.shield > 0) {
       ctx.strokeStyle = 'rgba(134,239,172,.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y - z, 30 * f.B.size, 0, TAU); ctx.stroke();
       ctx.fillStyle = 'rgba(134,239,172,.2)'; ctx.fill();
+    }
+    if (f.buff) { // Stärkung: goldene, pulsierende Aura
+      ctx.strokeStyle = 'rgba(253,224,71,' + (.6 + .3 * Math.sin(performance.now() / 120)) + ')'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(f.x, f.y - z, 27 * f.B.size + Math.sin(performance.now() / 150) * 2, 0, TAU); ctx.stroke();
     }
   }
   function drawBars(f) {
@@ -1329,7 +1410,7 @@
     ctx.drawImage(L.base, 0, 0);
 
     for (const p of puddles) {
-      ctx.globalAlpha = .35 + .25 * (p.t / p.max); ctx.fillStyle = '#84cc16';
+      ctx.globalAlpha = .35 + .25 * (p.t / p.max); ctx.fillStyle = p.color || '#84cc16';
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -1350,7 +1431,10 @@
     }
 
     const alive = fighters.filter(f => f.alive).sort((a, b) => a.y - b.y);
-    for (const f of alive) { drawBody(f); if (!f.isPlayer) drawBars(f); }
+    for (const f of alive) {
+      if (f.invis > 0 && !f.isPlayer && Math.hypot(f.x - P.x, f.y - P.y) > 110) continue; // getarnte Gegner sind unsichtbar
+      drawBody(f); if (!f.isPlayer) drawBars(f);
+    }
     ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0); ctx.globalAlpha = 1;
     if (P.alive) drawBars(P);
 

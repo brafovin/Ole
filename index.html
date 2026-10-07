@@ -3,13 +3,1095 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ole</title>
+<title>Brawler</title>
 <style>
-  body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#f8fafc}
-  main{text-align:center;padding:32px}
-  h1{font-size:clamp(28px,6vw,56px);margin:0 0 12px}
-  p{opacity:.7;margin:0}
+  :root{--bg:#0f172a;--panel:#1e293b;--text:#f8fafc;--muted:#94a3b8;--yellow:#facc15;--red:#ef4444}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:-apple-system,system-ui,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:960px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:24px}
+  h1{font-size:clamp(32px,8vw,56px);margin:0;letter-spacing:.02em;text-transform:uppercase;color:var(--yellow);text-shadow:0 3px 0 #92400e}
+  .panel{background:var(--panel);border-radius:16px;padding:16px}
+  #arena{width:100%;aspect-ratio:8/5;display:block;border-radius:12px;background:#14532d;touch-action:none;cursor:crosshair}
+  .bar{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  .bar .who{font-weight:800}
+  button{font:inherit;color:inherit;border:0;touch-action:manipulation;cursor:pointer}
+  .act{font-weight:800;border-radius:12px;padding:12px 20px;color:#fff}
+  #atk{background:var(--red)}
+  #sup{background:#475569}
+  #sup.ready{background:var(--yellow);color:#422006}
+  .act:active{transform:translateY(1px)}
+  .hint{color:var(--muted);font-size:13px;flex-basis:100%}
+  .rarity{display:grid;gap:12px}
+  .rarity h2{margin:0;display:flex;align-items:center;gap:10px;font-size:22px;text-transform:uppercase;letter-spacing:.04em}
+  .rarity h2 span{font-size:13px;font-weight:700;color:var(--muted);text-transform:none;letter-spacing:0}
+  .dot{width:14px;height:14px;border-radius:50%;background:var(--c)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .brawler{background:var(--panel);border-radius:16px;padding:14px;text-align:left;display:grid;gap:8px;border:3px solid transparent;border-top:6px solid var(--c)}
+  .brawler:hover{background:#273449}
+  .brawler.sel{border-color:var(--c);border-top-width:6px}
+  .brawler canvas{width:100%;height:96px;background:#14532d;border-radius:10px}
+  .brawler h3{margin:0;font-size:20px;display:flex;justify-content:space-between;align-items:baseline}
+  .brawler h3 small{font-size:12px;color:var(--muted);font-weight:600}
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .mini b{display:block;font-size:15px;color:var(--text);text-transform:none;letter-spacing:0}
+  .move{font-size:13px;color:var(--muted);line-height:1.35}
+  .move strong{color:var(--yellow)}
+  .note{color:var(--muted);font-size:12px;margin:0}
+  .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .top h1{margin-right:auto}
+  .coins{background:var(--panel);border-radius:999px;padding:8px 16px;font-weight:800;font-size:18px;white-space:nowrap}
+  .menu-btn{background:#7c3aed;color:#fff;font-weight:800;border-radius:12px;padding:12px 20px}
+  #menu{position:fixed;inset:0;z-index:10;background:rgba(15,23,42,.96);overflow-y:auto;overscroll-behavior:contain}
+  #menu[hidden]{display:none}
+  .menu-in{max-width:960px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:20px}
+  .menu-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:rgba(15,23,42,.96);padding:8px 0;z-index:1}
+  .menu-head h2{margin:0 auto 0 0;font-size:clamp(24px,6vw,36px);color:var(--yellow);text-transform:uppercase}
+  .close{background:#475569;color:#fff;font-weight:800;border-radius:12px;padding:10px 16px}
+  .pic{position:relative}
+  .pic .lock{position:absolute;inset:0;display:none;place-items:center;font-size:34px}
+  .brawler.locked .pic canvas{filter:grayscale(1) brightness(.45)}
+  .brawler.locked .pic .lock{display:grid}
+  .brawler.owned{cursor:pointer}
+  .brawler.owned:hover{background:#273449}
+  .cta{white-space:nowrap;font-weight:800;border-radius:10px;padding:10px;width:100%;color:#fff;background:#475569}
+  .cta.pick{background:#16a34a}
+  .cta.cur{background:transparent;border:2px solid var(--c);cursor:default}
+  .cta.buy{background:var(--yellow);color:#422006}
+  .cta:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
+  .tabs{display:flex;gap:8px}
+  .tab{background:#334155;color:#cbd5e1;font-weight:800;border-radius:12px;padding:10px 22px}
+  .tab.on{background:#7c3aed;color:#fff}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips[hidden]{display:none}
+  .chip{background:#1e293b;color:#cbd5e1;font-weight:700;border-radius:999px;padding:6px 14px;border:2px solid var(--c)}
+  .chip.on{background:var(--c);color:#0f172a}
+  .mapgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .brawler.mapcard canvas{height:auto;aspect-ratio:8/5;background:none}
+  .where{color:var(--muted);font-weight:600;font-size:13px}
 </style>
 </head>
-<body><main><h1>Ole</h1><p>Diese Seite wurde automatisch angelegt.</p></main></body>
+<body>
+<main>
+  <div class="top">
+    <h1>Brawler</h1>
+    <span class="coins">🪙 <span class="coin-n">0</span></span>
+    <button class="menu-btn" id="open-menu">☰ Menü</button>
+  </div>
+
+  <section class="panel">
+    <canvas id="arena" width="800" height="500" aria-label="Trainingsarena"></canvas>
+    <div class="bar">
+      <span class="who" id="who">Shelly</span>
+      <span class="where" id="where"></span>
+      <button class="act" id="atk">Angriff</button>
+      <button class="act" id="sup">Super</button>
+      <span class="hint">Besiege Puppen für 🪙 Münzen, schalte im Menü neue Brawler frei und wähle eine von 4 Maps · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
+    </div>
+  </section>
+</main>
+
+<div id="menu" hidden role="dialog" aria-modal="true" aria-label="Brawler-Menü">
+  <div class="menu-in">
+    <div class="menu-head">
+      <h2>Brawler</h2>
+      <span class="coins">🪙 <span class="coin-n">0</span></span>
+      <button class="close" id="close-menu">✕ Schließen</button>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-tab="brawler">Brawler</button>
+      <button class="tab" data-tab="maps">Maps</button>
+    </div>
+    <div id="chips" class="chips"></div>
+    <div id="rarities" class="rarity"></div>
+    <p class="note">Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ---------- Daten ---------- */
+  const RARITIES = [
+    { id: 'start',  name: 'Start',  color: '#94a3b8', info: 'Jeder Spieler beginnt mit diesem Brawler' },
+    { id: 'selten', name: 'Selten', color: '#22c55e', info: '8 Brawler' },
+    { id: 'super', name: 'Super Selten', color: '#38bdf8', info: '8 Brawler' },
+    { id: 'episch', name: 'Episch', color: '#a855f7', info: '20 Brawler' },
+    { id: 'mythisch', name: 'Mythisch', color: '#ef4444', info: '10 Brawler' },
+  ];
+
+  const BRAWLERS = [
+    { id:'shelly', rarity:'start', name:'Shelly', role:'Schadensausteiler', hp:3600, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#a855f7', body:'#7e22ce', accent:'#facc15', weapon:'gun', wc:'#334155', len:24 },
+      atkName:'Schrotflinte', atkText:'5 Kugeln im Fächer, 300 Schaden pro Kugel.',
+      supName:'Superschuss', supText:'9 Kugeln mit mehr Reichweite und Rückstoß.',
+      atk:{ type:'pellets', n:5, spread:.28, dmg:300, sp:720, life:.27 },
+      sup:{ type:'pellets', n:9, spread:.5, dmg:320, sp:760, life:.42, knock:.03 } },
+
+    { id:'colt', rarity:'selten', name:'Colt', role:'Schadensausteiler', hp:3600, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#7c2d12', body:'#1d4ed8', accent:'#f8fafc', weapon:'gun', wc:'#94a3b8', len:22, hat:'#92400e' },
+      atkName:'Sechsschuss', atkText:'6 Kugeln in einer Linie auf große Entfernung.',
+      supName:'Kugelhagel', supText:'12 durchschlagende Kugeln in einer Linie.',
+      atk:{ type:'pellets', n:6, spread:.05, dmg:300, sp:900, life:.55 },
+      sup:{ type:'pellets', n:12, spread:.06, dmg:300, sp:1000, life:.6, pierce:true } },
+
+    { id:'nita', rarity:'selten', name:'Nita', role:'Schadensausteiler', hp:4000, speed:190, size:1,
+      look:{ skin:'#c68642', hair:'#1c1917', body:'#b45309', accent:'#fde68a', weapon:'none' },
+      atkName:'Druckwelle', atkText:'Eine durchschlagende Welle, 800 Schaden.',
+      supName:'Bär Bruce', supText:'Ruft einen Bären, der Gegner jagt und zuschlägt.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:800, sp:520, life:.5, r:13, pierce:true, color:'#bfdbfe' },
+      sup:{ type:'bear', time:6 } },
+
+    { id:'bull', rarity:'selten', name:'Bull', role:'Tank', hp:5000, speed:210, size:1.15,
+      look:{ skin:'#d19a6a', hair:null, body:'#475569', accent:'#ef4444', weapon:'gun', wc:'#1e293b', len:20, ring:true },
+      atkName:'Doppellauf', atkText:'Breite Schrotsalve mit sehr kurzer Reichweite.',
+      supName:'Stieransturm', supText:'Rast nach vorn und rammt alles auf dem Weg.',
+      atk:{ type:'pellets', n:5, spread:.4, dmg:280, sp:700, life:.2 },
+      sup:{ type:'dash', dist:260, dmg:1000 } },
+
+    { id:'brock', rarity:'selten', name:'Brock', role:'Scharfschütze', hp:3400, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#1e3a8a', body:'#0f766e', accent:'#fde047', weapon:'tube', wc:'#f97316', goggles:true },
+      atkName:'Raketenwerfer', atkText:'Weitreichende Rakete mit Explosion, 1000 Schaden.',
+      supName:'Raketenregen', supText:'6 Raketen prasseln auf ein Zielgebiet.',
+      atk:{ type:'rocket', sp:760, life:.6, aoe:48, dmg:1000 },
+      sup:{ type:'rain', count:6, area:90, aoe:56, dmg:600 } },
+
+    { id:'primo', rarity:'selten', name:'El Primo', role:'Tank', hp:6000, speed:200, size:1.3,
+      look:{ skin:'#d19a6a', hair:null, body:'#dc2626', accent:'#facc15', weapon:'fists', glove:'#facc15', mask:'#dc2626' },
+      atkName:'Fliegende Fäuste', atkText:'Mehrere Schläge direkt vor ihm.',
+      supName:'Absprung', supText:'Springt zum Ziel und löst eine Druckwelle aus.',
+      atk:{ type:'pellets', n:6, spread:.5, dmg:250, sp:600, life:.14 },
+      sup:{ type:'slam', dist:280, r:95, dmg:1200 } },
+
+    { id:'barley', rarity:'selten', name:'Barley', role:'Werfer', hp:3400, speed:190, size:1,
+      look:{ skin:'#cbd5e1', hair:null, body:'#92400e', accent:'#e5e7eb', weapon:'bottle', wc:'#65a30d', hat:'#475569' },
+      atkName:'Flaschenwurf', atkText:'Wirft eine Flasche, die eine Pfütze hinterlässt.',
+      supName:'Giftrunde', supText:'Riesige Flasche mit großer, ätzender Pfütze.',
+      atk:{ type:'lob', range:320, dmg:400, puddle:{ r:42, time:2.5, tick:140 } },
+      sup:{ type:'lob', range:340, dmg:500, puddle:{ r:72, time:3.2, tick:200 } } },
+
+    { id:'poco', rarity:'selten', name:'Poco', role:'Unterstützer', hp:3800, speed:190, size:1,
+      look:{ skin:'#f1f5f9', hair:null, body:'#7c3aed', accent:'#f472b6', weapon:'guitar', wc:'#b45309', hat:'#a16207', hollow:true },
+      atkName:'Gitarrenwelle', atkText:'Breite Schallwelle, trifft mehrere Gegner.',
+      supName:'Liebeslied', supText:'Große Welle, die Verbündete heilen würde.',
+      atk:{ type:'pellets', n:3, spread:.5, dmg:450, sp:650, life:.35, pierce:true, color:'#f9a8d4' },
+      sup:{ type:'pellets', n:9, spread:.55, dmg:500, sp:800, life:.6, pierce:true, color:'#f9a8d4', heal:true } },
+
+    { id:'rosa', rarity:'selten', name:'Rosa', role:'Tank', hp:5000, speed:200, size:1.1,
+      look:{ skin:'#a16207', hair:'#166534', body:'#15803d', accent:'#f9a8d4', weapon:'fists', glove:'#ec4899' },
+      atkName:'Boxhandschuhe', atkText:'Schnelle Schläge auf kurze Distanz.',
+      supName:'Pflanzenschild', supText:'4 Sekunden Schild und schneller unterwegs.',
+      atk:{ type:'pellets', n:6, spread:.45, dmg:220, sp:600, life:.14 },
+      sup:{ type:'shield', time:4 } },
+
+    { id:'rico', rarity:'super', name:'Rico', role:'Schadensausteiler', hp:3400, speed:190, size:1,
+      look:{ skin:'#cbd5e1', hair:null, body:'#2563eb', accent:'#f8fafc', weapon:'gun', wc:'#2563eb', len:26, antenna:true, goggles:true },
+      atkName:'Prallkugeln', atkText:'5 Kugeln, die an der Wand abprallen.',
+      supName:'Superprall', supText:'10 Kugeln, die mehrfach abprallen.',
+      atk:{ type:'pellets', n:5, spread:.1, dmg:300, sp:850, life:.8, bounce:2, color:'#93c5fd' },
+      sup:{ type:'pellets', n:10, spread:.6, dmg:300, sp:850, life:1, bounce:3, color:'#93c5fd' } },
+
+    { id:'darryl', rarity:'super', name:'Darryl', role:'Tank', hp:5500, speed:200, size:1.15,
+      look:{ skin:'#d19a6a', hair:null, body:'#a16207', accent:'#78350f', weapon:'gun', wc:'#475569', len:22, hat:'#1f2937', hoops:true },
+      atkName:'Doppelflinte', atkText:'Zwei Läufe, breite Schrotsalve.',
+      supName:'Fassrolle', supText:'Rollt weit nach vorn und rammt Gegner.',
+      atk:{ type:'pellets', n:6, spread:.3, dmg:280, sp:700, life:.22 },
+      sup:{ type:'dash', dist:340, dmg:800 } },
+
+    { id:'penny', rarity:'super', name:'Penny', role:'Werferin', hp:3600, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#ea580c', body:'#0e7490', accent:'#fde047', weapon:'tube', wc:'#ca8a04', hat:'#7f1d1d' },
+      atkName:'Münzbombe', atkText:'Mörserschuss mit Flächenschaden.',
+      supName:'Kanone', supText:'Stellt einen Geschützturm auf, der 8 Sekunden feuert.',
+      atk:{ type:'lob', range:380, dmg:750, splash:46, time:.55 },
+      sup:{ type:'turret', time:8, dmg:400, every:.8 } },
+
+    { id:'carl', rarity:'super', name:'Carl', role:'Schadensausteiler', hp:5000, speed:200, size:1.05,
+      look:{ skin:'#d19a6a', hair:null, body:'#92400e', accent:'#fbbf24', weapon:'pick', hat:'#f59e0b' },
+      atkName:'Spitzhacke', atkText:'Wirft die Hacke, die zurückkehrt und zweimal trifft.',
+      supName:'Wirbelwind', supText:'Dreht sich und schlägt dreimal rundherum zu.',
+      atk:{ type:'boom', range:300, dmg:600, dur:.7 },
+      sup:{ type:'spin', r:85, dmg:500, hits:3 } },
+
+    { id:'jacky', rarity:'super', name:'Jacky', role:'Tank', hp:5500, speed:205, size:1.1,
+      look:{ skin:'#a16207', hair:null, body:'#f97316', accent:'#fde047', weapon:'tube', wc:'#64748b', hat:'#fbbf24' },
+      atkName:'Presslufthammer', atkText:'Schlägt in einem Kreis um sich.',
+      supName:'Sogwirkung', supText:'Zieht Gegner in der Nähe zu sich heran.',
+      atk:{ type:'pulse', r:78, range:78, dmg:550 },
+      sup:{ type:'pull', r:240, dmg:400 } },
+
+    { id:'gus', rarity:'super', name:'Gus', role:'Unterstützer', hp:3200, speed:190, size:.95,
+      look:{ skin:'#bae6fd', hair:'#475569', body:'#e2e8f0', accent:'#7dd3fc', weapon:'gun', wc:'#7dd3fc', len:16, hollow:true },
+      atkName:'Geisterblase', atkText:'Langsame Blase, die explodiert.',
+      supName:'Geisterschild', supText:'4 Sekunden Schild und mehr Tempo.',
+      atk:{ type:'rocket', sp:520, life:.65, aoe:42, dmg:700 },
+      sup:{ type:'shield', time:4 } },
+
+    { id:'ruffs', rarity:'super', name:'Colonel Ruffs', role:'Unterstützer', hp:3800, speed:190, size:1,
+      look:{ skin:'#d6d3d1', hair:'#44403c', body:'#365314', accent:'#facc15', weapon:'gun', wc:'#1c1917', len:26, hat:'#166534' },
+      atkName:'Laserfeuer', atkText:'3 durchschlagende Schüsse im Fächer.',
+      supName:'Luftschlag', supText:'3 schwere Bomben auf ein Zielgebiet.',
+      atk:{ type:'pellets', n:3, spread:.15, dmg:400, sp:800, life:.5, pierce:true, color:'#fca5a5' },
+      sup:{ type:'rain', count:3, area:40, aoe:80, dmg:700 } },
+
+    { id:'tick', rarity:'super', name:'Tick', role:'Werfer', hp:3200, speed:190, size:.95,
+      look:{ skin:'#9ca3af', hair:null, body:'#f59e0b', accent:'#ef4444', weapon:'tube', wc:'#4b5563', hollow:true, antenna:true },
+      atkName:'Minen', atkText:'Wirft 3 Minen im Fächer, die explodieren.',
+      supName:'Kopfwurf', supText:'Schleudert seinen Kopf: riesige Explosion.',
+      atk:{ type:'lob', n:3, spread:.22, range:300, dmg:450, splash:48, time:.5 },
+      sup:{ type:'rocket', sp:450, life:.8, aoe:95, dmg:1500 } },
+
+    { id:'piper', rarity:'episch', name:'Piper', role:'Scharfschützin', hp:3400, speed:190, size:1,
+      look:{ skin:'#f1c9a5', hair:'#fde68a', body:'#be185d', accent:'#fbcfe8', weapon:'gun', wc:'#f9a8d4', len:34, hat:'#f472b6' },
+      atkName:'Präzisionsschuss', atkText:'Ein schneller Schuss auf riesige Entfernung.',
+      supName:'Zuckerbomben', supText:'4 Bomben regnen auf ein Zielgebiet.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:1300, life:.7, color:'#f9a8d4' },
+      sup:{ type:'rain', count:4, area:50, aoe:50, dmg:600 } },
+
+    { id:'pam', rarity:'episch', name:'Pam', role:'Unterstützerin', hp:4800, speed:190, size:1.1,
+      look:{ skin:'#c68642', hair:'#9a3412', body:'#0369a1', accent:'#fde047', weapon:'gun', wc:'#64748b', len:26, hoops:true },
+      atkName:'Schrottsalve', atkText:'Breiter Hagel aus Metallschrott.',
+      supName:'Heilstation', supText:'Eine Station, die 8 Sekunden Schrott feuert.',
+      atk:{ type:'pellets', n:6, spread:.3, dmg:220, sp:700, life:.32 },
+      sup:{ type:'turret', time:8, dmg:250, every:.4 } },
+
+    { id:'frank', rarity:'episch', name:'Frank', role:'Tank', hp:7000, speed:180, size:1.35,
+      look:{ skin:'#a7f3d0', hair:'#0f172a', body:'#475569', accent:'#22d3ee', weapon:'fists', glove:'#64748b' },
+      atkName:'Hammerschlag', atkText:'Wuchtiger Schlag, trifft hart und kurz.',
+      supName:'Betäubungsschlag', supText:'Gewaltiger Schlag rundherum.',
+      atk:{ type:'pellets', n:3, spread:.5, dmg:900, sp:600, life:.13 },
+      sup:{ type:'pulse', r:130, range:130, dmg:1300 } },
+
+    { id:'bibi', rarity:'episch', name:'Bibi', role:'Tank', hp:5000, speed:205, size:1,
+      look:{ skin:'#e8b48a', hair:'#f472b6', body:'#7c3aed', accent:'#fde047', weapon:'pick', hat:'#ec4899' },
+      atkName:'Baseballschlag', atkText:'Schwingt breit und schleudert Gegner weg.',
+      supName:'Gummiball', supText:'Großer Ball mit starkem Rückstoß.',
+      atk:{ type:'pellets', n:5, spread:.9, dmg:350, sp:600, life:.12, pierce:true, knock:.05 },
+      sup:{ type:'pellets', n:1, spread:0, dmg:900, sp:700, life:.5, r:16, pierce:true, knock:.12, color:'#f472b6' } },
+
+    { id:'bea', rarity:'episch', name:'Bea', role:'Scharfschützin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#fde68a', hair:'#facc15', body:'#ca8a04', accent:'#1c1917', weapon:'gun', wc:'#44403c', len:30, goggles:true },
+      atkName:'Bienenstachel', atkText:'Sehr schneller, harter Schuss.',
+      supName:'Bienenschwarm', supText:'Durchschlagender Super-Stachel mit 2000 Schaden.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:1100, life:.6, color:'#fde047' },
+      sup:{ type:'pellets', n:1, spread:0, dmg:2000, sp:1200, life:.7, r:9, pierce:true, color:'#facc15' } },
+
+    { id:'nani', rarity:'episch', name:'Nani', role:'Schadensausteilerin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#cbd5e1', hair:'#38bdf8', body:'#0e7490', accent:'#e0f2fe', weapon:'gun', wc:'#38bdf8', len:20, antenna:true, goggles:true },
+      atkName:'Peep-Laser', atkText:'Schnelle Mini-Rakete mit kleiner Explosion.',
+      supName:'Peep-Strahl', supText:'Salve aus 9 durchschlagenden Strahlen.',
+      atk:{ type:'rocket', sp:900, life:.6, aoe:32, dmg:900 },
+      sup:{ type:'pellets', n:9, spread:.08, dmg:400, sp:1000, life:.5, pierce:true, color:'#7dd3fc' } },
+
+    { id:'edgar', rarity:'episch', name:'Edgar', role:'Assassine', hp:4400, speed:215, size:1,
+      look:{ skin:'#e5e7eb', hair:'#111827', body:'#1f2937', accent:'#a78bfa', weapon:'fists', glove:'#a78bfa' },
+      atkName:'Schnellschläge', atkText:'Blitzschnelle Fäuste mit hohem Schaden.',
+      supName:'Sprung', supText:'Springt zum Ziel und schlägt zu.',
+      atk:{ type:'pellets', n:2, spread:.2, dmg:550, sp:600, life:.13 },
+      sup:{ type:'slam', dist:300, r:70, dmg:900 } },
+
+    { id:'griff', rarity:'episch', name:'Griff', role:'Schadensausteiler', hp:3600, speed:190, size:1,
+      look:{ skin:'#d19a6a', hair:'#1c1917', body:'#15803d', accent:'#fde047', weapon:'gun', wc:'#ca8a04', len:20, hat:'#365314' },
+      atkName:'Münzregen', atkText:'Fächer aus Münzen.',
+      supName:'Münzexplosion', supText:'Münzen fliegen in alle Richtungen.',
+      atk:{ type:'pellets', n:5, spread:.35, dmg:290, sp:700, life:.3, color:'#fde047' },
+      sup:{ type:'pellets', n:14, spread:2.9, dmg:350, sp:620, life:.38, color:'#fde047' } },
+
+    { id:'grom', rarity:'episch', name:'Grom', role:'Werfer', hp:3400, speed:190, size:1,
+      look:{ skin:'#a3b18a', hair:null, body:'#4d7c0f', accent:'#fef08a', weapon:'tube', wc:'#14532d', hat:'#3f6212' },
+      atkName:'Granatwurf', atkText:'Weitreichende Granate mit Splash.',
+      supName:'Turmgeschoss', supText:'Riesiges Geschoss mit großer Explosion.',
+      atk:{ type:'lob', range:420, dmg:800, splash:50, time:.6 },
+      sup:{ type:'rocket', sp:520, life:.75, aoe:110, dmg:1400 } },
+
+    { id:'bonnie', rarity:'episch', name:'Bonnie', role:'Schadensausteilerin', hp:3200, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#7c2d12', body:'#be123c', accent:'#fde68a', weapon:'tube', wc:'#92400e', hat:'#9f1239' },
+      atkName:'Kanonenschuss', atkText:'Ein harter Schuss geradeaus.',
+      supName:'Rückstoß-Sprung', supText:'Springt zurück ins Getümmel mit Druckwelle.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1100, sp:900, life:.5, r:6, color:'#fb7185' },
+      sup:{ type:'slam', dist:260, r:60, dmg:700 } },
+
+    { id:'gale', rarity:'episch', name:'Gale', role:'Unterstützer', hp:3600, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#e2e8f0', body:'#0284c7', accent:'#f8fafc', weapon:'tube', wc:'#7dd3fc' },
+      atkName:'Schneepuster', atkText:'Drei durchschlagende Schneeböen.',
+      supName:'Schneesturm', supText:'Breiter Sturm mit starkem Rückstoß.',
+      atk:{ type:'pellets', n:3, spread:.12, dmg:380, sp:700, life:.45, pierce:true, color:'#e0f2fe' },
+      sup:{ type:'pellets', n:7, spread:.8, dmg:500, sp:700, life:.5, pierce:true, knock:.08, color:'#e0f2fe' } },
+
+    { id:'colette', rarity:'episch', name:'Colette', role:'Schadensausteilerin', hp:4200, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#1e293b', body:'#0f766e', accent:'#fde047', weapon:'bottle', wc:'#0f766e' },
+      atkName:'Einkaufstasche', atkText:'Wirft die Tasche, die zurückkehrt.',
+      supName:'Kassensturz', supText:'Rast nach vorn und schlägt hart zu.',
+      atk:{ type:'boom', range:330, dmg:650, dur:.6 },
+      sup:{ type:'dash', dist:300, dmg:1000 } },
+
+    { id:'belle', rarity:'episch', name:'Belle', role:'Scharfschützin', hp:3400, speed:190, size:1,
+      look:{ skin:'#c68642', hair:'#fde047', body:'#a16207', accent:'#fef9c3', weapon:'gun', wc:'#facc15', len:30, hat:'#78350f' },
+      atkName:'Blitzschuss', atkText:'Durchschlagender Strahl auf lange Distanz.',
+      supName:'Blitzmarke', supText:'4 Blitze schlagen im Zielgebiet ein.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:800, sp:1000, life:.6, pierce:true, color:'#fde047' },
+      sup:{ type:'rain', count:4, area:100, aoe:60, dmg:600 } },
+
+    { id:'ash', rarity:'episch', name:'Ash', role:'Tank', hp:5800, speed:195, size:1.2,
+      look:{ skin:'#a8a29e', hair:null, body:'#57534e', accent:'#ef4444', weapon:'gun', wc:'#44403c', len:18, mask:'#78716c' },
+      atkName:'Müllschaufel', atkText:'Breiter Schlag auf kurze Distanz.',
+      supName:'Wutanfall', supText:'4 Sekunden Wut: Schild und mehr Tempo.',
+      atk:{ type:'pellets', n:5, spread:.35, dmg:300, sp:700, life:.2 },
+      sup:{ type:'shield', time:4 } },
+
+    { id:'lola', rarity:'episch', name:'Lola', role:'Schadensausteilerin', hp:3800, speed:190, size:1,
+      look:{ skin:'#f1c9a5', hair:'#f97316', body:'#be185d', accent:'#fde047', weapon:'gun', wc:'#ec4899', len:22, hat:'#be185d' },
+      atkName:'Feuerstrahl', atkText:'Vier durchschlagende Feuerzungen.',
+      supName:'Alter Ego', supText:'Ein Klon, der 8 Sekunden feuert.',
+      atk:{ type:'pellets', n:4, spread:.2, dmg:300, sp:700, life:.32, pierce:true, color:'#fb923c' },
+      sup:{ type:'turret', time:8, dmg:300, every:.5 } },
+
+    { id:'sam', rarity:'episch', name:'Sam', role:'Schadensausteiler', hp:5500, speed:195, size:1.15,
+      look:{ skin:'#d19a6a', hair:'#fde047', body:'#0369a1', accent:'#f97316', weapon:'fists', glove:'#94a3b8' },
+      atkName:'Schlagringe', atkText:'Wirft die Fäuste, die zurückkehren.',
+      supName:'Bodenschlag', supText:'Springt vor und löst eine Druckwelle aus.',
+      atk:{ type:'boom', range:220, dmg:500, dur:.55 },
+      sup:{ type:'slam', dist:240, r:70, dmg:1000 } },
+
+    { id:'mandy', rarity:'episch', name:'Mandy', role:'Scharfschützin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#fbcfe8', hair:'#f9a8d4', body:'#ec4899', accent:'#fdf2f8', weapon:'gun', wc:'#f472b6', len:30, hat:'#db2777' },
+      atkName:'Lollipop-Schuss', atkText:'Süßer, schneller Präzisionsschuss.',
+      supName:'Bonbonsturm', supText:'7 durchschlagende Bonbons im Fächer.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:900, sp:1200, life:.65, color:'#f9a8d4' },
+      sup:{ type:'pellets', n:7, spread:.5, dmg:500, sp:900, life:.6, pierce:true, color:'#f9a8d4' } },
+
+    { id:'maisie', rarity:'episch', name:'Maisie', role:'Werferin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#e8b48a', hair:'#7c2d12', body:'#4338ca', accent:'#fde047', weapon:'tube', wc:'#6366f1', goggles:true },
+      atkName:'Kanonenkugel', atkText:'Mörserschuss auf große Entfernung.',
+      supName:'Superbombe', supText:'Gewaltige Explosion am Zielpunkt.',
+      atk:{ type:'lob', range:400, dmg:800, splash:44, time:.55 },
+      sup:{ type:'lob', range:400, dmg:1600, splash:110, time:.7 } },
+
+    { id:'rt', rarity:'episch', name:'R-T', role:'Schadensausteiler', hp:3200, speed:190, size:1,
+      look:{ skin:'#94a3b8', hair:null, body:'#475569', accent:'#22d3ee', weapon:'gun', wc:'#22d3ee', len:22, antenna:true, hollow:true },
+      atkName:'Doppelstrahl', atkText:'Zwei durchschlagende Strahlen.',
+      supName:'Teilung', supText:'Dreht sich zweimal und trifft rundherum.',
+      atk:{ type:'pellets', n:2, spread:.1, dmg:450, sp:800, life:.5, pierce:true, color:'#67e8f9' },
+      sup:{ type:'spin', r:90, dmg:600, hits:2 } },
+
+    { id:'hank', rarity:'episch', name:'Hank', role:'Tank', hp:5600, speed:190, size:1.2,
+      look:{ skin:'#fda4af', hair:null, body:'#0891b2', accent:'#fde047', weapon:'gun', wc:'#94a3b8', len:20, ring:true },
+      atkName:'Wasserstrahl', atkText:'Dicker, harter Strahl.',
+      supName:'Druckschild', supText:'5 Sekunden Schild und mehr Tempo.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:600, life:.45, r:10, color:'#67e8f9' },
+      sup:{ type:'shield', time:5 } },
+
+    { id:'mortis', rarity:'mythisch', name:'Mortis', role:'Assassine', hp:4000, speed:215, size:1,
+      look:{ skin:'#d6d3d1', hair:'#0f172a', body:'#111827', accent:'#a78bfa', weapon:'pick', hat:'#1f2937' },
+      atkName:'Schaufelsprung', atkText:'Springt nach vorn und schlägt zu, 700 Schaden.',
+      supName:'Fledermausschwarm', supText:'Riesiger Schlag rundherum, 1200 Schaden.',
+      atk:{ type:'dash', dist:140, range:140, dmg:700 },
+      sup:{ type:'pulse', r:150, range:150, dmg:1200 } },
+
+    { id:'tara', rarity:'mythisch', name:'Tara', role:'Schadensausteilerin', hp:3600, speed:190, size:1,
+      look:{ skin:'#c4a484', hair:'#4c1d95', body:'#6d28d9', accent:'#fde047', weapon:'none', hat:'#4c1d95' },
+      atkName:'Tarotkarten', atkText:'3 durchschlagende Karten im Fächer.',
+      supName:'Schwarzes Loch', supText:'Zieht alle Gegner in weitem Umkreis heran.',
+      atk:{ type:'pellets', n:3, spread:.25, dmg:500, sp:800, life:.4, pierce:true, color:'#c4b5fd' },
+      sup:{ type:'pull', r:280, dmg:900 } },
+
+    { id:'gene', rarity:'mythisch', name:'Gene', role:'Unterstützer', hp:3400, speed:190, size:1,
+      look:{ skin:'#38bdf8', hair:null, body:'#0ea5e9', accent:'#fde047', weapon:'bottle', wc:'#fbbf24' },
+      atkName:'Magische Hand', atkText:'Hand, die weit fliegt und zurückkehrt.',
+      supName:'Zauberlampe', supText:'Reißt Gegner aus riesiger Entfernung heran.',
+      atk:{ type:'boom', range:400, dmg:750, dur:1 },
+      sup:{ type:'pull', r:400, dmg:700 } },
+
+    { id:'max', rarity:'mythisch', name:'Max', role:'Unterstützerin', hp:3200, speed:215, size:.95,
+      look:{ skin:'#e8b48a', hair:'#f43f5e', body:'#0e7490', accent:'#fde047', weapon:'gun', wc:'#0ea5e9', len:24, goggles:true },
+      atkName:'Schnellfeuer', atkText:'5 präzise Kugeln, sehr schnell.',
+      supName:'Turbo-Schub', supText:'5 Sekunden Schild und viel mehr Tempo.',
+      atk:{ type:'pellets', n:5, spread:.06, dmg:280, sp:950, life:.5, color:'#7dd3fc' },
+      sup:{ type:'shield', time:5 } },
+
+    { id:'mrp', rarity:'mythisch', name:'Mr. P', role:'Werfer', hp:4000, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:null, body:'#1e3a8a', accent:'#fde047', weapon:'bottle', wc:'#92400e', hat:'#1e3a8a' },
+      atkName:'Koffer', atkText:'Wirft einen Koffer mit Flächenschaden.',
+      supName:'Page Porter', supText:'Ein Gepäckträger, der 10 Sekunden feuert.',
+      atk:{ type:'lob', range:360, dmg:700, splash:42, time:.5 },
+      sup:{ type:'turret', time:10, dmg:350, every:.6 } },
+
+    { id:'sprout', rarity:'mythisch', name:'Sprout', role:'Kontrolle', hp:3800, speed:190, size:.95,
+      look:{ skin:'#86efac', hair:'#16a34a', body:'#166534', accent:'#fde047', weapon:'tube', wc:'#4d7c0f' },
+      atkName:'Samenbombe', atkText:'Wirft einen Samen, der Dornen wachsen lässt.',
+      supName:'Dornenhecke', supText:'Riesiges Dornenfeld, das lange schadet.',
+      atk:{ type:'lob', range:340, dmg:450, puddle:{ r:30, time:3, tick:130 } },
+      sup:{ type:'lob', range:360, dmg:600, puddle:{ r:100, time:5, tick:180 } } },
+
+    { id:'byron', rarity:'mythisch', name:'Byron', role:'Scharfschütze', hp:3000, speed:190, size:1,
+      look:{ skin:'#e5e7eb', hair:'#0f172a', body:'#365314', accent:'#a3e635', weapon:'gun', wc:'#65a30d', len:30, goggles:true },
+      atkName:'Giftspritze', atkText:'Ein einziger, harter Schuss auf lange Distanz.',
+      supName:'Giftwolke', supText:'Große Giftlache, die lange Schaden macht.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1200, sp:1000, life:.6, color:'#a3e635' },
+      sup:{ type:'lob', range:360, dmg:800, puddle:{ r:75, time:4, tick:220 } } },
+
+    { id:'squeak', rarity:'mythisch', name:'Squeak', role:'Werfer', hp:3200, speed:190, size:.9,
+      look:{ skin:'#93c5fd', hair:null, body:'#2563eb', accent:'#bfdbfe', weapon:'bottle', wc:'#60a5fa', mask:'#3b82f6' },
+      atkName:'Klebebomben', atkText:'3 Klebebomben im Fächer.',
+      supName:'Riesenklecks', supText:'Große Bombe mit Pfütze, die lange schadet.',
+      atk:{ type:'lob', n:3, spread:.25, range:300, dmg:400, splash:44, time:.5 },
+      sup:{ type:'lob', range:340, dmg:700, puddle:{ r:90, time:4, tick:220 } } },
+
+    { id:'gray', rarity:'mythisch', name:'Gray', role:'Assassine', hp:3600, speed:200, size:1,
+      look:{ skin:'#cbd5e1', hair:'#475569', body:'#374151', accent:'#f8fafc', weapon:'gun', wc:'#9ca3af', len:20, hat:'#111827' },
+      atkName:'Zylinder-Salve', atkText:'3 Kugeln im engen Fächer.',
+      supName:'Portal', supText:'Teleportiert sich zum Ziel und löst eine Druckwelle aus.',
+      atk:{ type:'pellets', n:3, spread:.3, dmg:450, sp:700, life:.32 },
+      sup:{ type:'blink', dist:320, r:80, dmg:900 } },
+
+    { id:'buster', rarity:'mythisch', name:'Buster', role:'Tank', hp:5800, speed:190, size:1.2,
+      look:{ skin:'#d19a6a', hair:'#1c1917', body:'#be123c', accent:'#fde047', weapon:'tube', wc:'#334155', ring:true },
+      atkName:'Filmrolle', atkText:'Wirft eine Filmrolle, die zurückkehrt.',
+      supName:'Dreh-Szene', supText:'Dreht sich dreimal und trifft alles rundherum.',
+      atk:{ type:'boom', range:260, dmg:800, dur:.6 },
+      sup:{ type:'spin', r:100, dmg:800, hits:3 } },
+  ];
+  const byId = Object.fromEntries(BRAWLERS.map(b => [b.id, b]));
+  const TAU = Math.PI * 2;
+
+  /* ---------- Maps (Raster 16 x 10 Felder à 50) ---------- */
+  const T = 50;
+  const rc = (kind, gx, gy, gw = 1, gh = 1) => ({ kind, x: gx * T, y: gy * T, w: gw * T, h: gh * T });
+  const MAPS = [
+    { id:'wiese', name:'Sonnenwiese', info:'Felsen, Büsche zum Verstecken und ein kleiner Teich.',
+      g:['#3f9142','#46a049'], bushColor:'#2e7d32', waterColor:'#3b9ae1',
+      walls:[rc('rock',3,2), rc('rock',12,2), rc('rock',3,7), rc('rock',12,7), rc('rock',7,1,2,1), rc('rock',7,8,2,1)],
+      water:[rc('water',11,4,2,2)],
+      bushes:[rc('bush',1,4,1,2), rc('bush',14,4,1,2), rc('bush',5,4,1,2), rc('bush',4,8,2,1), rc('bush',10,1,2,1)] },
+    { id:'wueste', name:'Kaktus-Canyon', info:'Kakteen und Felswände, viel offener Sand.',
+      g:['#d9b36c','#d0a95e'], bushColor:'#a16207', waterColor:'#3b9ae1',
+      walls:[rc('cactus',3,3), rc('cactus',12,2), rc('cactus',4,6), rc('cactus',11,7), rc('cactus',6,2), rc('cactus',9,7),
+        rc('rock',1,1,2,1), rc('rock',13,8,2,1), rc('rock',5,8,2,1), rc('rock',9,1,2,1)],
+      bushes:[rc('bush',13,4,1,2), rc('bush',2,5,1,1)] },
+    { id:'schnee', name:'Eisfeld', info:'Eisblöcke, verschneite Tannen und ein eiskalter See.',
+      g:['#e8f1f7','#d9e8f3'], bushColor:'#bcd7ea', waterColor:'#4aa3d8',
+      walls:[rc('ice',3,3), rc('ice',12,6), rc('ice',5,1,1,2), rc('ice',10,7,1,2),
+        rc('pine',1,1), rc('pine',14,1), rc('pine',1,8), rc('pine',14,8), rc('pine',6,6)],
+      water:[rc('water',11,2,3,2)],
+      bushes:[rc('bush',3,7,2,1)] },
+    { id:'lava', name:'Lavahöhle', info:'Dunkle Felsen und Lavaströme, die niemand betreten kann.',
+      g:['#3b2a2a','#342424'], bushColor:'#2b1d1d', waterColor:'#ff5a1f', glow:true,
+      walls:[rc('dark',3,2,1,2), rc('dark',12,6,1,2), rc('dark',6,7), rc('dark',9,2), rc('dark',5,4), rc('dark',10,5)],
+      water:[rc('water',0,4,2,2), rc('water',14,4,2,2), rc('water',7,9,2,1)] },
+  ];
+  for (const m of MAPS) { m.walls = m.walls || []; m.water = m.water || []; m.bushes = m.bushes || []; m.solid = [...m.walls, ...m.water]; }
+
+  /* ---------- Zeichnen ---------- */
+  function drawWeapon(c, L, recoil) {
+    const w = L.weapon, back = -recoil;
+    if (w === 'gun') {
+      c.fillStyle = '#78350f'; c.fillRect(2 + back, -4, 14, 8);
+      c.fillStyle = L.wc; c.fillRect(14 + back, -3.5, L.len, 7);
+      c.fillStyle = '#1e293b'; c.fillRect(14 + L.len - 4 + back, -3.5, 5, 7);
+    } else if (w === 'tube') {
+      c.fillStyle = L.wc; c.fillRect(4 + back, -6, 34, 12);
+      c.fillStyle = '#1e293b'; c.fillRect(36 + back, -7, 5, 14);
+    } else if (w === 'bottle') {
+      c.fillStyle = L.wc; c.fillRect(14, -5, 14, 10); c.fillRect(28, -2, 8, 4);
+      c.fillStyle = '#fef3c7'; c.fillRect(17, -3, 6, 6);
+    } else if (w === 'guitar') {
+      c.fillStyle = L.wc; c.beginPath(); c.ellipse(18 + back, 0, 11, 9, 0, 0, TAU); c.fill();
+      c.fillStyle = '#451a03'; c.fillRect(24 + back, -2, 18, 4);
+      c.beginPath(); c.arc(18 + back, 0, 3, 0, TAU); c.fill();
+    } else if (w === 'fists') {
+      const f = 22 + recoil;
+      c.fillStyle = L.glove;
+      c.beginPath(); c.arc(f, -9, 8, 0, TAU); c.arc(f, 9, 8, 0, TAU); c.fill();
+    } else if (w === 'pick') {
+      c.fillStyle = '#78350f'; c.fillRect(4 + back, -2, 32, 4);
+      c.fillStyle = '#94a3b8'; c.fillRect(32 + back, -11, 5, 22);
+    } else if (L.weapon === 'none') {
+      c.fillStyle = '#e8b48a'; c.beginPath(); c.arc(18, 0, 6, 0, TAU); c.fill();
+    }
+  }
+  function drawBrawler(c, B, x, y, aim, recoil, scale, opt = {}) {
+    const L = B.look, s = scale * B.size;
+    c.save(); c.translate(x, y);
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(0, 18 * s, 18 * s, 7 * s, 0, 0, TAU); c.fill();
+    c.translate(0, -(opt.z || 0)); c.scale(s, s);
+    c.save(); c.rotate(aim); drawWeapon(c, L, recoil); c.restore();
+    // Körper
+    c.fillStyle = L.body; c.beginPath(); c.arc(0, 4, 16, 0, TAU); c.fill();
+    c.fillStyle = L.accent; c.fillRect(-3, -4, 6, 16);
+    if (L.hoops) { c.fillStyle = L.accent; c.fillRect(-16, 0, 32, 3); c.fillRect(-14, 9, 28, 3); }
+    if (L.antenna) { c.strokeStyle = '#475569'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, -18); c.lineTo(0, -27); c.stroke(); c.fillStyle = '#ef4444'; c.beginPath(); c.arc(0, -28, 3, 0, TAU); c.fill(); }
+    if (L.ring) { c.strokeStyle = '#facc15'; c.lineWidth = 3; c.beginPath(); c.arc(0, -4, 7, 0, TAU); c.stroke(); }
+    // Kopf
+    c.fillStyle = L.mask || L.skin; c.beginPath(); c.arc(0, -8, 11, 0, TAU); c.fill();
+    if (L.mask) { c.fillStyle = L.accent; c.beginPath(); c.ellipse(-4, -8, 4, 3.5, 0, 0, TAU); c.ellipse(4, -8, 4, 3.5, 0, 0, TAU); c.fill(); }
+    if (L.hair) {
+      c.fillStyle = L.hair; c.beginPath(); c.arc(0, -11, 12, Math.PI, 0); c.fill();
+      c.beginPath(); c.arc(-11, -6, 4.5, 0, TAU); c.arc(11, -6, 4.5, 0, TAU); c.fill();
+    }
+    // Augen
+    const ex = Math.cos(aim) * 2, ey = Math.sin(aim) * 1.5;
+    if (L.hollow) {
+      c.fillStyle = '#0f172a'; c.beginPath(); c.arc(-4 + ex, -8 + ey, 3, 0, TAU); c.arc(4 + ex, -8 + ey, 3, 0, TAU); c.fill();
+    } else {
+      c.fillStyle = '#fff'; c.beginPath(); c.arc(-4, -8, 3, 0, TAU); c.arc(4, -8, 3, 0, TAU); c.fill();
+      c.fillStyle = '#111'; c.beginPath(); c.arc(-4 + ex, -8 + ey, 1.5, 0, TAU); c.arc(4 + ex, -8 + ey, 1.5, 0, TAU); c.fill();
+    }
+    if (L.goggles) {
+      c.strokeStyle = '#fde047'; c.lineWidth = 2; c.beginPath(); c.arc(-4, -8, 4, 0, TAU); c.arc(4, -8, 4, 0, TAU); c.stroke();
+    }
+    if (L.hat) {
+      c.fillStyle = L.hat; c.beginPath(); c.ellipse(0, -15, 16, 4.5, 0, 0, TAU); c.fill();
+      c.fillRect(-8, -26, 16, 11);
+    }
+    c.restore();
+  }
+
+  /* ---------- Map-Ebenen (einmal vorgerendert) ---------- */
+  const BOX = { rock:['#8b8f98','#5b5f68'], dark:['#4a3a3a','#1f1515'], ice:['#bfe6ff','#6fb7e6'] };
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function tilesOf(r) {
+    const a = [];
+    for (let i = 0; i < r.w / T; i++) for (let j = 0; j < r.h / T; j++) a.push([r.x + i * T + T / 2, r.y + j * T + T / 2]);
+    return a;
+  }
+  function drawWall(c, r) {
+    if (BOX[r.kind]) {
+      const [f, e] = BOX[r.kind], x = r.x + 3, y = r.y + 3, w = r.w - 6, h = r.h - 6;
+      c.fillStyle = 'rgba(0,0,0,.25)'; rr(c, x + 5, y + 7, w, h, 8); c.fill();
+      c.fillStyle = f; rr(c, x, y, w, h, 8); c.fill(); c.strokeStyle = e; c.lineWidth = 3; c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.2)'; rr(c, x + 4, y + 4, w - 8, (h - 8) / 2.4, 5); c.fill();
+      return;
+    }
+    for (const [cx, cy] of tilesOf(r)) {
+      c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(cx + 4, cy + 17, 20, 8, 0, 0, TAU); c.fill();
+      if (r.kind === 'cactus') {
+        c.fillStyle = '#3f9a4a'; c.strokeStyle = '#2a6e33'; c.lineWidth = 3;
+        for (const [x, y, w, h] of [[-7, -22, 14, 40], [-19, -6, 12, 8], [-19, -16, 8, 14], [7, -2, 12, 8], [11, -12, 8, 14]]) { rr(c, cx + x, cy + y, w, h, 4); c.fill(); c.stroke(); }
+      } else if (r.kind === 'pine') {
+        c.fillStyle = '#6d4c2a'; c.fillRect(cx - 4, cy + 4, 8, 14);
+        c.fillStyle = '#1f6b43'; c.beginPath(); c.moveTo(cx, cy - 26); c.lineTo(cx - 21, cy + 10); c.lineTo(cx + 21, cy + 10); c.closePath(); c.fill();
+        c.fillStyle = '#fff'; c.beginPath(); c.moveTo(cx, cy - 26); c.lineTo(cx - 9, cy - 9); c.lineTo(cx + 9, cy - 9); c.closePath(); c.fill();
+      }
+    }
+  }
+  function layers(m) {
+    if (m._l) return m._l;
+    const mk = () => { const k = document.createElement('canvas'); k.width = 800; k.height = 500; return k; };
+    const base = mk(), over = mk(), c = base.getContext('2d'), o = over.getContext('2d');
+    for (let gx = 0; gx < 16; gx++) for (let gy = 0; gy < 10; gy++) { c.fillStyle = m.g[(gx + gy) % 2]; c.fillRect(gx * T, gy * T, T, T); }
+    let seed = 7; const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    c.fillStyle = 'rgba(0,0,0,.07)'; for (let i = 0; i < 160; i++) c.fillRect(rand() * 800, rand() * 500, 3, 3);
+    for (const r of m.water) {
+      c.fillStyle = m.waterColor; c.fillRect(r.x, r.y, r.w, r.h);
+      c.strokeStyle = m.glow ? 'rgba(255,230,120,.55)' : 'rgba(255,255,255,.35)'; c.lineWidth = 2;
+      for (let y = r.y + 12; y < r.y + r.h; y += 18) {
+        c.beginPath();
+        for (let x = r.x; x <= r.x + r.w; x += 10) { const yy = y + Math.sin(x * .15 + y) * 3; if (x === r.x) c.moveTo(x, yy); else c.lineTo(x, yy); }
+        c.stroke();
+      }
+      c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = 4; c.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+    }
+    for (const r of [...m.walls].sort((a, b) => a.y - b.y)) drawWall(c, r);
+    c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = 8; c.strokeRect(0, 0, 800, 500);
+    for (const r of m.bushes) for (const [cx, cy] of tilesOf(r)) {
+      for (const [dx, dy, rad] of [[-9, 6, 17], [9, 6, 17], [0, -7, 19]]) {
+        o.fillStyle = m.bushColor; o.beginPath(); o.arc(cx + dx, cy + dy, rad, 0, TAU); o.fill();
+      }
+      o.fillStyle = 'rgba(255,255,255,.14)'; o.beginPath(); o.arc(cx - 3, cy - 10, 9, 0, TAU); o.fill();
+    }
+    return (m._l = { base, over });
+  }
+
+  /* ---------- Auswahl-Karten ---------- */
+  const rangeOf = a => a.range || a.sp * a.life;
+  const rangeLabel = r => r < 220 ? 'Kurz' : r < 380 ? 'Mittel' : 'Lang';
+  const root = document.getElementById('rarities'), menuEl = document.getElementById('menu');
+
+  /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
+  const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000 };
+  const COIN_PER_KILL = 10;
+  const STORE_KEY = 'brawl-menu';
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id };
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (s && typeof s === 'object') {
+      const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
+      save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
+        selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id };
+    }
+  } catch (e) { /* ohne Speicher weiterspielen */ }
+  const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
+  const isOwned = id => save.unlocked.includes(id);
+  let menuOpen = false;
+
+  function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
+  function addCoins(n) { save.coins += n; persist(); showCoins(); if (menuOpen) renderMenu(); }
+
+  let menuTab = 'brawler', menuFilter = 'all';
+  function renderMenu() {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === menuTab));
+    const chips = document.getElementById('chips');
+    chips.hidden = menuTab !== 'brawler';
+    if (menuTab === 'maps') { chips.innerHTML = ''; renderMaps(); return; }
+    chips.innerHTML = '';
+    for (const [id, label, color] of [['all', 'Alle', '#e2e8f0'], ...RARITIES.map(r => [r.id, r.name, r.color])]) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (menuFilter === id ? ' on' : ''); b.style.setProperty('--c', color); b.textContent = label;
+      b.addEventListener('click', () => { menuFilter = id; renderMenu(); });
+      chips.appendChild(b);
+    }
+    renderBrawlers();
+  }
+  function renderMaps() {
+    root.innerHTML = '';
+    const grid = document.createElement('div'); grid.className = 'grid mapgrid';
+    for (const m of MAPS) {
+      const cur = m.id === M.id, el = document.createElement('div');
+      el.className = 'brawler mapcard owned' + (cur ? ' sel' : ''); el.style.setProperty('--c', '#facc15');
+      el.innerHTML = `<div class="pic"><canvas width="300" height="188"></canvas></div>
+        <h3>${m.name}</h3><div class="move">${m.info}</div>
+        <button class="cta ${cur ? 'cur' : 'pick'}">${cur ? '✓ Aktiv' : 'Spielen'}</button>`;
+      const pc = el.querySelector('canvas').getContext('2d'), L = layers(m);
+      pc.drawImage(L.base, 0, 0, 300, 188); pc.drawImage(L.over, 0, 0, 300, 188);
+      el.addEventListener('click', () => { applyMap(m.id); closeMenu(); });
+      grid.appendChild(el);
+    }
+    root.appendChild(grid);
+  }
+  function renderBrawlers() {
+    root.innerHTML = '';
+    for (const R of RARITIES) {
+      if (menuFilter !== 'all' && menuFilter !== R.id) continue;
+      const cost = COST[R.id];
+      const sec = document.createElement('section'); sec.className = 'rarity';
+      sec.innerHTML = `<h2><i class="dot" style="--c:${R.color}"></i>${R.name}<span>${R.info}${cost ? ` · ${cost} 🪙 pro Brawler` : ''}</span></h2><div class="grid"></div>`;
+      const grid = sec.querySelector('.grid');
+      for (const b of BRAWLERS.filter(x => x.rarity === R.id)) {
+        const owned = isOwned(b.id), current = b.id === save.selected;
+        const el = document.createElement('div');
+        el.className = 'brawler' + (owned ? ' owned' : ' locked') + (current ? ' sel' : '');
+        el.dataset.id = b.id; el.style.setProperty('--c', R.color);
+        el.innerHTML = `<div class="pic"><canvas width="300" height="120"></canvas><span class="lock">🔒</span></div>
+          <h3>${b.name}<small>${b.role}</small></h3>
+          <div class="mini"><div>Leben<b>${b.hp}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div></div>
+          <div class="move"><strong>${b.atkName}:</strong> ${b.atkText}</div>
+          <div class="move"><strong>${b.supName}:</strong> ${b.supText}</div>
+          <button class="cta"></button>`;
+        const pc = el.querySelector('canvas').getContext('2d');
+        pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 120);
+        drawBrawler(pc, b, 150, 70, 0.35, 0, 2.2);
+        const btn = el.querySelector('.cta');
+        if (!owned) {
+          btn.classList.add('buy'); btn.textContent = `🔓 ${cost} 🪙`; btn.title = 'Freischalten'; btn.disabled = save.coins < cost;
+          btn.addEventListener('click', () => buy(b.id));
+        } else if (current) {
+          btn.classList.add('cur'); btn.textContent = '✓ Gewählt';
+          btn.addEventListener('click', e => { e.stopPropagation(); closeMenu(); });
+        } else {
+          btn.classList.add('pick'); btn.textContent = 'Wählen';
+          btn.addEventListener('click', e => { e.stopPropagation(); choose(b.id); });
+        }
+        if (owned) el.addEventListener('click', () => choose(b.id));
+        grid.appendChild(el);
+      }
+      root.appendChild(sec);
+    }
+  }
+  function buy(id) {
+    const cost = COST[byId[id].rarity];
+    if (isOwned(id) || save.coins < cost) return;
+    save.coins -= cost; save.unlocked.push(id); persist(); showCoins(); renderMenu();
+  }
+  function choose(id) {
+    if (!isOwned(id)) return;
+    save.selected = id; persist(); select(id); closeMenu();
+  }
+  function openMenu() {
+    menuOpen = true; for (const k in keys) keys[k] = false; moveTo = null;
+    renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { menuTab = t.dataset.tab; renderMenu(); }));
+  document.getElementById('open-menu').addEventListener('click', openMenu);
+  document.getElementById('close-menu').addEventListener('click', closeMenu);
+  menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
+
+  /* ---------- Spiel ---------- */
+  const cv = document.getElementById('arena'), ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup'), whoEl = document.getElementById('who');
+
+  let B = BRAWLERS[0];
+  const P = { x: W / 2, y: H / 2, ammo: 3, charge: 0, aim: 0, recoil: 0, dash: null, jump: null, shield: 0 };
+  let dummies = [], shots = [], fx = [], floaters = [], rings = [], lobs = [], puddles = [], timers = [], bears = [], turrets = [];
+  const keys = {};
+  let pointer = { x: W / 2 + 100, y: H / 2 }, moveTo = null;
+
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let M = MAPS.find(m => m.id === save.map) || MAPS[0];
+  const whereEl = document.getElementById('where');
+
+  // Hindernisse: Brawler, Puppen und Bär stoßen sich an Wänden und Wasser
+  function pushOut(e, r) {
+    for (let it = 0; it < 2; it++) for (const s of M.solid) {
+      const cx = clamp(e.x, s.x, s.x + s.w), cy = clamp(e.y, s.y, s.y + s.h), dx = e.x - cx, dy = e.y - cy, d = Math.hypot(dx, dy);
+      if (d >= r) continue;
+      if (d > 0) { e.x += dx / d * (r - d); e.y += dy / d * (r - d); }
+      else {
+        const l = e.x - s.x, rt = s.x + s.w - e.x, t = e.y - s.y, b = s.y + s.h - e.y, m = Math.min(l, rt, t, b);
+        if (m === l) e.x = s.x - r; else if (m === rt) e.x = s.x + s.w + r; else if (m === t) e.y = s.y - r; else e.y = s.y + s.h + r;
+      }
+    }
+    e.x = clamp(e.x, r, W - r); e.y = clamp(e.y, r, H - r);
+  }
+  // Kugeln werden nur von Wänden gestoppt, nicht von Wasser
+  const wallHit = (x, y, r) => M.walls.find(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
+  const inSolid = (x, y, r) => M.solid.some(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
+
+  function spawnPos(d) {
+    for (let i = 0; i < 80; i++) {
+      const x = rnd(70, W - 70), y = rnd(60, H - 60);
+      if (Math.hypot(x - P.x, y - P.y) < 110 || inSolid(x, y, d.r + 6)) continue;
+      d.x = x; d.y = y; return;
+    }
+    d.x = W - 80; d.y = 80;
+  }
+  for (let i = 0; i < 4; i++) { const d = { r: 20, hp: 3000, max: 3000, flash: 0, vx: 0, vy: 0, t: 0, dead: 0 }; spawnPos(d); dummies.push(d); }
+
+  function select(id) {
+    B = byId[id];
+    Object.assign(P, { x: W / 2, y: H / 2, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0 });
+    shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = [];
+    whoEl.textContent = B.name;
+  }
+  function applyMap(id) {
+    M = MAPS.find(m => m.id === id) || MAPS[0];
+    save.map = M.id; persist();
+    select(B.id);
+    for (const d of dummies) { d.hp = d.max; d.dead = 0; d.flash = 0; spawnPos(d); }
+    whereEl.textContent = '· ' + M.name;
+  }
+
+  function pop(x, y, color, n) {
+    for (let i = 0; i < n; i++) { const a = rnd(0, TAU), s = rnd(40, 160); fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .35, color }); }
+  }
+  function hit(d, dmg, src) {
+    if (d.hp <= 0) return;
+    d.hp -= dmg; d.flash = .12;
+    if (src === 'atk') P.charge = Math.min(1, P.charge + dmg / 5000);
+    floaters.push({ x: d.x + rnd(-10, 10), y: d.y - 24, t: .6, txt: Math.round(dmg) });
+    if (d.hp <= 0) {
+      pop(d.x, d.y, '#f97316', 24); d.dead = 0;
+      floaters.push({ x: d.x, y: d.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL);
+    }
+  }
+  function explode(x, y, r, dmg, src) {
+    rings.push({ x, y, r, t: .3 }); pop(x, y, '#fb923c', 14);
+    for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - x, d.y - y) < r + d.r) hit(d, dmg, src);
+  }
+  const toward =(len) => ({ x: clamp(P.x + Math.cos(P.aim) * len, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * len, 20, H - 20) });
+  const muzzle = () => 26 * B.size;
+
+  function pellets(a, src) {
+    for (let i = 0; i < a.n; i++) {
+      const ang = P.aim + (a.n === 1 ? 0 : (i / (a.n - 1) - .5) * 2 * a.spread) + rnd(-.025, .025);
+      const sp = a.sp * rnd(.97, 1.04);
+      shots.push({ x: P.x + Math.cos(P.aim) * muzzle(), y: P.y + Math.sin(P.aim) * muzzle(), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+        life: a.life, dmg: a.dmg, r: a.r || 3.5, pierce: !!a.pierce, hit: new Set(), src, knock: a.knock || 0, bounces: a.bounce || 0,
+        color: a.color || (src === 'sup' ? '#fde047' : '#fb923c') });
+    }
+  }
+  function use(a, src) {
+    P.recoil = src === 'sup' ? 14 : 8;
+    switch (a.type) {
+      case 'pellets': pellets(a, src); if (a.heal) floaters.push({ x: P.x, y: P.y - 40, t: .8, txt: '♥ Heilung' }); break;
+      case 'rocket':
+        shots.push({ x: P.x + Math.cos(P.aim) * muzzle(), y: P.y + Math.sin(P.aim) * muzzle(), vx: Math.cos(P.aim) * a.sp, vy: Math.sin(P.aim) * a.sp,
+          life: a.life, dmg: a.dmg, r: 6, aoe: a.aoe, hit: new Set(), src, color: '#f97316' });
+        break;
+      case 'lob': {
+        const dx = Math.min(a.range, Math.hypot(pointer.x - P.x, pointer.y - P.y)), n = a.n || 1;
+        for (let i = 0; i < n; i++) {
+          const ang = P.aim + (n === 1 ? 0 : (i / (n - 1) - .5) * 2 * a.spread);
+          lobs.push({ sx: P.x, sy: P.y, tx: clamp(P.x + Math.cos(ang) * dx, 20, W - 20), ty: clamp(P.y + Math.sin(ang) * dx, 20, H - 20),
+            t: 0, dur: a.time || .5, a, src });
+        }
+        break;
+      }
+      case 'boom':
+        shots.push({ boom: true, x: P.x, y: P.y, sx: P.x, sy: P.y, ang: P.aim, range: a.range, t: 0, dur: a.dur, dmg: a.dmg, r: 12,
+          pierce: true, hit: new Set(), src, life: 1, color: '#cbd5e1' });
+        break;
+      case 'pulse': explode(P.x, P.y, a.r, a.dmg, src); break;
+      case 'pull':
+        rings.push({ x: P.x, y: P.y, r: a.r, t: .3 });
+        for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - P.x, d.y - P.y) < a.r + d.r) {
+          d.x = P.x + (d.x - P.x) * .35; d.y = P.y + (d.y - P.y) * .35; hit(d, a.dmg, 'sup'); pop(d.x, d.y, '#fde047', 6);
+        }
+        break;
+      case 'spin':
+        for (let i = 0; i < a.hits; i++) timers.push({ t: i * .2, fn: () => explode(P.x, P.y, a.r, a.dmg, 'sup') });
+        break;
+      case 'turret': {
+        const dist = Math.min(280, Math.hypot(pointer.x - P.x, pointer.y - P.y));
+        turrets.push({ x: clamp(P.x + Math.cos(P.aim) * dist, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * dist, 20, H - 20), t: a.time, cd: .3, ang: P.aim, a });
+        break;
+      }
+      case 'dash': P.dash = { vx: Math.cos(P.aim) * a.dist / .27, vy: Math.sin(P.aim) * a.dist / .27, t: .27, hit: new Set(), dmg: a.dmg }; break;
+      case 'slam': {
+        const dist = Math.min(a.dist, Math.hypot(pointer.x - P.x, pointer.y - P.y));
+        P.jump = { sx: P.x, sy: P.y, tx: clamp(P.x + Math.cos(P.aim) * dist, 25, W - 25), ty: clamp(P.y + Math.sin(P.aim) * dist, 25, H - 25), t: 0, dur: .45, a };
+        break;
+      }
+      case 'rain': {
+        const c = toward(Math.min(420, Math.hypot(pointer.x - P.x, pointer.y - P.y)));
+        for (let i = 0; i < a.count; i++) timers.push({ t: .15 + i * .12, fn: () => explode(clamp(c.x + rnd(-a.area, a.area), 10, W - 10), clamp(c.y + rnd(-a.area, a.area), 10, H - 10), a.aoe, a.dmg, 'sup') });
+        break;
+      }
+      case 'bear': bears.push({ x: P.x + Math.cos(P.aim) * 40, y: P.y + Math.sin(P.aim) * 40, t: a.time, cd: 0 }); break;
+      case 'shield': P.shield = a.time; break;
+      case 'blink': {
+        const dist = Math.min(a.dist, Math.hypot(pointer.x - P.x, pointer.y - P.y));
+        rings.push({ x: P.x, y: P.y, r: 30, t: .3 }); pop(P.x, P.y, '#e2e8f0', 12);
+        P.x = clamp(P.x + Math.cos(P.aim) * dist, 25, W - 25); P.y = clamp(P.y + Math.sin(P.aim) * dist, 25, H - 25);
+        pushOut(P, 18 * B.size); explode(P.x, P.y, a.r, a.dmg, 'sup');
+        break;
+      }
+    }
+  }
+  const blocked = () => P.dash || P.jump;
+  function attack() { if (!blocked() && P.ammo >= 1) { P.ammo -= 1; use(B.atk, 'atk'); } }
+  function superAttack() { if (!blocked() && P.charge >= 1) { P.charge = 0; use(B.sup, 'sup'); } }
+
+  addEventListener('keydown', e => {
+    if (menuOpen) { if (e.key === 'Escape') closeMenu(); return; }
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
+    if (e.repeat) return;
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === ' ') attack();
+    if (e.key.toLowerCase() === 'e') superAttack();
+  });
+  addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+  const toCanvas = e => { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left) * W / b.width, y: (e.clientY - b.top) * H / b.height }; };
+  cv.addEventListener('pointermove', e => { pointer = toCanvas(e); if (e.pointerType === 'touch' && moveTo) moveTo = pointer; });
+  cv.addEventListener('pointerdown', e => {
+    pointer = toCanvas(e);
+    if (e.pointerType === 'touch') { moveTo = pointer; cv.setPointerCapture(e.pointerId); } else attack();
+  });
+  cv.addEventListener('pointerup', () => { moveTo = null; });
+  cv.addEventListener('pointercancel', () => { moveTo = null; });
+  atkBtn.addEventListener('click', attack);
+  supBtn.addEventListener('click', superAttack);
+
+  let last = performance.now();
+  function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); draw(); requestAnimationFrame(frame); }
+
+  function update(dt) {
+    const R = 18 * B.size;
+    // Bewegung
+    if (P.jump) {
+      const j = P.jump; j.t += dt; const k = Math.min(1, j.t / j.dur);
+      P.x = j.sx + (j.tx - j.sx) * k; P.y = j.sy + (j.ty - j.sy) * k;
+      if (k >= 1) { explode(P.x, P.y, j.a.r, j.a.dmg, 'sup'); P.jump = null; }
+    } else if (P.dash) {
+      const d = P.dash; d.t -= dt;
+      P.x = clamp(P.x + d.vx * dt, R, W - R); P.y = clamp(P.y + d.vy * dt, R, H - R);
+      for (const m of dummies) if (m.hp > 0 && !d.hit.has(m) && Math.hypot(m.x - P.x, m.y - P.y) < R + m.r) {
+        d.hit.add(m); hit(m, d.dmg, 'sup'); m.x += d.vx * .06; m.y += d.vy * .06; pop(m.x, m.y, '#fde047', 8);
+      }
+      if (d.t <= 0) P.dash = null;
+    } else {
+      let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+      let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+      if (moveTo) { const tx = moveTo.x - P.x, ty = moveTo.y - P.y, d = Math.hypot(tx, ty); if (d > 12) { dx = tx / d; dy = ty / d; } }
+      const len = Math.hypot(dx, dy), sp = B.speed * (P.shield > 0 ? 1.4 : 1);
+      if (len) { P.x += dx / len * sp * dt; P.y += dy / len * sp * dt; }
+    }
+    if (!P.jump) pushOut(P, R);
+    P.aim = Math.atan2(pointer.y - P.y, pointer.x - P.x);
+    P.ammo = Math.min(3, P.ammo + dt / 1.3);
+    P.recoil = Math.max(0, P.recoil - dt * 60);
+    P.shield = Math.max(0, P.shield - dt);
+
+    // Geschosse
+    for (const p of shots) {
+      if (p.boom) {
+        p.t += dt; const half = p.dur / 2, fx_ = p.sx + Math.cos(p.ang) * p.range, fy_ = p.sy + Math.sin(p.ang) * p.range;
+        if (p.t < half) { const k = p.t / half; p.x = p.sx + (fx_ - p.sx) * k; p.y = p.sy + (fy_ - p.sy) * k; }
+        else {
+          if (!p.turned) { p.turned = true; p.hit.clear(); }
+          const k = Math.min(1, (p.t - half) / half); p.x = fx_ + (P.x - fx_) * k; p.y = fy_ + (P.y - fy_) * k;
+        }
+        if (p.t >= p.dur) p.life = 0;
+      } else {
+        p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+        if (p.bounces > 0) {
+          if (p.x < 0 || p.x > W) { p.vx = -p.vx; p.x = clamp(p.x, 0, W); p.bounces--; }
+          if (p.y < 0 || p.y > H) { p.vy = -p.vy; p.y = clamp(p.y, 0, H); p.bounces--; }
+        }
+        const w = wallHit(p.x, p.y, p.r * .5);
+        if (w) {
+          if (p.bounces > 0) {
+            const px = p.x - p.vx * dt, py = p.y - p.vy * dt;
+            if (px > w.x - 1 && px < w.x + w.w + 1) p.vy = -p.vy; else p.vx = -p.vx;
+            p.x = px; p.y = py; p.bounces--;
+          } else { p.life = 0; if (!p.aoe) continue; }
+        }
+      }
+      for (const d of dummies) {
+        if (d.hp <= 0 || p.hit.has(d) || Math.hypot(p.x - d.x, p.y - d.y) >= d.r + p.r) continue;
+        if (p.aoe) { p.life = 0; break; }
+        hit(d, p.dmg, p.src); pop(p.x, p.y, '#fde047', 3);
+        if (p.knock) { d.x += p.vx * p.knock; d.y += p.vy * p.knock; }
+        if (p.pierce) p.hit.add(d); else { p.life = 0; break; }
+      }
+      if (p.life <= 0 && p.aoe) explode(p.x, p.y, p.aoe, p.dmg, p.src);
+    }
+    shots = shots.filter(p => p.life > 0 && p.x > -30 && p.x < W + 30 && p.y > -30 && p.y < H + 30);
+
+    // Flaschen & Pfützen
+    for (const l of lobs) {
+      l.t += dt;
+      if (l.t >= l.dur) {
+        const pd = l.a.puddle; explode(l.tx, l.ty, pd ? pd.r : l.a.splash, l.a.dmg, l.src);
+        if (pd) puddles.push({ x: l.tx, y: l.ty, r: pd.r, t: pd.time, max: pd.time, tick: 0, dmg: pd.tick, src: l.src });
+        l.done = true;
+      }
+    }
+    lobs = lobs.filter(l => !l.done);
+    for (const p of puddles) {
+      p.t -= dt; p.tick -= dt;
+      if (p.tick <= 0) { p.tick = .25; for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - p.x, d.y - p.y) < p.r + d.r) hit(d, p.dmg, p.src); }
+    }
+    puddles = puddles.filter(p => p.t > 0);
+
+    // Zeitgesteuerte Effekte (Raketenregen)
+    for (const t of timers) { t.t -= dt; if (t.t <= 0) { t.fn(); t.done = true; } }
+    timers = timers.filter(t => !t.done);
+
+    // Bär
+    for (const b of bears) {
+      b.t -= dt; b.cd -= dt;
+      let tg = null, best = 1e9;
+      for (const d of dummies) { const m = Math.hypot(d.x - b.x, d.y - b.y); if (d.hp > 0 && m < best) { best = m; tg = d; } }
+      if (tg) {
+        if (best > 34) { b.x += (tg.x - b.x) / best * 170 * dt; b.y += (tg.y - b.y) / best * 170 * dt; pushOut(b, 17); }
+        else if (b.cd <= 0) { b.cd = .5; hit(tg, 400, 'sup'); pop(tg.x, tg.y, '#fde047', 6); }
+      }
+    }
+    bears = bears.filter(b => b.t > 0);
+
+    // Geschütztürme
+    for (const t of turrets) {
+      t.t -= dt; t.cd -= dt;
+      let tg = null, best = 380;
+      for (const d of dummies) { const m = Math.hypot(d.x - t.x, d.y - t.y); if (d.hp > 0 && m < best) { best = m; tg = d; } }
+      if (tg) {
+        t.ang = Math.atan2(tg.y - t.y, tg.x - t.x);
+        if (t.cd <= 0) {
+          t.cd = t.a.every;
+          shots.push({ x: t.x + Math.cos(t.ang) * 20, y: t.y + Math.sin(t.ang) * 20, vx: Math.cos(t.ang) * 800, vy: Math.sin(t.ang) * 800,
+            life: .5, dmg: t.a.dmg, r: 5, pierce: false, hit: new Set(), src: 'sup', knock: 0, bounces: 0, color: '#fde047' });
+        }
+      }
+    }
+    turrets = turrets.filter(t => t.t > 0);
+
+    // Übungspuppen
+    for (const d of dummies) {
+      if (d.hp <= 0) { d.dead += dt; if (d.dead > 1.5) { d.hp = d.max; spawnPos(d); } continue; }
+      d.t -= dt; if (d.t <= 0) { d.t = rnd(1, 3); const a = rnd(0, TAU); d.vx = Math.cos(a) * 35; d.vy = Math.sin(a) * 35; }
+      d.x += d.vx * dt; d.y += d.vy * dt; pushOut(d, d.r);
+      d.flash = Math.max(0, d.flash - dt);
+    }
+    for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.life -= dt; }
+    fx = fx.filter(f => f.life > 0);
+    for (const f of floaters) { f.y -= 40 * dt; f.t -= dt; }
+    floaters = floaters.filter(f => f.t > 0);
+    for (const r of rings) r.t -= dt;
+    rings = rings.filter(r => r.t > 0);
+
+    supBtn.classList.toggle('ready', P.charge >= 1);
+    supBtn.textContent = P.charge >= 1 ? B.supName.toUpperCase() + '!' : 'Super ' + Math.floor(P.charge * 100) + '%';
+    atkBtn.textContent = 'Angriff ' + '●'.repeat(Math.floor(P.ammo)) + '○'.repeat(3 - Math.floor(P.ammo));
+  }
+
+  function draw() {
+    const L = layers(M);
+    ctx.drawImage(L.base, 0, 0);
+
+    for (const p of puddles) {
+      ctx.globalAlpha = .35 + .25 * (p.t / p.max); ctx.fillStyle = '#84cc16';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    for (const d of dummies) {
+      if (d.hp <= 0) continue;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(d.x, d.y + 16, 18, 6, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = d.flash > 0 ? '#fff' : '#b45309'; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(d.x, d.y, 8, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#7f1d1d'; ctx.fillRect(d.x - 20, d.y - 34, 40, 6);
+      ctx.fillStyle = '#22c55e'; ctx.fillRect(d.x - 20, d.y - 34, 40 * d.hp / d.max, 6);
+    }
+
+    for (const b of bears) {
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(b.x, b.y + 16, 18, 6, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.arc(b.x, b.y, 17, 0, TAU); ctx.arc(b.x - 11, b.y - 14, 6, 0, TAU); ctx.arc(b.x + 11, b.y - 14, 6, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(b.x, b.y + 4, 8, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(b.x - 5, b.y - 3, 2, 0, TAU); ctx.arc(b.x + 5, b.y - 3, 2, 0, TAU); ctx.fill();
+    }
+
+    for (const t of turrets) {
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(t.x, t.y + 12, 16, 6, 0, 0, TAU); ctx.fill();
+      ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.ang);
+      ctx.fillStyle = '#334155'; ctx.fillRect(0, -5, 24, 10); ctx.restore();
+      ctx.fillStyle = '#ca8a04'; ctx.beginPath(); ctx.arc(t.x, t.y, 13, 0, TAU); ctx.fill();
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3; ctx.stroke();
+    }
+
+    const z = P.jump ? Math.sin(Math.PI * Math.min(1, P.jump.t / P.jump.dur)) * 80 : 0;
+    drawBrawler(ctx, B, P.x, P.y, P.aim, P.recoil, 1, { z });
+    if (P.shield > 0) {
+      ctx.strokeStyle = 'rgba(134,239,172,.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(P.x, P.y, 30 * B.size, 0, TAU); ctx.stroke();
+      ctx.fillStyle = 'rgba(134,239,172,.2)'; ctx.fill();
+    }
+    ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0); ctx.globalAlpha = 1;
+
+    for (const l of lobs) {
+      const k = l.t / l.dur, x = l.sx + (l.tx - l.sx) * k, y = l.sy + (l.ty - l.sy) * k - Math.sin(Math.PI * k) * 70;
+      ctx.fillStyle = l.a.puddle ? '#65a30d' : '#374151'; ctx.beginPath(); ctx.arc(x, y, 8, 0, TAU); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.4)'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.arc(l.tx, l.ty, l.a.puddle ? l.a.puddle.r : l.a.splash, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+    }
+    for (const p of shots) {
+      ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.aoe ? 6 : p.r + (p.src === 'sup' ? 1 : 0), 0, TAU); ctx.fill();
+    }
+    for (const r of rings) {
+      ctx.globalAlpha = r.t / .3; ctx.fillStyle = '#fdba74'; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (1.1 - r.t / .3 * .3), 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    for (const f of fx) { ctx.globalAlpha = Math.max(0, f.life / .35); ctx.fillStyle = f.color; ctx.fillRect(f.x - 2, f.y - 2, 4, 4); }
+    ctx.globalAlpha = 1;
+    ctx.font = '800 16px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3;
+    for (const f of floaters) { ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = typeof f.txt === 'string' ? '#86efac' : '#fde047'; ctx.fillText(f.txt, f.x, f.y); }
+
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 8, 0, TAU); ctx.moveTo(pointer.x - 13, pointer.y); ctx.lineTo(pointer.x + 13, pointer.y);
+    ctx.moveTo(pointer.x, pointer.y - 13); ctx.lineTo(pointer.x, pointer.y + 13); ctx.stroke();
+
+    const top = P.y - 42 * B.size - z;
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(P.x - 24, top, 48, 8);
+    ctx.fillStyle = '#22c55e'; ctx.fillRect(P.x - 23, top + 1, 46, 6);
+    ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.fillText(B.name.toUpperCase(), P.x, top - 5);
+  }
+
+  showCoins();
+  select(save.selected);
+  whereEl.textContent = '· ' + M.name;
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
 </html>

@@ -90,6 +90,34 @@
   .lobby-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
   #result .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
   #result .act.alt{background:#475569}
+  #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:30;background:rgba(15,23,42,.96);color:#fde047;border:2px solid #facc15;border-radius:16px;padding:12px 22px;font-weight:800;font-size:17px;box-shadow:0 6px 20px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+  #toast[hidden]{display:none}
+  .side-btn.gold{background:linear-gradient(#fde047,#f59e0b);border-color:#78350f;box-shadow:0 5px 0 #78350f}
+  .side-btn.green{background:linear-gradient(#4ade80,#16a34a);border-color:#052e16;box-shadow:0 5px 0 #052e16}
+  .home-left{display:grid;gap:12px}
+  .pass-head,.quest{background:var(--panel);border-radius:16px;padding:14px 16px;display:grid;gap:8px}
+  .pass-head{border:3px solid #facc15;background:linear-gradient(135deg,#312e81,#1e293b)}
+  .pass-head h3{margin:0;font-size:20px;color:#fde047}
+  .pbar{height:16px;border-radius:8px;background:#0b1020;border:2px solid #000;overflow:hidden;position:relative}
+  .pbar i{position:absolute;inset:0 auto 0 0;width:var(--p);background:linear-gradient(90deg,#a855f7,#facc15)}
+  .pass-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;font-weight:700}
+  .passgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tier{background:var(--panel);border-radius:14px;padding:10px;display:grid;gap:6px;justify-items:center;text-align:center;border:3px solid #334155;position:relative}
+  .tier .no{position:absolute;top:-10px;left:-6px;background:#475569;color:#fff;border-radius:999px;font-weight:900;font-size:13px;padding:2px 10px;border:2px solid #0f172a}
+  .tier .ico{font-size:34px;line-height:1.1;min-height:40px;display:grid;place-items:center}
+  .tier canvas{width:100%;height:auto;aspect-ratio:300/130;border-radius:8px;background:#166534}
+  .tier .txt{font-size:13px;font-weight:700;color:#e2e8f0;min-height:34px}
+  .tier.can{border-color:#facc15;box-shadow:0 0 14px rgba(250,204,21,.45)}
+  .tier.can .no{background:#facc15;color:#422006}
+  .tier.done{opacity:.55}
+  .tier.lock{filter:saturate(.5)}
+  .tier .cta{padding:7px}
+  .quests{display:grid;gap:12px}
+  .quest h3{margin:0;font-size:18px}
+  .quest .rew{display:flex;gap:8px;flex-wrap:wrap}
+  .quest .rew span{background:#0f172a;border-radius:999px;padding:3px 12px;font-weight:800;font-size:14px}
+  .quest .qrow{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .quest .qrow .cta{width:auto;padding:9px 20px}
   .btns{display:grid;grid-template-columns:1fr auto;gap:8px}
   .cta.up{width:auto;background:#7c3aed;padding:10px 14px}
   .cta.up:disabled{background:#334155}
@@ -160,8 +188,9 @@
     -webkit-text-stroke:5px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000;font-style:italic;font-weight:900;letter-spacing:.03em}
   .start-bs:hover{filter:brightness(1.07)}
   @media (max-width:640px){
-    .home-hero{bottom:auto;top:134px;width:min(270px,72vw)}
-    .home-left{bottom:auto;top:84px}
+    .home-hero{bottom:auto;top:148px;width:min(260px,70vw)}
+    .home-left{display:flex;left:14px;right:14px;top:84px;bottom:auto;gap:8px}
+    .side-btn{padding:10px 8px;font-size:14px;flex:1;text-align:center}
     .home-right{left:14px;right:14px;justify-items:stretch}
     .start-bs{width:100%;padding-inline:0}
     .mode-card{justify-content:flex-start}
@@ -191,6 +220,8 @@
 
     <div class="home-left">
       <button class="side-btn stroke" id="brawler-btn">Brawler<i class="notif" id="notif">!</i></button>
+      <button class="side-btn stroke gold" id="pass-btn">Brawl Pass<i class="notif" id="notif-pass">!</i></button>
+      <button class="side-btn stroke green" id="quest-btn">Quests<i class="notif" id="notif-quest">!</i></button>
     </div>
 
     <div class="home-right">
@@ -219,6 +250,8 @@
     </div>
   </section>
 </main>
+
+<div id="toast" hidden></div>
 
 <div id="menu" hidden role="dialog" aria-modal="true" aria-label="Brawler-Menü">
   <div class="menu-in">
@@ -857,7 +890,34 @@
   // Kosten für Power-Level 2..11
   const UPGRADE_COST = [0, 0, 30, 50, 100, 160, 260, 400, 600, 900, 1300, 1900];
   const powerMult = lv => 1 + .05 * (lv - 1); // +5 % Leben & Schaden pro Level
-  let save = { coins: 150, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 }, trophies: {} };
+
+  /* ---------- Brawl Pass (kostenlos) ---------- */
+  const PASS_TIERS = 30, PASS_STEP = 100; // 100 Tokens pro Stufe
+  const PASS_REWARDS = [ // Stufe 1..30: Münzen, Gratis-Power-Level ('up') oder ein Brawler
+    { t: 'coins', n: 150 }, { t: 'coins', n: 150 }, { t: 'up' }, { t: 'brawler', id: 'colt' }, { t: 'coins', n: 250 },
+    { t: 'coins', n: 250 }, { t: 'up' }, { t: 'brawler', id: 'nita' }, { t: 'coins', n: 350 }, { t: 'brawler', id: 'rico' },
+    { t: 'coins', n: 400 }, { t: 'up' }, { t: 'coins', n: 450 }, { t: 'brawler', id: 'piper' }, { t: 'coins', n: 500 },
+    { t: 'up' }, { t: 'coins', n: 600 }, { t: 'brawler', id: 'mortis' }, { t: 'coins', n: 700 }, { t: 'up' },
+    { t: 'coins', n: 800 }, { t: 'coins', n: 900 }, { t: 'up' }, { t: 'coins', n: 1000 }, { t: 'brawler', id: 'leon' },
+    { t: 'coins', n: 1200 }, { t: 'up' }, { t: 'coins', n: 1500 }, { t: 'up' }, { t: 'brawler', id: 'meg' },
+  ];
+
+  /* ---------- Quests ---------- */
+  const QUEST_TPL = [
+    { id: 'kill',  ev: 'kill',  text: n => `Besiege ${n} Gegner`,                                  goals: [8, 15, 25],          coins: [120, 220, 350], tokens: [40, 70, 110] },
+    { id: 'win',   ev: 'win',   text: n => `Gewinne ${n} ${n === 1 ? 'Match' : 'Matches'}`,       goals: [1, 2, 3],            coins: [150, 300, 450], tokens: [60, 110, 160] },
+    { id: 'play',  ev: 'match', text: n => `Spiele ${n} Matches`,                                 goals: [2, 4, 6],            coins: [100, 200, 300], tokens: [40, 80, 120] },
+    { id: 'dmg',   ev: 'dmg',   text: n => `Verursache ${n.toLocaleString('de-DE')} Schaden`,     goals: [10000, 25000, 45000], coins: [120, 240, 380], tokens: [40, 80, 120] },
+    { id: 'super', ev: 'super', text: n => `Nutze ${n} Mal deinen Super`,                         goals: [3, 6, 10],           coins: [100, 200, 320], tokens: [40, 70, 110] },
+    { id: 'duo',   ev: 'duo',   text: n => `Spiele ${n} Duo-${n === 1 ? 'Match' : 'Matches'}`,    goals: [1, 2, 3],            coins: [130, 240, 360], tokens: [50, 90, 130] },
+  ];
+  const tplOf = q => QUEST_TPL.find(t => t.id === q.tpl);
+  function newQuest(active) { // zufällige Quest, die noch nicht aktiv ist
+    const free = QUEST_TPL.filter(t => !active.some(q => q.tpl === t.id));
+    const t = (free.length ? free : QUEST_TPL)[Math.floor(Math.random() * (free.length || QUEST_TPL.length))];
+    return { tpl: t.id, tier: Math.floor(Math.random() * 3), progress: 0 };
+  }
+  let save = { coins: 150, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 }, trophies: {}, pass: { tokens: 0, claimed: [] }, quests: [] };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
@@ -867,10 +927,16 @@
         diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal', mode: s.mode === 'duo' ? 'duo' : 'solo',
         trophies: Object.fromEntries(Object.entries((s.trophies && typeof s.trophies === 'object') ? s.trophies : {})
           .filter(([id, v]) => byId[id] && Number.isFinite(v) && v > 0).map(([id, v]) => [id, Math.floor(v)])),
+        pass: { tokens: Math.max(0, Math.min(PASS_TIERS * PASS_STEP, Math.floor(Number(s.pass && s.pass.tokens)) || 0)),
+          claimed: [...new Set((s.pass && Array.isArray(s.pass.claimed) ? s.pass.claimed : []).map(Number).filter(n => Number.isInteger(n) && n >= 1 && n <= PASS_TIERS))] },
+        quests: (Array.isArray(s.quests) ? s.quests : []).filter(q => q && QUEST_TPL.some(t => t.id === q.tpl) && [0, 1, 2].includes(q.tier)).slice(0, 3)
+          .map(q => ({ tpl: q.tpl, tier: q.tier, progress: Math.max(0, Math.floor(Number(q.progress)) || 0) })),
         levels: Object.fromEntries([...unlocked].map(id => [id, Math.max(1, Math.min(MAX_LEVEL, Math.floor(Number(s.levels && s.levels[id])) || 1))])) };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
+  while (save.quests.length < 3) save.quests.push(newQuest(save.quests)); // immer 3 aktive Quests
+  addEventListener('pagehide', persist);
   const isOwned = id => save.unlocked.includes(id);
   const levelOf = id => (save.levels && save.levels[id]) || 1;
   const TROPHY_DELTA = { 1: 12, 2: 4, 3: -3, 4: -6 }; // je nach Platzierung
@@ -885,8 +951,10 @@
   function renderMenu() {
     const chips = document.getElementById('chips');
     chips.innerHTML = '';
-    chips.hidden = menuMode === 'map';
+    chips.hidden = menuMode !== 'brawler';
     if (menuMode === 'map') { renderMaps(); return; }
+    if (menuMode === 'pass') { renderPass(); return; }
+    if (menuMode === 'quests') { renderQuests(); return; }
     for (const [id, label, color] of [['all', 'Alle', '#e2e8f0'], ...RARITIES.map(r => [r.id, r.name, r.color])]) {
       const b = document.createElement('button');
       b.className = 'chip' + (menuFilter === id ? ' on' : ''); b.style.setProperty('--c', color); b.textContent = label;
@@ -970,18 +1038,107 @@
     if (menuOpen) renderMenu();
     renderLobby();
   }
+
+  /* ----- Brawl Pass & Quests ----- */
+  function toast(msg) {
+    const el = document.getElementById('toast'); el.textContent = msg; el.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 3400);
+  }
+  const tierClaimable = t => save.pass.tokens >= t * PASS_STEP && !save.pass.claimed.includes(t);
+  const claimableCount = () => { let n = 0; for (let t = 1; t <= PASS_TIERS; t++) if (tierClaimable(t)) n++; return n; };
+  const questDone = q => q.progress >= tplOf(q).goals[q.tier];
+  function addTokens(n) { save.pass.tokens = Math.min(PASS_TIERS * PASS_STEP, save.pass.tokens + n); }
+  function questEvent(ev, n = 1) {
+    for (const q of save.quests) { const t = tplOf(q); if (t.ev === ev && !questDone(q)) q.progress = Math.min(t.goals[q.tier], q.progress + n); }
+  }
+  function claimTier(t) { // gibt eine Meldung zurück oder null
+    if (!tierClaimable(t)) return null;
+    const r = PASS_REWARDS[t - 1]; let msg;
+    if (r.t === 'coins') { save.coins += r.n; msg = `Stufe ${t}: +${r.n} 🪙`; }
+    else if (r.t === 'up') {
+      const id = save.selected, lv = levelOf(id);
+      if (lv < MAX_LEVEL) { save.levels[id] = lv + 1; msg = `Stufe ${t}: ${byId[id].name} ist jetzt ⚡ Power ${lv + 1}!`; }
+      else { save.coins += 300; msg = `Stufe ${t}: ${byId[id].name} ist schon Power 11 – dafür +300 🪙`; }
+    } else {
+      const b = byId[r.id];
+      if (isOwned(b.id)) { const c = COST[b.rarity]; save.coins += c; msg = `Stufe ${t}: ${b.name} hattest du schon – dafür +${c} 🪙`; }
+      else { save.unlocked.push(b.id); save.levels[b.id] = 1; msg = `Stufe ${t}: ${b.name} freigeschaltet! 🎉`; }
+    }
+    save.pass.claimed.push(t);
+    return msg;
+  }
+  function afterClaim() { persist(); showCoins(); renderLobby(); if (menuOpen) renderMenu(); }
+  function claimQuest(i) {
+    const q = save.quests[i]; if (!q || !questDone(q)) return;
+    const t = tplOf(q), c = t.coins[q.tier], k = t.tokens[q.tier];
+    save.coins += c; addTokens(k);
+    save.quests[i] = newQuest(save.quests.filter((_, j) => j !== i));
+    toast(`Quest geschafft: +${c} 🪙 · +${k} 🎟`); afterClaim();
+  }
+  function renderPass() {
+    root.innerHTML = '';
+    const tokens = save.pass.tokens, tier = Math.min(PASS_TIERS, Math.floor(tokens / PASS_STEP)), can = claimableCount();
+    const head = document.createElement('div'); head.className = 'pass-head';
+    head.innerHTML = `<h3>🎟 Brawl Pass · kostenlos</h3>
+      <div class="pass-row"><span>Stufe ${tier} / ${PASS_TIERS}</span><span>${tokens} Tokens${tier < PASS_TIERS ? ` · noch ${(tier + 1) * PASS_STEP - tokens} bis Stufe ${tier + 1}` : ' · alles freigeschaltet!'}</span></div>
+      <div class="pbar"><i style="--p:${tier >= PASS_TIERS ? 100 : tokens % PASS_STEP}%"></i></div>
+      <div class="pass-row"><span>Tokens gibt es für Matches, Kills, Siege und Quests.</span>${can ? `<button class="cta buy" id="claim-all" style="width:auto;padding:9px 18px">Alle abholen (${can})</button>` : ''}</div>`;
+    root.appendChild(head);
+    const grid = document.createElement('div'); grid.className = 'passgrid'; grid.style.marginTop = '14px';
+    for (let t = 1; t <= PASS_TIERS; t++) {
+      const r = PASS_REWARDS[t - 1], done = save.pass.claimed.includes(t), can1 = tierClaimable(t);
+      const el = document.createElement('div'); el.className = 'tier ' + (done ? 'done' : can1 ? 'can' : 'lock');
+      let icon, txt;
+      if (r.t === 'coins') { icon = '🪙'; txt = `${r.n} Münzen`; }
+      else if (r.t === 'up') { icon = '⚡'; txt = 'Gratis Power-Level für deinen Brawler'; }
+      else { const b = byId[r.id]; icon = '<canvas width="300" height="130"></canvas>'; txt = `${b.name} · ${RARITIES.find(x => x.id === b.rarity).name}`; }
+      el.innerHTML = `<span class="no">${t}</span><div class="ico">${icon}</div><div class="txt">${txt}</div>
+        <button class="cta ${can1 ? 'buy' : ''}" ${can1 ? '' : 'disabled'}>${done ? '✓ Geholt' : can1 ? 'Abholen' : '🔒 ' + t * PASS_STEP + ' 🎟'}</button>`;
+      if (r.t === 'brawler') { const c = el.querySelector('canvas').getContext('2d'); c.fillStyle = '#166534'; c.fillRect(0, 0, 300, 130); drawPortrait(c, byId[r.id], 300, 130); }
+      el.querySelector('.cta').addEventListener('click', () => { const m = claimTier(t); if (m) { toast(m); afterClaim(); } });
+      grid.appendChild(el);
+    }
+    root.appendChild(grid);
+    const all = document.getElementById('claim-all');
+    if (all) all.addEventListener('click', () => {
+      const msgs = []; for (let t = 1; t <= PASS_TIERS; t++) { const m = claimTier(t); if (m) msgs.push(m); }
+      if (msgs.length) { toast(msgs.length + ' Belohnungen abgeholt! ' + msgs.slice(-1)[0]); afterClaim(); }
+    });
+  }
+  function renderQuests() {
+    root.innerHTML = '';
+    const wrap = document.createElement('div'); wrap.className = 'quests';
+    save.quests.forEach((q, i) => {
+      const t = tplOf(q), goal = t.goals[q.tier], done = questDone(q), pct = Math.round(Math.min(q.progress, goal) / goal * 100);
+      const el = document.createElement('div'); el.className = 'quest';
+      el.innerHTML = `<h3>${t.text(goal)}</h3>
+        <div class="pbar"><i style="--p:${pct}%"></i></div>
+        <div class="qrow"><div class="rew"><span>🪙 ${t.coins[q.tier]}</span><span>🎟 ${t.tokens[q.tier]}</span></div>
+          <b>${Math.min(q.progress, goal).toLocaleString('de-DE')} / ${goal.toLocaleString('de-DE')}</b>
+          <button class="cta ${done ? 'buy' : ''}" ${done ? '' : 'disabled'}>${done ? 'Abholen' : 'Läuft'}</button></div>`;
+      el.querySelector('.cta').addEventListener('click', () => claimQuest(i));
+      wrap.appendChild(el);
+    });
+    root.appendChild(wrap);
+  }
   function choose(id) {
     if (!isOwned(id)) return;
     save.selected = id; persist(); select(id); closeMenu();
   }
   function openMenu(mode = 'brawler') {
     menuOpen = true; menuMode = mode; for (const k in keys) keys[k] = false; moveTo = null;
-    document.getElementById('menu-title').textContent = mode === 'map' ? 'Map wählen' : 'Brawler';
+    const TITLES = { brawler: 'Brawler', map: 'Map wählen', pass: 'Brawl Pass', quests: 'Quests' };
+    const NOTES = {
+      brawler: 'Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.',
+      map: 'Wähle eine Map – das Spiel startet sofort. Wände und Wasser blockieren, Büsche geben Deckung.',
+      pass: 'Der Brawl Pass ist komplett kostenlos. Spiele Matches und erledige Quests, um Tokens zu sammeln und Belohnungen abzuholen.',
+      quests: 'Du hast immer 3 Quests. Fortschritt zählt in Matches; abgeholte Quests werden durch neue ersetzt.',
+    };
+    document.getElementById('menu-title').textContent = TITLES[mode];
     document.getElementById('close-menu').textContent = mode === 'map' ? '✕ Zurück' : '✕ Schließen';
-    document.getElementById('menu-note').textContent = mode === 'map'
-      ? 'Wähle eine Map – das Spiel startet sofort. Wände und Wasser blockieren, Büsche geben Deckung.'
-      : 'Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.';
+    document.getElementById('menu-note').textContent = NOTES[mode];
     renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
+    if (mode === 'pass') { const cur = root.querySelector('.tier.can') || root.querySelector('.tier.lock'); if (cur) cur.scrollIntoView({ block: 'center' }); }
   }
   function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
   // Vollbild: Start geht automatisch hinein, ⛶ und Taste F schalten um
@@ -998,6 +1155,8 @@
   document.getElementById('brawler-btn').addEventListener('click', () => openMenu('brawler'));
   document.getElementById('start-btn').addEventListener('click', () => { enterFullscreen(); openMenu('map'); });
   document.getElementById('upgrade-btn').addEventListener('click', () => upgrade(save.selected));
+  document.getElementById('pass-btn').addEventListener('click', () => openMenu('pass'));
+  document.getElementById('quest-btn').addEventListener('click', () => openMenu('quests'));
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
 
@@ -1023,7 +1182,7 @@
 
   // Giftwolke: zieht nach GAS_START Sekunden von außen zur Mitte zu
   const GAS_START = 45, GAS_SHRINK = 60, ZONE_MAX = 480, ZONE_MIN = 90;
-  let matchT = 0, gasTick = 0;
+  let matchT = 0, gasTick = 0, questSnap = [];
   const gasProgress = () => clamp((matchT - GAS_START) / GAS_SHRINK, 0, 1);
   const zoneR = () => ZONE_MAX - (ZONE_MAX - ZONE_MIN) * gasProgress();
   const outZone = (x, y) => Math.hypot(x - W / 2, y - H / 2) > zoneR();
@@ -1095,7 +1254,7 @@
   }
   function newMatch(id) {
     shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = []; floaters = []; fx = [];
-    matchOver = false; matchT = 0; gasTick = 0; resultEl.hidden = true;
+    matchOver = false; matchT = 0; gasTick = 0; resultEl.hidden = true; questSnap = save.quests.map(questDone);
     const pb = byId[id || save.selected];
     P = makeFighter(pb, true, '#38bdf8', levelOf(pb.id));
     duoMatch = save.mode === 'duo';
@@ -1125,7 +1284,7 @@
   function goHome() {
     screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false;
     for (const k in keys) keys[k] = false; moveTo = null;
-    renderLobby();
+    persist(); renderLobby();
   }
 
   /* ----- Hauptmenü ----- */
@@ -1146,6 +1305,8 @@
     // Roter Punkt: etwas ist bezahlbar (Upgrade oder neuer Brawler)
     const news = BRAWLERS.some(x => isOwned(x.id) ? levelOf(x.id) < MAX_LEVEL && save.coins >= UPGRADE_COST[levelOf(x.id) + 1] : save.coins >= COST[x.rarity]);
     document.getElementById('notif').classList.toggle('on', news);
+    document.getElementById('notif-pass').classList.toggle('on', claimableCount() > 0);
+    document.getElementById('notif-quest').classList.toggle('on', save.quests.some(questDone));
     // Profilbild: Kopf des gewählten Brawlers
     avatarCtx.clearRect(0, 0, 64, 64);
     drawBrawler(avatarCtx, b, 32, 64, .3, 0, 2.3 / Math.max(1, b.size));
@@ -1172,7 +1333,7 @@
     pop(t.x, t.y, '#f97316', 24);
     if (o && o !== t) {
       o.kills++;
-      if (o.isPlayer) { floaters.push({ x: t.x, y: t.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL); }
+      if (o.isPlayer) { floaters.push({ x: t.x, y: t.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL); questEvent('kill'); }
     }
     t.lives--;
     if (t.lives <= 0) { // drittes Leben verloren: komplett raus
@@ -1190,6 +1351,10 @@
   function endMatch(win, place) {
     matchOver = true;
     const coins = win ? WIN_COINS : PLACE_COINS[place] || 50;
+    questEvent('match'); if (win) questEvent('win'); if (duoMatch) questEvent('duo');
+    const tokens = 30 + P.kills * 8 + (win ? 60 : place === 2 ? 25 : 10), tierBefore = Math.floor(save.pass.tokens / PASS_STEP);
+    addTokens(tokens);
+    const tierNow = Math.floor(save.pass.tokens / PASS_STEP), questNew = save.quests.some((q, i) => questDone(q) && !questSnap[i]);
     addCoins(coins);
     const tid = P.B.id, tBefore = trophyOf(tid), tAfter = Math.max(0, tBefore + (TROPHY_DELTA[place] || 0));
     save.trophies[tid] = tAfter; persist();
@@ -1198,7 +1363,8 @@
       <p>${duoMatch
         ? (win ? 'Dein Team ist das letzte im Spiel!' : 'Dein Team ist ausgeschieden – Platz ' + place + ' von ' + new Set(fighters.map(f => f.team)).size + '.')
         : (win ? 'Du bist der letzte Überlebende!' : 'Du hast alle 3 Leben verloren – Platz ' + place + ' von ' + fighters.length + '.')}</p>
-      <p>Deine Kills: ${P.kills} · +${coins} 🪙 · 🏆 ${tDelta >= 0 ? '+' : ''}${tDelta}</p>
+      <p>Deine Kills: ${P.kills} · +${coins} 🪙 · 🏆 ${tDelta >= 0 ? '+' : ''}${tDelta} · 🎟 +${tokens}</p>
+      ${tierNow > tierBefore ? `<p>🎁 Brawl-Pass-Stufe ${tierNow} erreicht – Belohnung wartet im Hauptmenü!</p>` : ''}${questNew ? '<p>✅ Quest geschafft – im Hauptmenü abholen!</p>' : ''}
       <div class="row"><button class="act" id="again">Nochmal</button><button class="act alt" id="to-home">Hauptmenü</button></div>`;
     resultEl.hidden = false;
     document.getElementById('again').addEventListener('click', () => newMatch(P.B.id));
@@ -1212,6 +1378,7 @@
     t.invis = 0; // getroffene Tarnung fliegt auf
     if (t.shield > 0) dmg *= .5;
     t.hp -= dmg; t.flash = .12;
+    if (o.isPlayer) questEvent('dmg', Math.round(dmg));
     if (src === 'atk') o.charge = Math.min(1, o.charge + dmg / 5000);
     floaters.push({ x: t.x + rnd(-10, 10), y: t.y - 24, t: .6, txt: Math.round(dmg), bad: t.isPlayer });
     if (t.hp <= 0) kill(t, o);
@@ -1297,7 +1464,7 @@
   }
   const blocked = o => o.dash || o.jump;
   function attack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.ammo >= 1) { o.ammo -= 1; o.invis = 0; use(o, o.B.atk, 'atk'); } }
-  function superAttack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.charge >= 1) { o.charge = 0; use(o, o.B.sup, 'sup'); } }
+  function superAttack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.charge >= 1) { o.charge = 0; use(o, o.B.sup, 'sup'); if (o === P) questEvent('super'); } }
 
   /* ----- Eingabe ----- */
   addEventListener('keydown', e => {

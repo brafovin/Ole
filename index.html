@@ -100,43 +100,91 @@
   .lvl-row span{font-weight:800;color:var(--yellow)}
   .upg{background:#7c3aed}
   .upg:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
+  .top[hidden]{display:none}
+
+  /* ---- Startbildschirm im Brawl-Stars-Stil ---- */
+  .home{position:relative;border-radius:22px;overflow:hidden;color:#fff;isolation:isolate;height:clamp(560px,68vw,660px);
+    background:
+      radial-gradient(ellipse 52% 30% at 50% 84%,rgba(251,191,36,.38),transparent 72%),
+      radial-gradient(ellipse 90% 70% at 50% 0%,#7c3aed 0%,#4c1d95 45%,#1e1b4b 100%)}
+  .home::before{content:'';position:absolute;inset:0;z-index:-1;opacity:.12;
+    background:repeating-linear-gradient(115deg,#fff 0 3px,transparent 3px 52px)}
+  .home[hidden]{display:none}
+  .stroke{-webkit-text-stroke:3px #000;paint-order:stroke fill;text-shadow:0 3px 0 #000;font-style:italic;font-weight:900;text-transform:uppercase;letter-spacing:.02em}
+  .home-top{position:absolute;inset:14px 14px auto 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:2}
+  .profile{display:flex;align-items:center;gap:10px;background:rgba(15,23,42,.6);border:2px solid rgba(255,255,255,.25);border-radius:18px;padding:6px 16px 6px 6px}
+  .profile canvas{width:52px;height:52px;border-radius:13px;border:3px solid #fff;background:linear-gradient(#38bdf8,#1d4ed8)}
+  .profile b{display:block;font-size:17px;line-height:1.1}
+  .profile span{font-weight:800;color:#fde047;font-size:15px}
+  .home .coins{background:rgba(15,23,42,.6);border:2px solid rgba(255,255,255,.25);font-size:20px}
+  .home-hero{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);display:grid;justify-items:center;z-index:1;width:min(440px,78vw)}
+  #hero{width:100%;height:auto;aspect-ratio:7/6;display:block;cursor:pointer;filter:drop-shadow(0 14px 14px rgba(0,0,0,.4))}
+  .nameplate{margin-top:-14px;text-align:center;display:grid;justify-items:center;gap:6px}
+  .nameplate h2{margin:0;font-size:clamp(28px,5.4vw,44px)}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .badge{background:rgba(0,0,0,.6);padding:3px 12px;border-radius:999px;font-weight:800;font-size:15px;border:2px solid rgba(255,255,255,.25)}
+  .up-bs{background:linear-gradient(#4ade80,#16a34a);border:3px solid #052e16;border-radius:14px;color:#fff;font-weight:900;padding:7px 16px;box-shadow:0 3px 0 #052e16;text-shadow:0 2px 0 rgba(0,0,0,.45)}
+  .up-bs:disabled{background:linear-gradient(#64748b,#475569);border-color:#1e293b;box-shadow:0 3px 0 #1e293b;cursor:not-allowed}
+  .home-left{position:absolute;left:14px;bottom:16px;z-index:2}
+  .side-btn{position:relative;background:linear-gradient(#60a5fa,#2563eb);border:3px solid #0b1b4d;border-radius:18px;padding:14px 22px;font-size:20px;box-shadow:0 5px 0 #0b1b4d;color:#fff}
+  .side-btn:active,.start-bs:active{transform:translateY(3px)}
+  .notif{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#ef4444;border:3px solid #fff;display:none;place-items:center;font-size:14px;font-style:normal;-webkit-text-stroke:0;text-shadow:none}
+  .notif.on{display:grid}
+  .home-right{position:absolute;right:14px;bottom:16px;display:grid;gap:10px;justify-items:end;z-index:2}
+  .mode-card{display:flex;align-items:center;gap:12px;background:rgba(15,23,42,.72);border:3px solid rgba(255,255,255,.3);border-radius:18px;padding:8px 18px 8px 10px;color:#fff;text-align:left}
+  .mode-card .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:26px;background:linear-gradient(#f87171,#b91c1c);border:2px solid #fff}
+  .mode-card small{display:block;color:#cbd5e1;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .mode-card b{font-size:20px;font-style:italic;text-transform:uppercase}
+  .diff-pill{background:rgba(15,23,42,.6);border:2px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 14px;font-weight:800;font-size:13px;color:#e2e8f0}
+  .start-bs{background:linear-gradient(#fde047,#facc15 55%,#eab308);border:4px solid #000;border-radius:20px;color:#fff;font-size:clamp(34px,6.4vw,52px);padding:8px 64px 12px;box-shadow:0 6px 0 #854d0e;
+    -webkit-text-stroke:5px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000;font-style:italic;font-weight:900;letter-spacing:.03em}
+  .start-bs:hover{filter:brightness(1.07)}
+  @media (max-width:640px){
+    .home{height:740px}
+    .home-hero{bottom:auto;top:134px;width:min(270px,72vw)}
+    .home-left{bottom:auto;top:84px}
+    .home-right{left:14px;right:14px;justify-items:stretch}
+    .start-bs{width:100%;padding-inline:0}
+    .mode-card{justify-content:flex-start}
+    .diff-pill{justify-self:center}
+  }
 </style>
 </head>
 <body>
 <main>
-  <div class="top">
+  <div class="top" id="topbar" hidden>
     <h1>Brawler</h1>
     <span class="coins">🪙 <span class="coin-n">0</span></span>
     <button class="menu-btn" id="open-menu">☰ Brawler</button>
   </div>
 
-  <section class="panel" id="lobby">
-    <div class="hero">
-      <canvas id="hero" width="360" height="280" aria-label="Dein Brawler"></canvas>
-      <div class="hero-info">
-        <p class="eyebrow">Dein Brawler</p>
-        <h2 id="hero-name">Shelly</h2>
-        <p class="hero-role" id="hero-role"></p>
-        <div class="mini" id="hero-stats"></div>
-        <div class="move" id="hero-atk"></div>
-        <div class="move" id="hero-sup"></div>
-        <div class="lvl-row"><span id="hero-lvl"></span><button class="act upg" id="upgrade-btn"></button></div>
+  <section class="home" id="lobby" aria-label="Startbildschirm">
+    <div class="home-top">
+      <div class="profile">
+        <canvas id="avatar" width="64" height="64" aria-hidden="true"></canvas>
+        <div><b>Spieler</b><span>🏆 <span id="trophies">0</span></span></div>
+      </div>
+      <span class="coins">🪙 <span class="coin-n">0</span></span>
+    </div>
+
+    <div class="home-hero">
+      <canvas id="hero" width="560" height="480" aria-label="Dein Brawler – tippen für Brawler-Auswahl"></canvas>
+      <div class="nameplate">
+        <h2 class="stroke" id="hero-name">Shelly</h2>
+        <div class="badges"><span class="badge" id="hero-lvl">⚡ Power 1</span><span class="badge" id="hero-trophy">🏆 0</span></div>
+        <button class="up-bs" id="upgrade-btn"></button>
       </div>
     </div>
-    <button class="start" id="start-btn">▶ Start</button>
-    <div class="lobby-row">
-      <button class="menu-btn" id="brawler-btn">☰ Brawler wählen</button>
-      <select id="mode" aria-label="Spielmodus">
-        <option value="solo">Modus: Solo</option>
-        <option value="duo">Modus: Duo</option>
-      </select>
-      <select id="diff" aria-label="Schwierigkeit der Bots">
-        <option value="leicht">Bots: Leicht</option>
-        <option value="normal">Bots: Normal</option>
-        <option value="schwer">Bots: Schwer</option>
-      </select>
+
+    <div class="home-left">
+      <button class="side-btn stroke" id="brawler-btn">Brawler<i class="notif" id="notif">!</i></button>
     </div>
-    <p class="note" style="margin-top:12px">Drück auf Start und wähle eine Map. Solo: du gegen 3 Bots. Duo: du und ein Bot als Teamkamerad gegen zwei gegnerische Teams. Jeder hat 3 Leben, wer das dritte verliert, ist raus. Der letzte Überlebende (bzw. das letzte Team) gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Platzierung geben 🪙 Münzen für neue Brawler.</p>
+
+    <div class="home-right">
+      <button class="mode-card" id="mode-btn" title="Modus wechseln"><span class="ico">☠</span><span><small>Showdown</small><b id="mode-name">Solo</b></span></button>
+      <button class="diff-pill" id="diff-btn" title="Schwierigkeit der Bots wechseln">Bots: Normal</button>
+      <button class="start-bs" id="start-btn">Start</button>
+    </div>
   </section>
 
   <section class="panel" id="game" hidden>
@@ -738,7 +786,7 @@
   // Kosten für Power-Level 2..11
   const UPGRADE_COST = [0, 0, 30, 50, 100, 160, 260, 400, 600, 900, 1300, 1900];
   const powerMult = lv => 1 + .05 * (lv - 1); // +5 % Leben & Schaden pro Level
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 } };
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 }, trophies: {} };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
@@ -746,12 +794,17 @@
       save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
         selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id,
         diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal', mode: s.mode === 'duo' ? 'duo' : 'solo',
+        trophies: Object.fromEntries(Object.entries((s.trophies && typeof s.trophies === 'object') ? s.trophies : {})
+          .filter(([id, v]) => byId[id] && Number.isFinite(v) && v > 0).map(([id, v]) => [id, Math.floor(v)])),
         levels: Object.fromEntries([...unlocked].map(id => [id, Math.max(1, Math.min(MAX_LEVEL, Math.floor(Number(s.levels && s.levels[id])) || 1))])) };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
   const isOwned = id => save.unlocked.includes(id);
   const levelOf = id => (save.levels && save.levels[id]) || 1;
+  const TROPHY_DELTA = { 1: 12, 2: 4, 3: -3, 4: -6 }; // je nach Platzierung
+  const trophyOf = id => save.trophies[id] || 0;
+  const totalTrophies = () => Object.values(save.trophies).reduce((a, v) => a + v, 0);
   let menuOpen = false;
 
   function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
@@ -871,8 +924,8 @@
   const cv = document.getElementById('arena'), ctx = cv.getContext('2d');
   const W = cv.width, H = cv.height;
   const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup'), whoEl = document.getElementById('who');
-  const whereEl = document.getElementById('where'), resultEl = document.getElementById('result'), diffEl = document.getElementById('diff');
-  const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game');
+  const whereEl = document.getElementById('where'), resultEl = document.getElementById('result');
+  const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game'), topEl = document.getElementById('topbar');
   let screen = 'lobby'; // 'lobby' = Hauptmenü, 'game' = laufendes Match
 
   const LIVES = 3, RESPAWN = 3, WIN_COINS = 100;
@@ -984,38 +1037,52 @@
   function startGame(mapId) {
     M = MAPS.find(m => m.id === mapId) || MAPS[0];
     save.map = M.id; persist();
-    screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false;
+    screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false; topEl.hidden = false;
     whereEl.textContent = '· ' + (save.mode === 'duo' ? 'Duo · ' : '') + M.name;
     newMatch(save.selected);
     gameEl.scrollIntoView({ block: 'center' });
   }
   function goHome() {
-    screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false;
+    screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false; topEl.hidden = true;
     for (const k in keys) keys[k] = false; moveTo = null;
     renderLobby();
   }
 
   /* ----- Hauptmenü ----- */
   const heroCv = document.getElementById('hero'), hctx = heroCv.getContext('2d');
+  const avatarCtx = document.getElementById('avatar').getContext('2d');
+  const DIFF_LABEL = { leicht: 'Leicht', normal: 'Normal', schwer: 'Schwer' };
   function renderLobby() {
-    const b = byId[save.selected];
+    const b = byId[save.selected], lv = levelOf(b.id);
     document.getElementById('hero-name').textContent = b.name;
-    document.getElementById('hero-role').textContent = b.role + ' · ' + RARITIES.find(r => r.id === b.rarity).name;
-    const lv = levelOf(b.id), nextCost = UPGRADE_COST[lv + 1], upBtn = document.getElementById('upgrade-btn');
-    document.getElementById('hero-lvl').textContent = `⚡ Power ${lv}/${MAX_LEVEL}`;
+    document.getElementById('hero-lvl').textContent = `⚡ Power ${lv}`;
+    document.getElementById('hero-trophy').textContent = `🏆 ${trophyOf(b.id)}`;
+    document.getElementById('trophies').textContent = totalTrophies();
+    const upBtn = document.getElementById('upgrade-btn'), nextCost = UPGRADE_COST[lv + 1];
     if (lv >= MAX_LEVEL) { upBtn.textContent = 'MAX'; upBtn.disabled = true; }
     else { upBtn.textContent = `⬆ Power ${lv + 1} · ${nextCost} 🪙`; upBtn.disabled = save.coins < nextCost; }
-    document.getElementById('hero-stats').innerHTML =
-      `<div>Leben<b>${Math.round(b.hp * powerMult(lv))}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div>`;
-    document.getElementById('hero-atk').innerHTML = `<strong>${b.atkName}:</strong> ${b.atkText}`;
-    document.getElementById('hero-sup').innerHTML = `<strong>${b.supName}:</strong> ${b.supText}`;
+    document.getElementById('mode-name').textContent = save.mode === 'duo' ? 'Duo' : 'Solo';
+    document.getElementById('diff-btn').textContent = 'Bots: ' + DIFF_LABEL[save.diff];
+    // Roter Punkt: etwas ist bezahlbar (Upgrade oder neuer Brawler)
+    const news = BRAWLERS.some(x => isOwned(x.id) ? levelOf(x.id) < MAX_LEVEL && save.coins >= UPGRADE_COST[levelOf(x.id) + 1] : save.coins >= COST[x.rarity]);
+    document.getElementById('notif').classList.toggle('on', news);
+    // Profilbild: Kopf des gewählten Brawlers
+    avatarCtx.clearRect(0, 0, 64, 64);
+    drawBrawler(avatarCtx, b, 32, 62, .3, 0, 2.4 / Math.max(1, b.size));
   }
   function drawHero(now) {
     const t = now / 1000, b = byId[save.selected], w = heroCv.width, h = heroCv.height;
-    const g = hctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#1e3a8a'); g.addColorStop(.62, '#38bdf8'); g.addColorStop(.62, '#2f7d3a'); g.addColorStop(1, '#25652f');
-    hctx.fillStyle = g; hctx.fillRect(0, 0, w, h);
-    for (let i = 0; i < 6; i++) { hctx.fillStyle = 'rgba(255,255,255,.55)'; hctx.beginPath(); hctx.ellipse((i * 83 + t * 8) % (w + 80) - 40, 40 + (i % 3) * 28, 38, 11, 0, 0, TAU); hctx.fill(); }
-    drawBrawler(hctx, b, 150, 188 + Math.sin(t * 3) * 3, .25 + Math.sin(t * 1.1) * .35, 0, 3.4);
+    hctx.clearRect(0, 0, w, h);
+    for (let i = 0; i < 9; i++) { // funkelnde Sterne
+      const a = .35 + .35 * Math.sin(t * 2 + i * 1.7);
+      hctx.fillStyle = `rgba(255,255,255,${a})`; hctx.beginPath(); hctx.arc((i * 61 + 40) % (w - 40) + 20, 40 + ((i * 97) % 220), 2 + (i % 3), 0, TAU); hctx.fill();
+    }
+    // Größe so wählen, dass Waffe nach rechts und Hut nach oben ins Bild passen
+    const L = b.look, fists = L.weapon === 'fists', reach = fists ? 27 : 18, cx = w / 2 - 40;
+    const ext = { gun: (L.len || 20) + 19, tube: 41, bottle: 36, guitar: 42, pick: 37, fists: 30 }[L.weapon] || 26;
+    const eff = Math.min(8 * b.size / Math.max(1, b.size * .9), (w - 16 - cx) / ext, (h - 96) / (reach + 31)), sc = eff / b.size;
+    hctx.fillStyle = 'rgba(0,0,0,.35)'; hctx.beginPath(); hctx.ellipse(cx + 10, h - 78, 20 * eff, 4.2 * eff, 0, 0, TAU); hctx.fill();
+    drawBrawler(hctx, b, cx, h - 84 - reach * eff + Math.sin(t * 3) * 4, .02 + Math.sin(t * 1.1) * .3, 0, sc);
   }
 
   function pop(x, y, color, n) {
@@ -1045,11 +1112,14 @@
     matchOver = true;
     const coins = win ? WIN_COINS : PLACE_COINS[place] || 20;
     addCoins(coins);
+    const tid = P.B.id, tBefore = trophyOf(tid), tAfter = Math.max(0, tBefore + (TROPHY_DELTA[place] || 0));
+    save.trophies[tid] = tAfter; persist();
+    const tDelta = tAfter - tBefore;
     resultEl.innerHTML = `<h2>${win ? 'Sieg!' : 'Niederlage'}</h2>
       <p>${duoMatch
         ? (win ? 'Dein Team ist das letzte im Spiel!' : 'Dein Team ist ausgeschieden – Platz ' + place + ' von ' + new Set(fighters.map(f => f.team)).size + '.')
         : (win ? 'Du bist der letzte Überlebende!' : 'Du hast alle 3 Leben verloren – Platz ' + place + ' von ' + fighters.length + '.')}</p>
-      <p>Deine Kills: ${P.kills} · +${coins} 🪙</p>
+      <p>Deine Kills: ${P.kills} · +${coins} 🪙 · 🏆 ${tDelta >= 0 ? '+' : ''}${tDelta}</p>
       <div class="row"><button class="act" id="again">Nochmal</button><button class="act alt" id="to-home">Hauptmenü</button></div>`;
     resultEl.hidden = false;
     document.getElementById('again').addEventListener('click', () => newMatch(P.B.id));
@@ -1171,11 +1241,11 @@
   atkBtn.addEventListener('click', () => attack());
   supBtn.addEventListener('click', () => superAttack());
   document.getElementById('home').addEventListener('click', goHome);
-  const modeEl = document.getElementById('mode');
-  modeEl.value = save.mode;
-  modeEl.addEventListener('change', () => { save.mode = modeEl.value; persist(); modeEl.blur(); });
-  diffEl.value = save.diff;
-  diffEl.addEventListener('change', () => { save.diff = diffEl.value; DIFF = DIFFS[save.diff]; persist(); diffEl.blur(); });
+  document.getElementById('mode-btn').addEventListener('click', () => { save.mode = save.mode === 'solo' ? 'duo' : 'solo'; persist(); renderLobby(); });
+  document.getElementById('diff-btn').addEventListener('click', () => {
+    save.diff = DIFF_IDS[(DIFF_IDS.indexOf(save.diff) + 1) % DIFF_IDS.length]; DIFF = DIFFS[save.diff]; persist(); renderLobby();
+  });
+  heroCv.addEventListener('click', () => openMenu('brawler'));
 
   /* ----- Bots ----- */
   function superFits(f, t, dist) {

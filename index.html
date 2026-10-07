@@ -58,6 +58,13 @@
   .cta.cur{background:transparent;border:2px solid var(--c);cursor:default}
   .cta.buy{background:var(--yellow);color:#422006}
   .cta:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
+  .stage{position:relative}
+  #result{position:absolute;inset:0;display:grid;place-content:center;gap:10px;justify-items:center;text-align:center;background:rgba(15,23,42,.82);border-radius:12px;padding:16px}
+  #result[hidden]{display:none}
+  #result h2{margin:0;font-size:clamp(32px,8vw,56px);color:var(--yellow);text-transform:uppercase}
+  #result p{margin:0;font-size:18px}
+  #result .act{background:#16a34a}
+  select{font:inherit;font-weight:700;color:#fff;background:#334155;border:0;border-radius:12px;padding:12px 14px}
   .tabs{display:flex;gap:8px}
   .tab{background:#334155;color:#cbd5e1;font-weight:800;border-radius:12px;padding:10px 22px}
   .tab.on{background:#7c3aed;color:#fff}
@@ -79,13 +86,21 @@
   </div>
 
   <section class="panel">
-    <canvas id="arena" width="800" height="500" aria-label="Trainingsarena"></canvas>
+    <div class="stage">
+      <canvas id="arena" width="800" height="500" aria-label="Arena"></canvas>
+      <div id="result" hidden></div>
+    </div>
     <div class="bar">
       <span class="who" id="who">Shelly</span>
       <span class="where" id="where"></span>
       <button class="act" id="atk">Angriff</button>
       <button class="act" id="sup">Super</button>
-      <span class="hint">Besiege Puppen für 🪙 Münzen, schalte im Menü neue Brawler frei und wähle eine von 4 Maps · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
+      <select id="diff" aria-label="Schwierigkeit der Bots">
+        <option value="leicht">Bots: Leicht</option>
+        <option value="normal">Bots: Normal</option>
+        <option value="schwer">Bots: Schwer</option>
+      </select>
+      <span class="hint">Besiege die 3 Bots: Wer zuerst 10 Kills hat, gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Siege geben 🪙 Münzen für neue Brawler im Menü · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
     </div>
   </section>
 </main>
@@ -611,13 +626,15 @@
   const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000 };
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id };
+  const DIFF_IDS = ['leicht', 'normal', 'schwer'];
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal' };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
       const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
       save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
-        selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id };
+        selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id,
+        diff: DIFF_IDS.includes(s.diff) ? s.diff : 'normal' };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
@@ -716,23 +733,38 @@
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
 
-  /* ---------- Spiel ---------- */
+  /* ---------- Spiel: du gegen 3 Bots ---------- */
   const cv = document.getElementById('arena'), ctx = cv.getContext('2d');
   const W = cv.width, H = cv.height;
   const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup'), whoEl = document.getElementById('who');
+  const whereEl = document.getElementById('where'), resultEl = document.getElementById('result'), diffEl = document.getElementById('diff');
 
-  let B = BRAWLERS[0];
-  const P = { x: W / 2, y: H / 2, ammo: 3, charge: 0, aim: 0, recoil: 0, dash: null, jump: null, shield: 0 };
-  let dummies = [], shots = [], fx = [], floaters = [], rings = [], lobs = [], puddles = [], timers = [], bears = [], turrets = [];
+  const KILLS_TO_WIN = 10, RESPAWN = 3, WIN_COINS = 100, LOSE_COINS = 20;
+  const DIFFS = {
+    leicht: { dmg: .6,  err: .22, gap: [.8, 1.4],  speed: .85 },
+    normal: { dmg: .85, err: .12, gap: [.5, .9],   speed: .95 },
+    schwer: { dmg: 1.1, err: .05, gap: [.3, .55],  speed: 1.05 },
+  };
+  let DIFF = DIFFS[save.diff];
+  const BOT_COLORS = ['#ef4444', '#fb923c', '#f472b6'];
+
+  // Giftwolke: zieht nach GAS_START Sekunden von außen zur Mitte zu
+  const GAS_START = 45, GAS_SHRINK = 60, ZONE_MAX = 480, ZONE_MIN = 90;
+  let matchT = 0, gasTick = 0;
+  const gasProgress = () => clamp((matchT - GAS_START) / GAS_SHRINK, 0, 1);
+  const zoneR = () => ZONE_MAX - (ZONE_MAX - ZONE_MIN) * gasProgress();
+  const outZone = (x, y) => Math.hypot(x - W / 2, y - H / 2) > zoneR();
+
+  let fighters = [], P = null, matchOver = false;
+  let shots = [], fx = [], floaters = [], rings = [], lobs = [], puddles = [], timers = [], bears = [], turrets = [];
   const keys = {};
   let pointer = { x: W / 2 + 100, y: H / 2 }, moveTo = null;
 
   const rnd = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   let M = MAPS.find(m => m.id === save.map) || MAPS[0];
-  const whereEl = document.getElementById('where');
 
-  // Hindernisse: Brawler, Puppen und Bär stoßen sich an Wänden und Wasser
+  // Hindernisse: Kämpfer und Bären stoßen sich an Wänden und Wasser
   function pushOut(e, r) {
     for (let it = 0; it < 2; it++) for (const s of M.solid) {
       const cx = clamp(e.x, s.x, s.x + s.w), cy = clamp(e.y, s.y, s.y + s.h), dx = e.x - cx, dy = e.y - cy, d = Math.hypot(dx, dy);
@@ -748,122 +780,169 @@
   // Kugeln werden nur von Wänden gestoppt, nicht von Wasser
   const wallHit = (x, y, r) => M.walls.find(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
   const inSolid = (x, y, r) => M.solid.some(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
+  function los(ax, ay, bx, by) {
+    const n = Math.ceil(Math.hypot(bx - ax, by - ay) / 14);
+    for (let i = 1; i < n; i++) if (wallHit(ax + (bx - ax) * i / n, ay + (by - ay) * i / n, 3)) return false;
+    return true;
+  }
+  const foes = o => fighters.filter(f => f.alive && f !== o);
 
-  function spawnPos(d) {
-    for (let i = 0; i < 80; i++) {
-      const x = rnd(70, W - 70), y = rnd(60, H - 60);
-      if (Math.hypot(x - P.x, y - P.y) < 110 || inSolid(x, y, d.r + 6)) continue;
-      d.x = x; d.y = y; return;
+  /* ----- Kämpfer ----- */
+  function makeFighter(Bd, isPlayer, color) {
+    return { B: Bd, isPlayer, color, name: Bd.name, r: 18 * Bd.size, hp: Bd.hp, max: Bd.hp, kills: 0, alive: false,
+      x: 0, y: 0, vx: 0, vy: 0, aim: 0, ptr: { x: 0, y: 0 }, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, flash: 0, dead: 0, ai: null };
+  }
+  function spawnSpot(f, center) {
+    if (center && !inSolid(W / 2, H / 2, f.r + 4)) return { x: W / 2, y: H / 2 };
+    let best = null, bd = -1;
+    for (let i = 0; i < 30; i++) {
+      let x, y;
+      if (zoneR() < 400) { // Wolke aktiv: nur innerhalb der sicheren Zone spawnen
+        const a = rnd(0, TAU), rad = Math.sqrt(Math.random()) * Math.max(30, zoneR() - 40);
+        x = W / 2 + Math.cos(a) * rad; y = H / 2 + Math.sin(a) * rad;
+      } else { x = rnd(60, W - 60); y = rnd(60, H - 60); }
+      if (inSolid(x, y, f.r + 6)) continue;
+      let d = 1e9; for (const o of fighters) if (o !== f && o.alive) d = Math.min(d, Math.hypot(o.x - x, o.y - y));
+      if (d > bd) { bd = d; best = { x, y }; }
     }
-    d.x = W - 80; d.y = 80;
+    return best || { x: 80, y: 80 };
   }
-  for (let i = 0; i < 4; i++) { const d = { r: 20, hp: 3000, max: 3000, flash: 0, vx: 0, vy: 0, t: 0, dead: 0 }; spawnPos(d); dummies.push(d); }
-
-  function select(id) {
-    B = byId[id];
-    Object.assign(P, { x: W / 2, y: H / 2, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0 });
-    shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = [];
-    whoEl.textContent = B.name;
+  function respawn(f, center) {
+    const s = spawnSpot(f, center);
+    Object.assign(f, { x: s.x, y: s.y, vx: 0, vy: 0, hp: f.max, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0, flash: 0, dead: 0, alive: true });
+    f.ai = { tt: 0, st: 0, dir: 1, target: null, cd: rnd(.6, 1.2), sd: 1, ct: 0, cx: s.x, cy: s.y, esc: 0, eang: 0 };
+    pop(f.x, f.y, f.color, 14);
   }
+  function newMatch(id) {
+    shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = []; floaters = []; fx = [];
+    matchOver = false; matchT = 0; gasTick = 0; resultEl.hidden = true;
+    const pb = byId[id || save.selected];
+    P = makeFighter(pb, true, '#38bdf8');
+    const pool = BRAWLERS.filter(b => b.id !== pb.id).sort(() => Math.random() - .5).slice(0, 3);
+    fighters = [P, ...pool.map((b, i) => makeFighter(b, false, BOT_COLORS[i]))];
+    fighters.forEach((f, i) => respawn(f, i === 0));
+    whoEl.textContent = pb.name;
+  }
+  const select = id => newMatch(id);
   function applyMap(id) {
     M = MAPS.find(m => m.id === id) || MAPS[0];
     save.map = M.id; persist();
-    select(B.id);
-    for (const d of dummies) { d.hp = d.max; d.dead = 0; d.flash = 0; spawnPos(d); }
     whereEl.textContent = '· ' + M.name;
+    newMatch(P ? P.B.id : save.selected);
   }
 
   function pop(x, y, color, n) {
     for (let i = 0; i < n; i++) { const a = rnd(0, TAU), s = rnd(40, 160); fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: .35, color }); }
   }
-  function hit(d, dmg, src) {
-    if (d.hp <= 0) return;
-    d.hp -= dmg; d.flash = .12;
-    if (src === 'atk') P.charge = Math.min(1, P.charge + dmg / 5000);
-    floaters.push({ x: d.x + rnd(-10, 10), y: d.y - 24, t: .6, txt: Math.round(dmg) });
-    if (d.hp <= 0) {
-      pop(d.x, d.y, '#f97316', 24); d.dead = 0;
-      floaters.push({ x: d.x, y: d.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL);
+  function kill(t, o) {
+    t.alive = false; t.dead = 0; t.dash = null; t.jump = null; t.shield = 0;
+    pop(t.x, t.y, '#f97316', 24);
+    if (o && o !== t) {
+      o.kills++;
+      if (o.isPlayer) { floaters.push({ x: t.x, y: t.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL); }
+      if (o.kills >= KILLS_TO_WIN) endMatch(o);
     }
   }
-  function explode(x, y, r, dmg, src) {
-    rings.push({ x, y, r, t: .3 }); pop(x, y, '#fb923c', 14);
-    for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - x, d.y - y) < r + d.r) hit(d, dmg, src);
+  function endMatch(w) {
+    matchOver = true;
+    const win = w.isPlayer, coins = win ? WIN_COINS : LOSE_COINS;
+    addCoins(coins);
+    resultEl.innerHTML = `<h2>${win ? 'Sieg!' : 'Niederlage'}</h2>
+      <p>${win ? 'Du hast' : w.name + ' (Bot) hat'} ${KILLS_TO_WIN} Kills erreicht.</p>
+      <p>Deine Kills: ${P.kills} · +${coins} 🪙</p>
+      <button class="act" id="again">Nochmal</button>`;
+    resultEl.hidden = false;
+    document.getElementById('again').addEventListener('click', () => newMatch(P.B.id));
   }
-  const toward =(len) => ({ x: clamp(P.x + Math.cos(P.aim) * len, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * len, 20, H - 20) });
-  const muzzle = () => 26 * B.size;
+  function hit(t, dmg, src, o) {
+    if (!t.alive || matchOver) return;
+    if (!o.isPlayer) dmg *= DIFF.dmg;
+    if (t.shield > 0) dmg *= .5;
+    t.hp -= dmg; t.flash = .12;
+    if (src === 'atk') o.charge = Math.min(1, o.charge + dmg / 5000);
+    floaters.push({ x: t.x + rnd(-10, 10), y: t.y - 24, t: .6, txt: Math.round(dmg), bad: t.isPlayer });
+    if (t.hp <= 0) kill(t, o);
+  }
+  function explode(x, y, r, dmg, src, o) {
+    rings.push({ x, y, r, t: .3 }); pop(x, y, '#fb923c', 14);
+    for (const f of foes(o)) if (Math.hypot(f.x - x, f.y - y) < r + f.r) hit(f, dmg, src, o);
+  }
+  const toward = (o, len) => ({ x: clamp(o.x + Math.cos(o.aim) * len, 20, W - 20), y: clamp(o.y + Math.sin(o.aim) * len, 20, H - 20) });
+  const muzzle = o => 26 * o.B.size;
+  const ptrDist = o => Math.hypot(o.ptr.x - o.x, o.ptr.y - o.y);
 
-  function pellets(a, src) {
+  function pellets(o, a, src) {
     for (let i = 0; i < a.n; i++) {
-      const ang = P.aim + (a.n === 1 ? 0 : (i / (a.n - 1) - .5) * 2 * a.spread) + rnd(-.025, .025);
+      const ang = o.aim + (a.n === 1 ? 0 : (i / (a.n - 1) - .5) * 2 * a.spread) + rnd(-.025, .025);
       const sp = a.sp * rnd(.97, 1.04);
-      shots.push({ x: P.x + Math.cos(P.aim) * muzzle(), y: P.y + Math.sin(P.aim) * muzzle(), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+      shots.push({ o, x: o.x + Math.cos(o.aim) * muzzle(o), y: o.y + Math.sin(o.aim) * muzzle(o), vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
         life: a.life, dmg: a.dmg, r: a.r || 3.5, pierce: !!a.pierce, hit: new Set(), src, knock: a.knock || 0, bounces: a.bounce || 0,
         color: a.color || (src === 'sup' ? '#fde047' : '#fb923c') });
     }
   }
-  function use(a, src) {
-    P.recoil = src === 'sup' ? 14 : 8;
+  function use(o, a, src) {
+    o.recoil = src === 'sup' ? 14 : 8;
     switch (a.type) {
-      case 'pellets': pellets(a, src); if (a.heal) floaters.push({ x: P.x, y: P.y - 40, t: .8, txt: '♥ Heilung' }); break;
+      case 'pellets': pellets(o, a, src); if (a.heal) floaters.push({ x: o.x, y: o.y - 40, t: .8, txt: '♥ Heilung' }); break;
       case 'rocket':
-        shots.push({ x: P.x + Math.cos(P.aim) * muzzle(), y: P.y + Math.sin(P.aim) * muzzle(), vx: Math.cos(P.aim) * a.sp, vy: Math.sin(P.aim) * a.sp,
+        shots.push({ o, x: o.x + Math.cos(o.aim) * muzzle(o), y: o.y + Math.sin(o.aim) * muzzle(o), vx: Math.cos(o.aim) * a.sp, vy: Math.sin(o.aim) * a.sp,
           life: a.life, dmg: a.dmg, r: 6, aoe: a.aoe, hit: new Set(), src, color: '#f97316' });
         break;
       case 'lob': {
-        const dx = Math.min(a.range, Math.hypot(pointer.x - P.x, pointer.y - P.y)), n = a.n || 1;
+        const dx = Math.min(a.range, ptrDist(o)), n = a.n || 1;
         for (let i = 0; i < n; i++) {
-          const ang = P.aim + (n === 1 ? 0 : (i / (n - 1) - .5) * 2 * a.spread);
-          lobs.push({ sx: P.x, sy: P.y, tx: clamp(P.x + Math.cos(ang) * dx, 20, W - 20), ty: clamp(P.y + Math.sin(ang) * dx, 20, H - 20),
+          const ang = o.aim + (n === 1 ? 0 : (i / (n - 1) - .5) * 2 * a.spread);
+          lobs.push({ o, sx: o.x, sy: o.y, tx: clamp(o.x + Math.cos(ang) * dx, 20, W - 20), ty: clamp(o.y + Math.sin(ang) * dx, 20, H - 20),
             t: 0, dur: a.time || .5, a, src });
         }
         break;
       }
       case 'boom':
-        shots.push({ boom: true, x: P.x, y: P.y, sx: P.x, sy: P.y, ang: P.aim, range: a.range, t: 0, dur: a.dur, dmg: a.dmg, r: 12,
+        shots.push({ o, boom: true, x: o.x, y: o.y, sx: o.x, sy: o.y, ang: o.aim, range: a.range, t: 0, dur: a.dur, dmg: a.dmg, r: 12,
           pierce: true, hit: new Set(), src, life: 1, color: '#cbd5e1' });
         break;
-      case 'pulse': explode(P.x, P.y, a.r, a.dmg, src); break;
+      case 'pulse': explode(o.x, o.y, a.r, a.dmg, src, o); break;
       case 'pull':
-        rings.push({ x: P.x, y: P.y, r: a.r, t: .3 });
-        for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - P.x, d.y - P.y) < a.r + d.r) {
-          d.x = P.x + (d.x - P.x) * .35; d.y = P.y + (d.y - P.y) * .35; hit(d, a.dmg, 'sup'); pop(d.x, d.y, '#fde047', 6);
+        rings.push({ x: o.x, y: o.y, r: a.r, t: .3 });
+        for (const f of foes(o)) if (Math.hypot(f.x - o.x, f.y - o.y) < a.r + f.r) {
+          f.x = o.x + (f.x - o.x) * .35; f.y = o.y + (f.y - o.y) * .35; pushOut(f, f.r); hit(f, a.dmg, src, o); pop(f.x, f.y, '#fde047', 6);
         }
         break;
       case 'spin':
-        for (let i = 0; i < a.hits; i++) timers.push({ t: i * .2, fn: () => explode(P.x, P.y, a.r, a.dmg, 'sup') });
+        for (let i = 0; i < a.hits; i++) timers.push({ t: i * .2, fn: () => explode(o.x, o.y, a.r, a.dmg, src, o) });
         break;
       case 'turret': {
-        const dist = Math.min(280, Math.hypot(pointer.x - P.x, pointer.y - P.y));
-        turrets.push({ x: clamp(P.x + Math.cos(P.aim) * dist, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * dist, 20, H - 20), t: a.time, cd: .3, ang: P.aim, a });
+        const dist = Math.min(280, ptrDist(o));
+        turrets.push({ o, x: clamp(o.x + Math.cos(o.aim) * dist, 20, W - 20), y: clamp(o.y + Math.sin(o.aim) * dist, 20, H - 20), t: a.time, cd: .3, ang: o.aim, a });
         break;
       }
-      case 'dash': P.dash = { vx: Math.cos(P.aim) * a.dist / .27, vy: Math.sin(P.aim) * a.dist / .27, t: .27, hit: new Set(), dmg: a.dmg }; break;
+      case 'dash': o.dash = { vx: Math.cos(o.aim) * a.dist / .27, vy: Math.sin(o.aim) * a.dist / .27, t: .27, hit: new Set(), dmg: a.dmg, src }; break;
       case 'slam': {
-        const dist = Math.min(a.dist, Math.hypot(pointer.x - P.x, pointer.y - P.y));
-        P.jump = { sx: P.x, sy: P.y, tx: clamp(P.x + Math.cos(P.aim) * dist, 25, W - 25), ty: clamp(P.y + Math.sin(P.aim) * dist, 25, H - 25), t: 0, dur: .45, a };
+        const dist = Math.min(a.dist, ptrDist(o));
+        o.jump = { sx: o.x, sy: o.y, tx: clamp(o.x + Math.cos(o.aim) * dist, 25, W - 25), ty: clamp(o.y + Math.sin(o.aim) * dist, 25, H - 25), t: 0, dur: .45, a: { r: a.r, dmg: a.dmg }, src };
         break;
       }
       case 'rain': {
-        const c = toward(Math.min(420, Math.hypot(pointer.x - P.x, pointer.y - P.y)));
-        for (let i = 0; i < a.count; i++) timers.push({ t: .15 + i * .12, fn: () => explode(clamp(c.x + rnd(-a.area, a.area), 10, W - 10), clamp(c.y + rnd(-a.area, a.area), 10, H - 10), a.aoe, a.dmg, 'sup') });
+        const c = toward(o, Math.min(420, ptrDist(o)));
+        for (let i = 0; i < a.count; i++) timers.push({ t: .15 + i * .12, fn: () => explode(clamp(c.x + rnd(-a.area, a.area), 10, W - 10), clamp(c.y + rnd(-a.area, a.area), 10, H - 10), a.aoe, a.dmg, src, o) });
         break;
       }
-      case 'bear': bears.push({ x: P.x + Math.cos(P.aim) * 40, y: P.y + Math.sin(P.aim) * 40, t: a.time, cd: 0 }); break;
-      case 'shield': P.shield = a.time; break;
+      case 'bear': bears.push({ o, x: o.x + Math.cos(o.aim) * 40, y: o.y + Math.sin(o.aim) * 40, t: a.time, cd: 0 }); break;
+      case 'shield': o.shield = a.time; break;
       case 'blink': {
-        const dist = Math.min(a.dist, Math.hypot(pointer.x - P.x, pointer.y - P.y));
-        rings.push({ x: P.x, y: P.y, r: 30, t: .3 }); pop(P.x, P.y, '#e2e8f0', 12);
-        P.x = clamp(P.x + Math.cos(P.aim) * dist, 25, W - 25); P.y = clamp(P.y + Math.sin(P.aim) * dist, 25, H - 25);
-        pushOut(P, 18 * B.size); explode(P.x, P.y, a.r, a.dmg, 'sup');
+        const dist = Math.min(a.dist, ptrDist(o));
+        rings.push({ x: o.x, y: o.y, r: 30, t: .3 }); pop(o.x, o.y, '#e2e8f0', 12);
+        o.x = clamp(o.x + Math.cos(o.aim) * dist, 25, W - 25); o.y = clamp(o.y + Math.sin(o.aim) * dist, 25, H - 25);
+        pushOut(o, o.r); explode(o.x, o.y, a.r, a.dmg, src, o);
         break;
       }
     }
   }
-  const blocked = () => P.dash || P.jump;
-  function attack() { if (!blocked() && P.ammo >= 1) { P.ammo -= 1; use(B.atk, 'atk'); } }
-  function superAttack() { if (!blocked() && P.charge >= 1) { P.charge = 0; use(B.sup, 'sup'); } }
+  const blocked = o => o.dash || o.jump;
+  function attack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.ammo >= 1) { o.ammo -= 1; use(o, o.B.atk, 'atk'); } }
+  function superAttack(o = P) { if (o.alive && !matchOver && !blocked(o) && o.charge >= 1) { o.charge = 0; use(o, o.B.sup, 'sup'); } }
 
+  /* ----- Eingabe ----- */
   addEventListener('keydown', e => {
     if (menuOpen) { if (e.key === 'Escape') closeMenu(); return; }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
@@ -881,38 +960,139 @@
   });
   cv.addEventListener('pointerup', () => { moveTo = null; });
   cv.addEventListener('pointercancel', () => { moveTo = null; });
-  atkBtn.addEventListener('click', attack);
-  supBtn.addEventListener('click', superAttack);
+  atkBtn.addEventListener('click', () => attack());
+  supBtn.addEventListener('click', () => superAttack());
+  diffEl.value = save.diff;
+  diffEl.addEventListener('change', () => { save.diff = diffEl.value; DIFF = DIFFS[save.diff]; persist(); diffEl.blur(); });
+
+  /* ----- Bots ----- */
+  function superFits(f, t, dist) {
+    const s = f.B.sup, vis = los(f.x, f.y, t.x, t.y);
+    switch (s.type) {
+      case 'pellets': case 'rocket': return vis && dist <= (s.sp * s.life);
+      case 'lob': return dist <= s.range;
+      case 'rain': return dist < 420;
+      case 'turret': return dist < 320;
+      case 'bear': return dist < 350;
+      case 'dash': return vis && dist < s.dist * .9;
+      case 'slam': return dist < s.dist && dist > 80;
+      case 'blink': return dist < s.dist && dist > 100;
+      case 'pulse': case 'spin': return dist < s.r + t.r;
+      case 'pull': return dist < s.r * .9;
+      case 'shield': return dist < 260 || f.hp < f.max * .6;
+      default: return true;
+    }
+  }
+  function think(f, dt) {
+    const A = f.ai, a = f.B.atk;
+    const en = foes(f);
+    if (!en.length) return { dx: 0, dy: 0 };
+    A.tt -= dt;
+    if (A.tt <= 0 || !A.target || !A.target.alive) {
+      A.tt = .4; let best = null, bd = 1e9;
+      for (const e of en) { let d = Math.hypot(e.x - f.x, e.y - f.y); if (e.isPlayer) d *= .75; if (d < bd) { bd = d; best = e; } }
+      A.target = best;
+    }
+    const t = A.target, ex = t.x - f.x, ey = t.y - f.y, dist = Math.hypot(ex, ey) || 1, nx = ex / dist, ny = ey / dist;
+    const range = rangeOf(a), sup = f.B.sup;
+    let want = clamp(range * .7, 40, 300);
+    // Super mit Nahwirkung bereit: näher ran
+    if (f.charge >= 1 && (sup.type === 'pulse' || sup.type === 'spin')) want = Math.max(30, sup.r * .6);
+
+    // Bewegung: Abstand halten, seitlich ausweichen, bei wenig Leben zurückweichen
+    let mx = 0, my = 0;
+    if (dist > want + 25) { mx = nx; my = ny; } else if (dist < want - 50 && range > 150) { mx = -nx; my = -ny; }
+    if (f.hp < f.max * .3) { mx = -nx; my = -ny; }
+    A.st -= dt; if (A.st <= 0) { A.st = rnd(.8, 1.8); A.dir = Math.random() < .5 ? -1 : 1; }
+    const side = dist < want + 60 ? .8 : .25;
+    mx += -ny * A.dir * side; my += nx * A.dir * side;
+    A.ct += dt;
+    if (A.ct > .5) {
+      if ((mx || my) && Math.hypot(f.x - A.cx, f.y - A.cy) < 18) { A.esc = .7; A.eang = rnd(0, TAU); }
+      A.cx = f.x; A.cy = f.y; A.ct = 0;
+    }
+    if (A.esc > 0) { A.esc -= dt; mx = Math.cos(A.eang); my = Math.sin(A.eang); }
+    // Giftwolke: rechtzeitig in die sichere Zone laufen
+    if (matchT > GAS_START - 6) {
+      const gx = W / 2 - f.x, gy = H / 2 - f.y, gd = Math.hypot(gx, gy) || 1;
+      if (gd > zoneR() - 45) { mx = gx / gd; my = gy / gd; }
+    }
+
+    // Zielen (mit Vorhalt) und Schießen
+    const sp = a.sp || 800, lead = dist / sp * .5;
+    const tx = t.x + t.vx * lead, ty = t.y + t.vy * lead;
+    let ang = Math.atan2(ty - f.y, tx - f.x);
+    f.aim = ang; f.ptr = { x: tx, y: ty };
+    A.cd -= dt; A.sd -= dt;
+    if (!blocked(f)) {
+      if (A.cd <= 0 && f.ammo >= 1 && dist <= range + 10 && los(f.x, f.y, t.x, t.y)) {
+        ang += rnd(-DIFF.err, DIFF.err);
+        f.aim = ang; f.ptr = { x: f.x + Math.cos(ang) * dist, y: f.y + Math.sin(ang) * dist };
+        attack(f); A.cd = rnd(DIFF.gap[0], DIFF.gap[1]);
+      }
+      if (A.sd <= 0 && f.charge >= 1) { if (superFits(f, t, dist)) superAttack(f); A.sd = .5; }
+    }
+    return { dx: mx, dy: my };
+  }
+
+  /* ----- Bewegung & Update ----- */
+  function step(f, dt, dx, dy) {
+    f.vx = 0; f.vy = 0;
+    if (f.jump) {
+      const j = f.jump; j.t += dt; const k = Math.min(1, j.t / j.dur);
+      f.x = j.sx + (j.tx - j.sx) * k; f.y = j.sy + (j.ty - j.sy) * k;
+      if (k >= 1) { f.jump = null; pushOut(f, f.r); explode(f.x, f.y, j.a.r, j.a.dmg, j.src, f); }
+      return;
+    }
+    if (f.dash) {
+      const d = f.dash; d.t -= dt; f.x += d.vx * dt; f.y += d.vy * dt;
+      for (const t of foes(f)) if (!d.hit.has(t) && Math.hypot(t.x - f.x, t.y - f.y) < f.r + t.r) {
+        d.hit.add(t); hit(t, d.dmg, d.src, f); t.x += d.vx * .06; t.y += d.vy * .06; pop(t.x, t.y, '#fde047', 8);
+      }
+      if (d.t <= 0) f.dash = null;
+    } else {
+      const len = Math.hypot(dx, dy), sp = f.B.speed * (f.shield > 0 ? 1.4 : 1) * (f.isPlayer ? 1 : DIFF.speed);
+      if (len) { f.vx = dx / len * sp; f.vy = dy / len * sp; f.x += f.vx * dt; f.y += f.vy * dt; }
+    }
+    pushOut(f, f.r);
+  }
 
   let last = performance.now();
   function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); draw(); requestAnimationFrame(frame); }
 
   function update(dt) {
-    const R = 18 * B.size;
-    // Bewegung
-    if (P.jump) {
-      const j = P.jump; j.t += dt; const k = Math.min(1, j.t / j.dur);
-      P.x = j.sx + (j.tx - j.sx) * k; P.y = j.sy + (j.ty - j.sy) * k;
-      if (k >= 1) { explode(P.x, P.y, j.a.r, j.a.dmg, 'sup'); P.jump = null; }
-    } else if (P.dash) {
-      const d = P.dash; d.t -= dt;
-      P.x = clamp(P.x + d.vx * dt, R, W - R); P.y = clamp(P.y + d.vy * dt, R, H - R);
-      for (const m of dummies) if (m.hp > 0 && !d.hit.has(m) && Math.hypot(m.x - P.x, m.y - P.y) < R + m.r) {
-        d.hit.add(m); hit(m, d.dmg, 'sup'); m.x += d.vx * .06; m.y += d.vy * .06; pop(m.x, m.y, '#fde047', 8);
+    if (menuOpen) return;
+    if (!matchOver) {
+      for (const f of fighters) {
+        if (!f.alive) { f.dead += dt; if (f.dead >= RESPAWN) respawn(f); continue; }
+        f.ammo = Math.min(3, f.ammo + dt / 1.3);
+        f.recoil = Math.max(0, f.recoil - dt * 60);
+        f.shield = Math.max(0, f.shield - dt);
+        f.flash = Math.max(0, f.flash - dt);
+        let dx = 0, dy = 0;
+        if (f.isPlayer) {
+          dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+          dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+          if (moveTo) { const tx = moveTo.x - f.x, ty = moveTo.y - f.y, d = Math.hypot(tx, ty); if (d > 12) { dx = tx / d; dy = ty / d; } }
+          f.ptr = pointer;
+        } else { const r = think(f, dt); dx = r.dx; dy = r.dy; }
+        step(f, dt, dx, dy);
+        if (f.isPlayer) f.aim = Math.atan2(pointer.y - f.y, pointer.x - f.x);
       }
-      if (d.t <= 0) P.dash = null;
-    } else {
-      let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
-      let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
-      if (moveTo) { const tx = moveTo.x - P.x, ty = moveTo.y - P.y, d = Math.hypot(tx, ty); if (d > 12) { dx = tx / d; dy = ty / d; } }
-      const len = Math.hypot(dx, dy), sp = B.speed * (P.shield > 0 ? 1.4 : 1);
-      if (len) { P.x += dx / len * sp * dt; P.y += dy / len * sp * dt; }
+      matchT += dt;
+      if (matchT > GAS_START) {
+        gasTick -= dt;
+        if (gasTick <= 0) {
+          gasTick = .5;
+          const dmg = (300 + 600 * gasProgress()) * .5;
+          for (const f of fighters) if (f.alive && outZone(f.x, f.y)) {
+            f.hp -= dmg; f.flash = .12;
+            floaters.push({ x: f.x + rnd(-10, 10), y: f.y - 24, t: .6, txt: Math.round(dmg), gas: true });
+            if (f.hp <= 0) kill(f, null);
+          }
+        }
+      }
     }
-    if (!P.jump) pushOut(P, R);
-    P.aim = Math.atan2(pointer.y - P.y, pointer.x - P.x);
-    P.ammo = Math.min(3, P.ammo + dt / 1.3);
-    P.recoil = Math.max(0, P.recoil - dt * 60);
-    P.shield = Math.max(0, P.shield - dt);
 
     // Geschosse
     for (const p of shots) {
@@ -921,7 +1101,7 @@
         if (p.t < half) { const k = p.t / half; p.x = p.sx + (fx_ - p.sx) * k; p.y = p.sy + (fy_ - p.sy) * k; }
         else {
           if (!p.turned) { p.turned = true; p.hit.clear(); }
-          const k = Math.min(1, (p.t - half) / half); p.x = fx_ + (P.x - fx_) * k; p.y = fy_ + (P.y - fy_) * k;
+          const k = Math.min(1, (p.t - half) / half); p.x = fx_ + (p.o.x - fx_) * k; p.y = fy_ + (p.o.y - fy_) * k;
         }
         if (p.t >= p.dur) p.life = 0;
       } else {
@@ -939,14 +1119,14 @@
           } else { p.life = 0; if (!p.aoe) continue; }
         }
       }
-      for (const d of dummies) {
-        if (d.hp <= 0 || p.hit.has(d) || Math.hypot(p.x - d.x, p.y - d.y) >= d.r + p.r) continue;
+      for (const f of foes(p.o)) {
+        if (p.hit.has(f) || Math.hypot(p.x - f.x, p.y - f.y) >= f.r + p.r) continue;
         if (p.aoe) { p.life = 0; break; }
-        hit(d, p.dmg, p.src); pop(p.x, p.y, '#fde047', 3);
-        if (p.knock) { d.x += p.vx * p.knock; d.y += p.vy * p.knock; }
-        if (p.pierce) p.hit.add(d); else { p.life = 0; break; }
+        hit(f, p.dmg, p.src, p.o); pop(p.x, p.y, '#fde047', 3);
+        if (p.knock) { f.x += p.vx * p.knock; f.y += p.vy * p.knock; pushOut(f, f.r); }
+        if (p.pierce) p.hit.add(f); else { p.life = 0; break; }
       }
-      if (p.life <= 0 && p.aoe) explode(p.x, p.y, p.aoe, p.dmg, p.src);
+      if (p.life <= 0 && p.aoe) explode(p.x, p.y, p.aoe, p.dmg, p.src, p.o);
     }
     shots = shots.filter(p => p.life > 0 && p.x > -30 && p.x < W + 30 && p.y > -30 && p.y < H + 30);
 
@@ -954,19 +1134,19 @@
     for (const l of lobs) {
       l.t += dt;
       if (l.t >= l.dur) {
-        const pd = l.a.puddle; explode(l.tx, l.ty, pd ? pd.r : l.a.splash, l.a.dmg, l.src);
-        if (pd) puddles.push({ x: l.tx, y: l.ty, r: pd.r, t: pd.time, max: pd.time, tick: 0, dmg: pd.tick, src: l.src });
+        const pd = l.a.puddle; explode(l.tx, l.ty, pd ? pd.r : l.a.splash, l.a.dmg, l.src, l.o);
+        if (pd) puddles.push({ o: l.o, x: l.tx, y: l.ty, r: pd.r, t: pd.time, max: pd.time, tick: 0, dmg: pd.tick, src: l.src });
         l.done = true;
       }
     }
     lobs = lobs.filter(l => !l.done);
     for (const p of puddles) {
       p.t -= dt; p.tick -= dt;
-      if (p.tick <= 0) { p.tick = .25; for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - p.x, d.y - p.y) < p.r + d.r) hit(d, p.dmg, p.src); }
+      if (p.tick <= 0) { p.tick = .25; for (const f of foes(p.o)) if (Math.hypot(f.x - p.x, f.y - p.y) < p.r + f.r) hit(f, p.dmg, p.src, p.o); }
     }
     puddles = puddles.filter(p => p.t > 0);
 
-    // Zeitgesteuerte Effekte (Raketenregen)
+    // Zeitgesteuerte Effekte (Raketenregen, Wirbel)
     for (const t of timers) { t.t -= dt; if (t.t <= 0) { t.fn(); t.done = true; } }
     timers = timers.filter(t => !t.done);
 
@@ -974,10 +1154,10 @@
     for (const b of bears) {
       b.t -= dt; b.cd -= dt;
       let tg = null, best = 1e9;
-      for (const d of dummies) { const m = Math.hypot(d.x - b.x, d.y - b.y); if (d.hp > 0 && m < best) { best = m; tg = d; } }
+      for (const f of foes(b.o)) { const m = Math.hypot(f.x - b.x, f.y - b.y); if (m < best) { best = m; tg = f; } }
       if (tg) {
-        if (best > 34) { b.x += (tg.x - b.x) / best * 170 * dt; b.y += (tg.y - b.y) / best * 170 * dt; pushOut(b, 17); }
-        else if (b.cd <= 0) { b.cd = .5; hit(tg, 400, 'sup'); pop(tg.x, tg.y, '#fde047', 6); }
+        if (best > 34 + tg.r) { b.x += (tg.x - b.x) / best * 170 * dt; b.y += (tg.y - b.y) / best * 170 * dt; pushOut(b, 17); }
+        else if (b.cd <= 0) { b.cd = .5; hit(tg, 400, 'sup', b.o); pop(tg.x, tg.y, '#fde047', 6); }
       }
     }
     bears = bears.filter(b => b.t > 0);
@@ -986,25 +1166,18 @@
     for (const t of turrets) {
       t.t -= dt; t.cd -= dt;
       let tg = null, best = 380;
-      for (const d of dummies) { const m = Math.hypot(d.x - t.x, d.y - t.y); if (d.hp > 0 && m < best) { best = m; tg = d; } }
+      for (const f of foes(t.o)) { const m = Math.hypot(f.x - t.x, f.y - t.y); if (m < best) { best = m; tg = f; } }
       if (tg) {
         t.ang = Math.atan2(tg.y - t.y, tg.x - t.x);
         if (t.cd <= 0) {
           t.cd = t.a.every;
-          shots.push({ x: t.x + Math.cos(t.ang) * 20, y: t.y + Math.sin(t.ang) * 20, vx: Math.cos(t.ang) * 800, vy: Math.sin(t.ang) * 800,
+          shots.push({ o: t.o, x: t.x + Math.cos(t.ang) * 20, y: t.y + Math.sin(t.ang) * 20, vx: Math.cos(t.ang) * 800, vy: Math.sin(t.ang) * 800,
             life: .5, dmg: t.a.dmg, r: 5, pierce: false, hit: new Set(), src: 'sup', knock: 0, bounces: 0, color: '#fde047' });
         }
       }
     }
     turrets = turrets.filter(t => t.t > 0);
 
-    // Übungspuppen
-    for (const d of dummies) {
-      if (d.hp <= 0) { d.dead += dt; if (d.dead > 1.5) { d.hp = d.max; spawnPos(d); } continue; }
-      d.t -= dt; if (d.t <= 0) { d.t = rnd(1, 3); const a = rnd(0, TAU); d.vx = Math.cos(a) * 35; d.vy = Math.sin(a) * 35; }
-      d.x += d.vx * dt; d.y += d.vy * dt; pushOut(d, d.r);
-      d.flash = Math.max(0, d.flash - dt);
-    }
     for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.life -= dt; }
     fx = fx.filter(f => f.life > 0);
     for (const f of floaters) { f.y -= 40 * dt; f.t -= dt; }
@@ -1013,8 +1186,72 @@
     rings = rings.filter(r => r.t > 0);
 
     supBtn.classList.toggle('ready', P.charge >= 1);
-    supBtn.textContent = P.charge >= 1 ? B.supName.toUpperCase() + '!' : 'Super ' + Math.floor(P.charge * 100) + '%';
+    supBtn.textContent = P.charge >= 1 ? P.B.supName.toUpperCase() + '!' : 'Super ' + Math.floor(P.charge * 100) + '%';
     atkBtn.textContent = 'Angriff ' + '●'.repeat(Math.floor(P.ammo)) + '○'.repeat(3 - Math.floor(P.ammo));
+  }
+
+  /* ----- Zeichnen ----- */
+  function drawBody(f) {
+    const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
+    ctx.strokeStyle = f.color; ctx.lineWidth = 3; ctx.globalAlpha = .9;
+    ctx.beginPath(); ctx.ellipse(f.x, f.y + 17 * f.B.size, 21 * f.B.size, 8 * f.B.size, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+    if (f.flash > 0) ctx.globalAlpha = .55 + Math.sin(performance.now() / 30) * .25;
+    drawBrawler(ctx, f.B, f.x, f.y, f.aim, f.recoil, 1, { z });
+    ctx.globalAlpha = 1;
+    if (f.shield > 0) {
+      ctx.strokeStyle = 'rgba(134,239,172,.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(f.x, f.y - z, 30 * f.B.size, 0, TAU); ctx.stroke();
+      ctx.fillStyle = 'rgba(134,239,172,.2)'; ctx.fill();
+    }
+  }
+  function drawBars(f) {
+    const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
+    const top = f.y - 44 * f.B.size - z, w = 52;
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(f.x - w / 2 - 1, top, w + 2, 9);
+    ctx.fillStyle = f.isPlayer ? '#22c55e' : f.color; ctx.fillRect(f.x - w / 2, top + 1, w * Math.max(0, f.hp / f.max), 7);
+    ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText((f.isPlayer ? 'DU · ' : '') + f.name.toUpperCase(), f.x, top - 4);
+  }
+  function drawGas() {
+    if (matchT <= GAS_START - 10) return;
+    const R = zoneR(), cx = W / 2, cy = H / 2;
+    if (matchT > GAS_START) {
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.arc(cx, cy, R, 0, TAU, true);
+      ctx.fillStyle = 'rgba(74,222,128,.34)'; ctx.fill('evenodd');
+      ctx.clip('evenodd');
+      const t = performance.now() / 1000;
+      ctx.fillStyle = 'rgba(190,255,200,.10)';
+      for (let i = 0; i < 28; i++) {
+        const x = (i * 97 + Math.sin(t * .6 + i) * 40 + 800) % 800, y = (i * 61 + Math.cos(t * .5 + i * 2) * 40 + 500) % 500;
+        ctx.beginPath(); ctx.arc(x, y, 30 + (i % 4) * 14, 0, TAU); ctx.fill();
+      }
+      ctx.restore();
+    }
+    ctx.strokeStyle = matchT > GAS_START ? 'rgba(134,239,172,.95)' : 'rgba(134,239,172,.45)';
+    ctx.lineWidth = 4; ctx.setLineDash(matchT > GAS_START ? [] : [10, 8]);
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function drawGasInfo() {
+    let txt = '', hot = false;
+    if (matchT < GAS_START) { const s = Math.ceil(GAS_START - matchT); txt = '☠ Giftwolke in ' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); hot = s <= 10; }
+    else if (gasProgress() < 1) { txt = '☠ Giftwolke zieht zu – ab in die Mitte!'; hot = true; }
+    else { txt = '☠ Giftwolke am Ziel'; hot = true; }
+    ctx.font = '800 13px system-ui,sans-serif'; ctx.textAlign = 'center';
+    const w = ctx.measureText(txt).width + 28, x = W / 2 - w / 2, y = H - 34;
+    const pulse = hot ? .75 + .25 * Math.sin(performance.now() / 160) : .75;
+    ctx.fillStyle = 'rgba(15,23,42,' + pulse + ')'; rr(ctx, x, y, w, 24, 12); ctx.fill();
+    ctx.fillStyle = hot ? '#86efac' : '#e2e8f0'; ctx.fillText(txt, W / 2, y + 16);
+  }
+  function drawScore() {
+    ctx.font = '800 12px system-ui,sans-serif';
+    fighters.forEach((f, i) => {
+      const x = 8 + i * 196, y = 8;
+      ctx.fillStyle = 'rgba(15,23,42,.75)'; rr(ctx, x, y, 188, 24, 12); ctx.fill();
+      ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(x + 13, y + 12, 6, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.fillText((f.isPlayer ? 'Du' : f.name).slice(0, 16), x + 26, y + 16);
+      ctx.textAlign = 'right'; ctx.fillText(f.kills + '/' + KILLS_TO_WIN, x + 178, y + 16);
+    });
+    ctx.textAlign = 'center';
   }
 
   function draw() {
@@ -1027,38 +1264,25 @@
     }
     ctx.globalAlpha = 1;
 
-    for (const d of dummies) {
-      if (d.hp <= 0) continue;
-      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(d.x, d.y + 16, 18, 6, 0, 0, TAU); ctx.fill();
-      ctx.fillStyle = d.flash > 0 ? '#fff' : '#b45309'; ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, TAU); ctx.fill();
-      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3; ctx.stroke();
-      ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(d.x, d.y, 8, 0, TAU); ctx.fill();
-      ctx.fillStyle = '#7f1d1d'; ctx.fillRect(d.x - 20, d.y - 34, 40, 6);
-      ctx.fillStyle = '#22c55e'; ctx.fillRect(d.x - 20, d.y - 34, 40 * d.hp / d.max, 6);
-    }
-
     for (const b of bears) {
       ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(b.x, b.y + 16, 18, 6, 0, 0, TAU); ctx.fill();
       ctx.fillStyle = '#92400e'; ctx.beginPath(); ctx.arc(b.x, b.y, 17, 0, TAU); ctx.arc(b.x - 11, b.y - 14, 6, 0, TAU); ctx.arc(b.x + 11, b.y - 14, 6, 0, TAU); ctx.fill();
       ctx.fillStyle = '#fde68a'; ctx.beginPath(); ctx.arc(b.x, b.y + 4, 8, 0, TAU); ctx.fill();
       ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(b.x - 5, b.y - 3, 2, 0, TAU); ctx.arc(b.x + 5, b.y - 3, 2, 0, TAU); ctx.fill();
+      ctx.strokeStyle = b.o.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(b.x, b.y + 16, 20, 7, 0, 0, TAU); ctx.stroke();
     }
-
     for (const t of turrets) {
       ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(t.x, t.y + 12, 16, 6, 0, 0, TAU); ctx.fill();
       ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.ang);
       ctx.fillStyle = '#334155'; ctx.fillRect(0, -5, 24, 10); ctx.restore();
       ctx.fillStyle = '#ca8a04'; ctx.beginPath(); ctx.arc(t.x, t.y, 13, 0, TAU); ctx.fill();
-      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.strokeStyle = t.o.color; ctx.lineWidth = 3; ctx.stroke();
     }
 
-    const z = P.jump ? Math.sin(Math.PI * Math.min(1, P.jump.t / P.jump.dur)) * 80 : 0;
-    drawBrawler(ctx, B, P.x, P.y, P.aim, P.recoil, 1, { z });
-    if (P.shield > 0) {
-      ctx.strokeStyle = 'rgba(134,239,172,.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(P.x, P.y, 30 * B.size, 0, TAU); ctx.stroke();
-      ctx.fillStyle = 'rgba(134,239,172,.2)'; ctx.fill();
-    }
+    const alive = fighters.filter(f => f.alive).sort((a, b) => a.y - b.y);
+    for (const f of alive) { drawBody(f); if (!f.isPlayer) drawBars(f); }
     ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0); ctx.globalAlpha = 1;
+    if (P.alive) drawBars(P);
 
     for (const l of lobs) {
       const k = l.t / l.dur, x = l.sx + (l.tx - l.sx) * k, y = l.sy + (l.ty - l.sy) * k - Math.sin(Math.PI * k) * 70;
@@ -1075,21 +1299,28 @@
     for (const f of fx) { ctx.globalAlpha = Math.max(0, f.life / .35); ctx.fillStyle = f.color; ctx.fillRect(f.x - 2, f.y - 2, 4, 4); }
     ctx.globalAlpha = 1;
     ctx.font = '800 16px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3;
-    for (const f of floaters) { ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = typeof f.txt === 'string' ? '#86efac' : '#fde047'; ctx.fillText(f.txt, f.x, f.y); }
+    for (const f of floaters) {
+      ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, f.y);
+      ctx.fillStyle = typeof f.txt === 'string' || f.gas ? '#86efac' : f.bad ? '#fca5a5' : '#fde047'; ctx.fillText(f.txt, f.x, f.y);
+    }
 
     ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 8, 0, TAU); ctx.moveTo(pointer.x - 13, pointer.y); ctx.lineTo(pointer.x + 13, pointer.y);
     ctx.moveTo(pointer.x, pointer.y - 13); ctx.lineTo(pointer.x, pointer.y + 13); ctx.stroke();
 
-    const top = P.y - 42 * B.size - z;
-    ctx.fillStyle = '#1e293b'; ctx.fillRect(P.x - 24, top, 48, 8);
-    ctx.fillStyle = '#22c55e'; ctx.fillRect(P.x - 23, top + 1, 46, 6);
-    ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.fillText(B.name.toUpperCase(), P.x, top - 5);
+    drawGas();
+    drawScore(); drawGasInfo();
+    if (!P.alive && !matchOver) {
+      ctx.fillStyle = 'rgba(15,23,42,.55)'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#fff'; ctx.font = '800 34px system-ui,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('Besiegt!', W / 2, H / 2 - 6);
+      ctx.font = '700 18px system-ui,sans-serif'; ctx.fillText('Neuer Versuch in ' + Math.ceil(RESPAWN - P.dead) + ' …', W / 2, H / 2 + 24);
+    }
   }
 
   showCoins();
-  select(save.selected);
   whereEl.textContent = '· ' + M.name;
+  newMatch(save.selected);
   requestAnimationFrame(frame);
 })();
 </script>

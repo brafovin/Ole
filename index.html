@@ -115,6 +115,7 @@
     { id: 'selten', name: 'Selten', color: '#22c55e', info: '8 Brawler' },
     { id: 'super', name: 'Super Selten', color: '#38bdf8', info: '8 Brawler' },
     { id: 'episch', name: 'Episch', color: '#a855f7', info: '20 Brawler' },
+    { id: 'mythisch', name: 'Mythisch', color: '#ef4444', info: '10 Brawler' },
   ];
 
   const BRAWLERS = [
@@ -376,6 +377,76 @@
       supName:'Druckschild', supText:'5 Sekunden Schild und mehr Tempo.',
       atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:600, life:.45, r:10, color:'#67e8f9' },
       sup:{ type:'shield', time:5 } },
+
+    { id:'mortis', rarity:'mythisch', name:'Mortis', role:'Assassine', hp:4000, speed:215, size:1,
+      look:{ skin:'#d6d3d1', hair:'#0f172a', body:'#111827', accent:'#a78bfa', weapon:'pick', hat:'#1f2937' },
+      atkName:'Schaufelsprung', atkText:'Springt nach vorn und schlägt zu, 700 Schaden.',
+      supName:'Fledermausschwarm', supText:'Riesiger Schlag rundherum, 1200 Schaden.',
+      atk:{ type:'dash', dist:140, range:140, dmg:700 },
+      sup:{ type:'pulse', r:150, range:150, dmg:1200 } },
+
+    { id:'tara', rarity:'mythisch', name:'Tara', role:'Schadensausteilerin', hp:3600, speed:190, size:1,
+      look:{ skin:'#c4a484', hair:'#4c1d95', body:'#6d28d9', accent:'#fde047', weapon:'none', hat:'#4c1d95' },
+      atkName:'Tarotkarten', atkText:'3 durchschlagende Karten im Fächer.',
+      supName:'Schwarzes Loch', supText:'Zieht alle Gegner in weitem Umkreis heran.',
+      atk:{ type:'pellets', n:3, spread:.25, dmg:500, sp:800, life:.4, pierce:true, color:'#c4b5fd' },
+      sup:{ type:'pull', r:280, dmg:900 } },
+
+    { id:'gene', rarity:'mythisch', name:'Gene', role:'Unterstützer', hp:3400, speed:190, size:1,
+      look:{ skin:'#38bdf8', hair:null, body:'#0ea5e9', accent:'#fde047', weapon:'bottle', wc:'#fbbf24' },
+      atkName:'Magische Hand', atkText:'Hand, die weit fliegt und zurückkehrt.',
+      supName:'Zauberlampe', supText:'Reißt Gegner aus riesiger Entfernung heran.',
+      atk:{ type:'boom', range:400, dmg:750, dur:1 },
+      sup:{ type:'pull', r:400, dmg:700 } },
+
+    { id:'max', rarity:'mythisch', name:'Max', role:'Unterstützerin', hp:3200, speed:215, size:.95,
+      look:{ skin:'#e8b48a', hair:'#f43f5e', body:'#0e7490', accent:'#fde047', weapon:'gun', wc:'#0ea5e9', len:24, goggles:true },
+      atkName:'Schnellfeuer', atkText:'5 präzise Kugeln, sehr schnell.',
+      supName:'Turbo-Schub', supText:'5 Sekunden Schild und viel mehr Tempo.',
+      atk:{ type:'pellets', n:5, spread:.06, dmg:280, sp:950, life:.5, color:'#7dd3fc' },
+      sup:{ type:'shield', time:5 } },
+
+    { id:'mrp', rarity:'mythisch', name:'Mr. P', role:'Werfer', hp:4000, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:null, body:'#1e3a8a', accent:'#fde047', weapon:'bottle', wc:'#92400e', hat:'#1e3a8a' },
+      atkName:'Koffer', atkText:'Wirft einen Koffer mit Flächenschaden.',
+      supName:'Page Porter', supText:'Ein Gepäckträger, der 10 Sekunden feuert.',
+      atk:{ type:'lob', range:360, dmg:700, splash:42, time:.5 },
+      sup:{ type:'turret', time:10, dmg:350, every:.6 } },
+
+    { id:'sprout', rarity:'mythisch', name:'Sprout', role:'Kontrolle', hp:3800, speed:190, size:.95,
+      look:{ skin:'#86efac', hair:'#16a34a', body:'#166534', accent:'#fde047', weapon:'tube', wc:'#4d7c0f' },
+      atkName:'Samenbombe', atkText:'Wirft einen Samen, der Dornen wachsen lässt.',
+      supName:'Dornenhecke', supText:'Riesiges Dornenfeld, das lange schadet.',
+      atk:{ type:'lob', range:340, dmg:450, puddle:{ r:30, time:3, tick:130 } },
+      sup:{ type:'lob', range:360, dmg:600, puddle:{ r:100, time:5, tick:180 } } },
+
+    { id:'byron', rarity:'mythisch', name:'Byron', role:'Scharfschütze', hp:3000, speed:190, size:1,
+      look:{ skin:'#e5e7eb', hair:'#0f172a', body:'#365314', accent:'#a3e635', weapon:'gun', wc:'#65a30d', len:30, goggles:true },
+      atkName:'Giftspritze', atkText:'Ein einziger, harter Schuss auf lange Distanz.',
+      supName:'Giftwolke', supText:'Große Giftlache, die lange Schaden macht.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1200, sp:1000, life:.6, color:'#a3e635' },
+      sup:{ type:'lob', range:360, dmg:800, puddle:{ r:75, time:4, tick:220 } } },
+
+    { id:'squeak', rarity:'mythisch', name:'Squeak', role:'Werfer', hp:3200, speed:190, size:.9,
+      look:{ skin:'#93c5fd', hair:null, body:'#2563eb', accent:'#bfdbfe', weapon:'bottle', wc:'#60a5fa', mask:'#3b82f6' },
+      atkName:'Klebebomben', atkText:'3 Klebebomben im Fächer.',
+      supName:'Riesenklecks', supText:'Große Bombe mit Pfütze, die lange schadet.',
+      atk:{ type:'lob', n:3, spread:.25, range:300, dmg:400, splash:44, time:.5 },
+      sup:{ type:'lob', range:340, dmg:700, puddle:{ r:90, time:4, tick:220 } } },
+
+    { id:'gray', rarity:'mythisch', name:'Gray', role:'Assassine', hp:3600, speed:200, size:1,
+      look:{ skin:'#cbd5e1', hair:'#475569', body:'#374151', accent:'#f8fafc', weapon:'gun', wc:'#9ca3af', len:20, hat:'#111827' },
+      atkName:'Zylinder-Salve', atkText:'3 Kugeln im engen Fächer.',
+      supName:'Portal', supText:'Teleportiert sich zum Ziel und löst eine Druckwelle aus.',
+      atk:{ type:'pellets', n:3, spread:.3, dmg:450, sp:700, life:.32 },
+      sup:{ type:'blink', dist:320, r:80, dmg:900 } },
+
+    { id:'buster', rarity:'mythisch', name:'Buster', role:'Tank', hp:5800, speed:190, size:1.2,
+      look:{ skin:'#d19a6a', hair:'#1c1917', body:'#be123c', accent:'#fde047', weapon:'tube', wc:'#334155', ring:true },
+      atkName:'Filmrolle', atkText:'Wirft eine Filmrolle, die zurückkehrt.',
+      supName:'Dreh-Szene', supText:'Dreht sich dreimal und trifft alles rundherum.',
+      atk:{ type:'boom', range:260, dmg:800, dur:.6 },
+      sup:{ type:'spin', r:100, dmg:800, hits:3 } },
   ];
   const byId = Object.fromEntries(BRAWLERS.map(b => [b.id, b]));
   const TAU = Math.PI * 2;
@@ -537,7 +608,7 @@
   const root = document.getElementById('rarities'), menuEl = document.getElementById('menu');
 
   /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
-  const COST = { start: 0, selten: 100, super: 300, episch: 500 };
+  const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000 };
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
   let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id };
@@ -780,6 +851,13 @@
       }
       case 'bear': bears.push({ x: P.x + Math.cos(P.aim) * 40, y: P.y + Math.sin(P.aim) * 40, t: a.time, cd: 0 }); break;
       case 'shield': P.shield = a.time; break;
+      case 'blink': {
+        const dist = Math.min(a.dist, Math.hypot(pointer.x - P.x, pointer.y - P.y));
+        rings.push({ x: P.x, y: P.y, r: 30, t: .3 }); pop(P.x, P.y, '#e2e8f0', 12);
+        P.x = clamp(P.x + Math.cos(P.aim) * dist, 25, W - 25); P.y = clamp(P.y + Math.sin(P.aim) * dist, 25, H - 25);
+        pushOut(P, 18 * B.size); explode(P.x, P.y, a.r, a.dmg, 'sup');
+        break;
+      }
     }
   }
   const blocked = () => P.dash || P.jump;

@@ -37,11 +37,36 @@
   .move{font-size:13px;color:var(--muted);line-height:1.35}
   .move strong{color:var(--yellow)}
   .note{color:var(--muted);font-size:12px;margin:0}
+  .top{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .top h1{margin-right:auto}
+  .coins{background:var(--panel);border-radius:999px;padding:8px 16px;font-weight:800;font-size:18px;white-space:nowrap}
+  .menu-btn{background:#7c3aed;color:#fff;font-weight:800;border-radius:12px;padding:12px 20px}
+  #menu{position:fixed;inset:0;z-index:10;background:rgba(15,23,42,.96);overflow-y:auto;overscroll-behavior:contain}
+  #menu[hidden]{display:none}
+  .menu-in{max-width:960px;margin:0 auto;padding:20px 16px 48px;display:grid;gap:20px}
+  .menu-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;background:rgba(15,23,42,.96);padding:8px 0;z-index:1}
+  .menu-head h2{margin:0 auto 0 0;font-size:clamp(24px,6vw,36px);color:var(--yellow);text-transform:uppercase}
+  .close{background:#475569;color:#fff;font-weight:800;border-radius:12px;padding:10px 16px}
+  .pic{position:relative}
+  .pic .lock{position:absolute;inset:0;display:none;place-items:center;font-size:34px}
+  .brawler.locked .pic canvas{filter:grayscale(1) brightness(.45)}
+  .brawler.locked .pic .lock{display:grid}
+  .brawler.owned{cursor:pointer}
+  .brawler.owned:hover{background:#273449}
+  .cta{white-space:nowrap;font-weight:800;border-radius:10px;padding:10px;width:100%;color:#fff;background:#475569}
+  .cta.pick{background:#16a34a}
+  .cta.cur{background:transparent;border:2px solid var(--c);cursor:default}
+  .cta.buy{background:var(--yellow);color:#422006}
+  .cta:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
 <main>
-  <h1>Brawler</h1>
+  <div class="top">
+    <h1>Brawler</h1>
+    <span class="coins">🪙 <span class="coin-n">0</span></span>
+    <button class="menu-btn" id="open-menu">☰ Menü</button>
+  </div>
 
   <section class="panel">
     <canvas id="arena" width="800" height="500" aria-label="Trainingsarena"></canvas>
@@ -49,13 +74,22 @@
       <span class="who" id="who">Shelly</span>
       <button class="act" id="atk">Angriff</button>
       <button class="act" id="sup">Super</button>
-      <span class="hint">Brawler unten antippen zum Wechseln · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
+      <span class="hint">Besiege Puppen für 🪙 Münzen und schalte im Menü neue Brawler frei · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
     </div>
   </section>
-
-  <div id="rarities" class="rarity"></div>
-  <p class="note">Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
 </main>
+
+<div id="menu" hidden role="dialog" aria-modal="true" aria-label="Brawler-Menü">
+  <div class="menu-in">
+    <div class="menu-head">
+      <h2>Brawler</h2>
+      <span class="coins">🪙 <span class="coin-n">0</span></span>
+      <button class="close" id="close-menu">✕ Schließen</button>
+    </div>
+    <div id="rarities" class="rarity"></div>
+    <p class="note">Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -257,27 +291,83 @@
   /* ---------- Auswahl-Karten ---------- */
   const rangeOf = a => a.range || a.sp * a.life;
   const rangeLabel = r => r < 220 ? 'Kurz' : r < 380 ? 'Mittel' : 'Lang';
-  const root = document.getElementById('rarities');
-  for (const R of RARITIES) {
-    const sec = document.createElement('section'); sec.className = 'rarity';
-    sec.innerHTML = `<h2><i class="dot" style="--c:${R.color}"></i>${R.name}<span>${R.info}</span></h2><div class="grid"></div>`;
-    const grid = sec.querySelector('.grid');
-    for (const B of BRAWLERS.filter(b => b.rarity === R.id)) {
-      const el = document.createElement('button');
-      el.className = 'brawler'; el.dataset.id = B.id; el.style.setProperty('--c', R.color);
-      el.innerHTML = `<canvas width="300" height="120"></canvas>
-        <h3>${B.name}<small>${B.role}</small></h3>
-        <div class="mini"><div>Leben<b>${B.hp}</b></div><div>Tempo<b>${B.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(B.atk))}</b></div></div>
-        <div class="move"><strong>${B.atkName}:</strong> ${B.atkText}</div>
-        <div class="move"><strong>${B.supName}:</strong> ${B.supText}</div>`;
-      const pc = el.querySelector('canvas').getContext('2d');
-      pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 120);
-      drawBrawler(pc, B, 150, 70, 0.35, 0, 2.2);
-      el.addEventListener('click', () => { select(B.id); document.getElementById('arena').scrollIntoView({ behavior: 'smooth', block: 'center' }); });
-      grid.appendChild(el);
+  const root = document.getElementById('rarities'), menuEl = document.getElementById('menu');
+
+  /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
+  const COST = { start: 0, selten: 100, super: 300 };
+  const COIN_PER_KILL = 10;
+  const STORE_KEY = 'brawl-menu';
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly' };
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (s && typeof s === 'object') {
+      const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
+      save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
+        selected: unlocked.has(s.selected) ? s.selected : 'shelly' };
     }
-    root.appendChild(sec);
+  } catch (e) { /* ohne Speicher weiterspielen */ }
+  const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
+  const isOwned = id => save.unlocked.includes(id);
+  let menuOpen = false;
+
+  function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
+  function addCoins(n) { save.coins += n; persist(); showCoins(); if (menuOpen) renderMenu(); }
+
+  function renderMenu() {
+    root.innerHTML = '';
+    for (const R of RARITIES) {
+      const cost = COST[R.id];
+      const sec = document.createElement('section'); sec.className = 'rarity';
+      sec.innerHTML = `<h2><i class="dot" style="--c:${R.color}"></i>${R.name}<span>${R.info}${cost ? ` · ${cost} 🪙 pro Brawler` : ''}</span></h2><div class="grid"></div>`;
+      const grid = sec.querySelector('.grid');
+      for (const b of BRAWLERS.filter(x => x.rarity === R.id)) {
+        const owned = isOwned(b.id), current = b.id === save.selected;
+        const el = document.createElement('div');
+        el.className = 'brawler' + (owned ? ' owned' : ' locked') + (current ? ' sel' : '');
+        el.dataset.id = b.id; el.style.setProperty('--c', R.color);
+        el.innerHTML = `<div class="pic"><canvas width="300" height="120"></canvas><span class="lock">🔒</span></div>
+          <h3>${b.name}<small>${b.role}</small></h3>
+          <div class="mini"><div>Leben<b>${b.hp}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div></div>
+          <div class="move"><strong>${b.atkName}:</strong> ${b.atkText}</div>
+          <div class="move"><strong>${b.supName}:</strong> ${b.supText}</div>
+          <button class="cta"></button>`;
+        const pc = el.querySelector('canvas').getContext('2d');
+        pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 120);
+        drawBrawler(pc, b, 150, 70, 0.35, 0, 2.2);
+        const btn = el.querySelector('.cta');
+        if (!owned) {
+          btn.classList.add('buy'); btn.textContent = `🔓 ${cost} 🪙`; btn.title = 'Freischalten'; btn.disabled = save.coins < cost;
+          btn.addEventListener('click', () => buy(b.id));
+        } else if (current) {
+          btn.classList.add('cur'); btn.textContent = '✓ Gewählt';
+          btn.addEventListener('click', e => { e.stopPropagation(); closeMenu(); });
+        } else {
+          btn.classList.add('pick'); btn.textContent = 'Wählen';
+          btn.addEventListener('click', e => { e.stopPropagation(); choose(b.id); });
+        }
+        if (owned) el.addEventListener('click', () => choose(b.id));
+        grid.appendChild(el);
+      }
+      root.appendChild(sec);
+    }
   }
+  function buy(id) {
+    const cost = COST[byId[id].rarity];
+    if (isOwned(id) || save.coins < cost) return;
+    save.coins -= cost; save.unlocked.push(id); persist(); showCoins(); renderMenu();
+  }
+  function choose(id) {
+    if (!isOwned(id)) return;
+    save.selected = id; persist(); select(id); closeMenu();
+  }
+  function openMenu() {
+    menuOpen = true; for (const k in keys) keys[k] = false; moveTo = null;
+    renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
+  document.getElementById('open-menu').addEventListener('click', openMenu);
+  document.getElementById('close-menu').addEventListener('click', closeMenu);
+  menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
 
   /* ---------- Spiel ---------- */
   const cv = document.getElementById('arena'), ctx = cv.getContext('2d');
@@ -299,7 +389,6 @@
     Object.assign(P, { x: W / 2, y: H / 2, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0 });
     shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = [];
     whoEl.textContent = B.name;
-    document.querySelectorAll('.brawler').forEach(e => e.classList.toggle('sel', e.dataset.id === id));
   }
 
   function pop(x, y, color, n) {
@@ -310,7 +399,10 @@
     d.hp -= dmg; d.flash = .12;
     if (src === 'atk') P.charge = Math.min(1, P.charge + dmg / 5000);
     floaters.push({ x: d.x + rnd(-10, 10), y: d.y - 24, t: .6, txt: Math.round(dmg) });
-    if (d.hp <= 0) { pop(d.x, d.y, '#f97316', 24); d.dead = 0; }
+    if (d.hp <= 0) {
+      pop(d.x, d.y, '#f97316', 24); d.dead = 0;
+      floaters.push({ x: d.x, y: d.y - 44, t: 1, txt: '+' + COIN_PER_KILL + ' 🪙' }); addCoins(COIN_PER_KILL);
+    }
   }
   function explode(x, y, r, dmg, src) {
     rings.push({ x, y, r, t: .3 }); pop(x, y, '#fb923c', 14);
@@ -385,6 +477,7 @@
   function superAttack() { if (!blocked() && P.charge >= 1) { P.charge = 0; use(B.sup, 'sup'); } }
 
   addEventListener('keydown', e => {
+    if (menuOpen) { if (e.key === 'Escape') closeMenu(); return; }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
     if (e.repeat) return;
     keys[e.key.toLowerCase()] = true;
@@ -598,7 +691,8 @@
     ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.fillText(B.name.toUpperCase(), P.x, top - 5);
   }
 
-  select('shelly');
+  showCoins();
+  select(save.selected);
   requestAnimationFrame(frame);
 })();
 </script>

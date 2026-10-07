@@ -98,6 +98,7 @@
     { id: 'start',  name: 'Start',  color: '#94a3b8', info: 'Jeder Spieler beginnt mit diesem Brawler' },
     { id: 'selten', name: 'Selten', color: '#22c55e', info: '8 Brawler' },
     { id: 'super', name: 'Super Selten', color: '#38bdf8', info: '8 Brawler' },
+    { id: 'episch', name: 'Episch', color: '#a855f7', info: '20 Brawler' },
   ];
 
   const BRAWLERS = [
@@ -219,6 +220,146 @@
       supName:'Kopfwurf', supText:'Schleudert seinen Kopf: riesige Explosion.',
       atk:{ type:'lob', n:3, spread:.22, range:300, dmg:450, splash:48, time:.5 },
       sup:{ type:'rocket', sp:450, life:.8, aoe:95, dmg:1500 } },
+
+    { id:'piper', rarity:'episch', name:'Piper', role:'Scharfschützin', hp:3400, speed:190, size:1,
+      look:{ skin:'#f1c9a5', hair:'#fde68a', body:'#be185d', accent:'#fbcfe8', weapon:'gun', wc:'#f9a8d4', len:34, hat:'#f472b6' },
+      atkName:'Präzisionsschuss', atkText:'Ein schneller Schuss auf riesige Entfernung.',
+      supName:'Zuckerbomben', supText:'4 Bomben regnen auf ein Zielgebiet.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:1300, life:.7, color:'#f9a8d4' },
+      sup:{ type:'rain', count:4, area:50, aoe:50, dmg:600 } },
+
+    { id:'pam', rarity:'episch', name:'Pam', role:'Unterstützerin', hp:4800, speed:190, size:1.1,
+      look:{ skin:'#c68642', hair:'#9a3412', body:'#0369a1', accent:'#fde047', weapon:'gun', wc:'#64748b', len:26, hoops:true },
+      atkName:'Schrottsalve', atkText:'Breiter Hagel aus Metallschrott.',
+      supName:'Heilstation', supText:'Eine Station, die 8 Sekunden Schrott feuert.',
+      atk:{ type:'pellets', n:6, spread:.3, dmg:220, sp:700, life:.32 },
+      sup:{ type:'turret', time:8, dmg:250, every:.4 } },
+
+    { id:'frank', rarity:'episch', name:'Frank', role:'Tank', hp:7000, speed:180, size:1.35,
+      look:{ skin:'#a7f3d0', hair:'#0f172a', body:'#475569', accent:'#22d3ee', weapon:'fists', glove:'#64748b' },
+      atkName:'Hammerschlag', atkText:'Wuchtiger Schlag, trifft hart und kurz.',
+      supName:'Betäubungsschlag', supText:'Gewaltiger Schlag rundherum.',
+      atk:{ type:'pellets', n:3, spread:.5, dmg:900, sp:600, life:.13 },
+      sup:{ type:'pulse', r:130, range:130, dmg:1300 } },
+
+    { id:'bibi', rarity:'episch', name:'Bibi', role:'Tank', hp:5000, speed:205, size:1,
+      look:{ skin:'#e8b48a', hair:'#f472b6', body:'#7c3aed', accent:'#fde047', weapon:'pick', hat:'#ec4899' },
+      atkName:'Baseballschlag', atkText:'Schwingt breit und schleudert Gegner weg.',
+      supName:'Gummiball', supText:'Großer Ball mit starkem Rückstoß.',
+      atk:{ type:'pellets', n:5, spread:.9, dmg:350, sp:600, life:.12, pierce:true, knock:.05 },
+      sup:{ type:'pellets', n:1, spread:0, dmg:900, sp:700, life:.5, r:16, pierce:true, knock:.12, color:'#f472b6' } },
+
+    { id:'bea', rarity:'episch', name:'Bea', role:'Scharfschützin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#fde68a', hair:'#facc15', body:'#ca8a04', accent:'#1c1917', weapon:'gun', wc:'#44403c', len:30, goggles:true },
+      atkName:'Bienenstachel', atkText:'Sehr schneller, harter Schuss.',
+      supName:'Bienenschwarm', supText:'Durchschlagender Super-Stachel mit 2000 Schaden.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:1100, life:.6, color:'#fde047' },
+      sup:{ type:'pellets', n:1, spread:0, dmg:2000, sp:1200, life:.7, r:9, pierce:true, color:'#facc15' } },
+
+    { id:'nani', rarity:'episch', name:'Nani', role:'Schadensausteilerin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#cbd5e1', hair:'#38bdf8', body:'#0e7490', accent:'#e0f2fe', weapon:'gun', wc:'#38bdf8', len:20, antenna:true, goggles:true },
+      atkName:'Peep-Laser', atkText:'Schnelle Mini-Rakete mit kleiner Explosion.',
+      supName:'Peep-Strahl', supText:'Salve aus 9 durchschlagenden Strahlen.',
+      atk:{ type:'rocket', sp:900, life:.6, aoe:32, dmg:900 },
+      sup:{ type:'pellets', n:9, spread:.08, dmg:400, sp:1000, life:.5, pierce:true, color:'#7dd3fc' } },
+
+    { id:'edgar', rarity:'episch', name:'Edgar', role:'Assassine', hp:4400, speed:215, size:1,
+      look:{ skin:'#e5e7eb', hair:'#111827', body:'#1f2937', accent:'#a78bfa', weapon:'fists', glove:'#a78bfa' },
+      atkName:'Schnellschläge', atkText:'Blitzschnelle Fäuste mit hohem Schaden.',
+      supName:'Sprung', supText:'Springt zum Ziel und schlägt zu.',
+      atk:{ type:'pellets', n:2, spread:.2, dmg:550, sp:600, life:.13 },
+      sup:{ type:'slam', dist:300, r:70, dmg:900 } },
+
+    { id:'griff', rarity:'episch', name:'Griff', role:'Schadensausteiler', hp:3600, speed:190, size:1,
+      look:{ skin:'#d19a6a', hair:'#1c1917', body:'#15803d', accent:'#fde047', weapon:'gun', wc:'#ca8a04', len:20, hat:'#365314' },
+      atkName:'Münzregen', atkText:'Fächer aus Münzen.',
+      supName:'Münzexplosion', supText:'Münzen fliegen in alle Richtungen.',
+      atk:{ type:'pellets', n:5, spread:.35, dmg:290, sp:700, life:.3, color:'#fde047' },
+      sup:{ type:'pellets', n:14, spread:2.9, dmg:350, sp:620, life:.38, color:'#fde047' } },
+
+    { id:'grom', rarity:'episch', name:'Grom', role:'Werfer', hp:3400, speed:190, size:1,
+      look:{ skin:'#a3b18a', hair:null, body:'#4d7c0f', accent:'#fef08a', weapon:'tube', wc:'#14532d', hat:'#3f6212' },
+      atkName:'Granatwurf', atkText:'Weitreichende Granate mit Splash.',
+      supName:'Turmgeschoss', supText:'Riesiges Geschoss mit großer Explosion.',
+      atk:{ type:'lob', range:420, dmg:800, splash:50, time:.6 },
+      sup:{ type:'rocket', sp:520, life:.75, aoe:110, dmg:1400 } },
+
+    { id:'bonnie', rarity:'episch', name:'Bonnie', role:'Schadensausteilerin', hp:3200, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#7c2d12', body:'#be123c', accent:'#fde68a', weapon:'tube', wc:'#92400e', hat:'#9f1239' },
+      atkName:'Kanonenschuss', atkText:'Ein harter Schuss geradeaus.',
+      supName:'Rückstoß-Sprung', supText:'Springt zurück ins Getümmel mit Druckwelle.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1100, sp:900, life:.5, r:6, color:'#fb7185' },
+      sup:{ type:'slam', dist:260, r:60, dmg:700 } },
+
+    { id:'gale', rarity:'episch', name:'Gale', role:'Unterstützer', hp:3600, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#e2e8f0', body:'#0284c7', accent:'#f8fafc', weapon:'tube', wc:'#7dd3fc' },
+      atkName:'Schneepuster', atkText:'Drei durchschlagende Schneeböen.',
+      supName:'Schneesturm', supText:'Breiter Sturm mit starkem Rückstoß.',
+      atk:{ type:'pellets', n:3, spread:.12, dmg:380, sp:700, life:.45, pierce:true, color:'#e0f2fe' },
+      sup:{ type:'pellets', n:7, spread:.8, dmg:500, sp:700, life:.5, pierce:true, knock:.08, color:'#e0f2fe' } },
+
+    { id:'colette', rarity:'episch', name:'Colette', role:'Schadensausteilerin', hp:4200, speed:190, size:1,
+      look:{ skin:'#e8b48a', hair:'#1e293b', body:'#0f766e', accent:'#fde047', weapon:'bottle', wc:'#0f766e' },
+      atkName:'Einkaufstasche', atkText:'Wirft die Tasche, die zurückkehrt.',
+      supName:'Kassensturz', supText:'Rast nach vorn und schlägt hart zu.',
+      atk:{ type:'boom', range:330, dmg:650, dur:.6 },
+      sup:{ type:'dash', dist:300, dmg:1000 } },
+
+    { id:'belle', rarity:'episch', name:'Belle', role:'Scharfschützin', hp:3400, speed:190, size:1,
+      look:{ skin:'#c68642', hair:'#fde047', body:'#a16207', accent:'#fef9c3', weapon:'gun', wc:'#facc15', len:30, hat:'#78350f' },
+      atkName:'Blitzschuss', atkText:'Durchschlagender Strahl auf lange Distanz.',
+      supName:'Blitzmarke', supText:'4 Blitze schlagen im Zielgebiet ein.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:800, sp:1000, life:.6, pierce:true, color:'#fde047' },
+      sup:{ type:'rain', count:4, area:100, aoe:60, dmg:600 } },
+
+    { id:'ash', rarity:'episch', name:'Ash', role:'Tank', hp:5800, speed:195, size:1.2,
+      look:{ skin:'#a8a29e', hair:null, body:'#57534e', accent:'#ef4444', weapon:'gun', wc:'#44403c', len:18, mask:'#78716c' },
+      atkName:'Müllschaufel', atkText:'Breiter Schlag auf kurze Distanz.',
+      supName:'Wutanfall', supText:'4 Sekunden Wut: Schild und mehr Tempo.',
+      atk:{ type:'pellets', n:5, spread:.35, dmg:300, sp:700, life:.2 },
+      sup:{ type:'shield', time:4 } },
+
+    { id:'lola', rarity:'episch', name:'Lola', role:'Schadensausteilerin', hp:3800, speed:190, size:1,
+      look:{ skin:'#f1c9a5', hair:'#f97316', body:'#be185d', accent:'#fde047', weapon:'gun', wc:'#ec4899', len:22, hat:'#be185d' },
+      atkName:'Feuerstrahl', atkText:'Vier durchschlagende Feuerzungen.',
+      supName:'Alter Ego', supText:'Ein Klon, der 8 Sekunden feuert.',
+      atk:{ type:'pellets', n:4, spread:.2, dmg:300, sp:700, life:.32, pierce:true, color:'#fb923c' },
+      sup:{ type:'turret', time:8, dmg:300, every:.5 } },
+
+    { id:'sam', rarity:'episch', name:'Sam', role:'Schadensausteiler', hp:5500, speed:195, size:1.15,
+      look:{ skin:'#d19a6a', hair:'#fde047', body:'#0369a1', accent:'#f97316', weapon:'fists', glove:'#94a3b8' },
+      atkName:'Schlagringe', atkText:'Wirft die Fäuste, die zurückkehren.',
+      supName:'Bodenschlag', supText:'Springt vor und löst eine Druckwelle aus.',
+      atk:{ type:'boom', range:220, dmg:500, dur:.55 },
+      sup:{ type:'slam', dist:240, r:70, dmg:1000 } },
+
+    { id:'mandy', rarity:'episch', name:'Mandy', role:'Scharfschützin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#fbcfe8', hair:'#f9a8d4', body:'#ec4899', accent:'#fdf2f8', weapon:'gun', wc:'#f472b6', len:30, hat:'#db2777' },
+      atkName:'Lollipop-Schuss', atkText:'Süßer, schneller Präzisionsschuss.',
+      supName:'Bonbonsturm', supText:'7 durchschlagende Bonbons im Fächer.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:900, sp:1200, life:.65, color:'#f9a8d4' },
+      sup:{ type:'pellets', n:7, spread:.5, dmg:500, sp:900, life:.6, pierce:true, color:'#f9a8d4' } },
+
+    { id:'maisie', rarity:'episch', name:'Maisie', role:'Werferin', hp:3200, speed:190, size:.95,
+      look:{ skin:'#e8b48a', hair:'#7c2d12', body:'#4338ca', accent:'#fde047', weapon:'tube', wc:'#6366f1', goggles:true },
+      atkName:'Kanonenkugel', atkText:'Mörserschuss auf große Entfernung.',
+      supName:'Superbombe', supText:'Gewaltige Explosion am Zielpunkt.',
+      atk:{ type:'lob', range:400, dmg:800, splash:44, time:.55 },
+      sup:{ type:'lob', range:400, dmg:1600, splash:110, time:.7 } },
+
+    { id:'rt', rarity:'episch', name:'R-T', role:'Schadensausteiler', hp:3200, speed:190, size:1,
+      look:{ skin:'#94a3b8', hair:null, body:'#475569', accent:'#22d3ee', weapon:'gun', wc:'#22d3ee', len:22, antenna:true, hollow:true },
+      atkName:'Doppelstrahl', atkText:'Zwei durchschlagende Strahlen.',
+      supName:'Teilung', supText:'Dreht sich zweimal und trifft rundherum.',
+      atk:{ type:'pellets', n:2, spread:.1, dmg:450, sp:800, life:.5, pierce:true, color:'#67e8f9' },
+      sup:{ type:'spin', r:90, dmg:600, hits:2 } },
+
+    { id:'hank', rarity:'episch', name:'Hank', role:'Tank', hp:5600, speed:190, size:1.2,
+      look:{ skin:'#fda4af', hair:null, body:'#0891b2', accent:'#fde047', weapon:'gun', wc:'#94a3b8', len:20, ring:true },
+      atkName:'Wasserstrahl', atkText:'Dicker, harter Strahl.',
+      supName:'Druckschild', supText:'5 Sekunden Schild und mehr Tempo.',
+      atk:{ type:'pellets', n:1, spread:0, dmg:1000, sp:600, life:.45, r:10, color:'#67e8f9' },
+      sup:{ type:'shield', time:5 } },
   ];
   const byId = Object.fromEntries(BRAWLERS.map(b => [b.id, b]));
   const TAU = Math.PI * 2;
@@ -294,7 +435,7 @@
   const root = document.getElementById('rarities'), menuEl = document.getElementById('menu');
 
   /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
-  const COST = { start: 0, selten: 100, super: 300 };
+  const COST = { start: 0, selten: 100, super: 300, episch: 500 };
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
   let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly' };

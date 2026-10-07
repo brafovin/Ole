@@ -3,13 +3,258 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ole</title>
+<title>Shelly – Brawler</title>
 <style>
-  body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#f8fafc}
-  main{text-align:center;padding:32px}
-  h1{font-size:clamp(28px,6vw,56px);margin:0 0 12px}
-  p{opacity:.7;margin:0}
+  :root{--bg:#0f172a;--panel:#1e293b;--text:#f8fafc;--muted:#94a3b8;--purple:#a855f7;--yellow:#facc15;--red:#ef4444;--green:#22c55e}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;font-family:-apple-system,system-ui,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+  main{max-width:880px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:20px}
+  header{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:clamp(32px,8vw,56px);margin:0;letter-spacing:.02em;text-transform:uppercase;color:var(--yellow);text-shadow:0 3px 0 #92400e}
+  .tag{background:var(--purple);color:#fff;padding:4px 12px;border-radius:999px;font-weight:700;font-size:13px}
+  .card{background:var(--panel);border-radius:16px;padding:20px}
+  .card p{margin:0 0 16px;color:var(--muted);line-height:1.5}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .stat{background:#0f172a;border-radius:12px;padding:12px 14px}
+  .stat b{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  .stat span{font-size:22px;font-weight:800}
+  .moves{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+  .move h3{margin:0 0 4px;font-size:16px}
+  .move h3 i{font-style:normal;color:var(--yellow)}
+  .move p{margin:0;font-size:14px}
+  #arena{width:100%;aspect-ratio:8/5;display:block;border-radius:16px;background:#14532d;touch-action:none;cursor:crosshair}
+  .bar{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+  button{font:inherit;font-weight:800;border:0;border-radius:12px;padding:12px 20px;color:#fff;cursor:pointer;touch-action:manipulation}
+  #atk{background:var(--red)}
+  #sup{background:#475569;position:relative;overflow:hidden}
+  #sup.ready{background:var(--yellow);color:#422006}
+  button:active{transform:translateY(1px)}
+  .hint{color:var(--muted);font-size:13px;margin-left:auto}
 </style>
 </head>
-<body><main><h1>Ole</h1><p>Diese Seite wurde automatisch angelegt.</p></main></body>
+<body>
+<main>
+  <header>
+    <h1>Shelly</h1>
+    <span class="tag">Start-Brawler</span>
+    <span class="tag" style="background:#475569">Schadensausteiler</span>
+  </header>
+
+  <section class="card">
+    <p>Shelly ist eine Nahkampf-Spezialistin mit einer Schrotflinte. Je näher der Gegner, desto mehr Kugeln treffen – und ihr Super sprengt ganze Gruppen auseinander.</p>
+    <div class="stats">
+      <div class="stat"><b>Leben</b><span>3600</span></div>
+      <div class="stat"><b>Geschwindigkeit</b><span>Normal</span></div>
+      <div class="stat"><b>Munition</b><span>3 Schuss</span></div>
+      <div class="stat"><b>Reichweite</b><span>Kurz</span></div>
+    </div>
+    <div class="moves">
+      <div class="move stat"><h3>Schrotflinte <i>Angriff</i></h3><p>5 Schrotkugeln im Fächer – 300 Schaden pro Kugel.</p></div>
+      <div class="move stat"><h3>Superschuss <i>Super</i></h3><p>9 Kugeln mit größerer Reichweite und Rückstoß. Lädt durch Treffer auf.</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <canvas id="arena" width="800" height="500" aria-label="Trainingsarena"></canvas>
+    <div class="bar">
+      <button id="atk">Angriff</button>
+      <button id="sup">Super</button>
+      <span class="hint">Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Schießen: Klick / Leertaste · Super: E</span>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const cv = document.getElementById('arena'), ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup');
+
+  const P = { x: W / 2, y: H / 2, r: 18, speed: 190, ammo: 3, charge: 0, aim: 0, recoil: 0 };
+  let dummies = [], pellets = [], fx = [], floaters = [];
+  const keys = {};
+  let pointer = { x: W / 2 + 100, y: H / 2 }, moveTo = null;
+
+  function spawnDummy() {
+    dummies.push({ x: 80 + Math.random() * (W - 160), y: 70 + Math.random() * (H - 140), r: 20,
+      hp: 3000, max: 3000, flash: 0, vx: 0, vy: 0, t: 0 });
+  }
+  for (let i = 0; i < 4; i++) spawnDummy();
+
+  function fire(superShot) {
+    const n = superShot ? 9 : 5, spread = superShot ? 0.5 : 0.28;
+    for (let i = 0; i < n; i++) {
+      const a = P.aim + (n === 1 ? 0 : (i / (n - 1) - 0.5) * 2 * spread) + (Math.random() - 0.5) * 0.05;
+      const sp = 720 + Math.random() * 60;
+      pellets.push({ x: P.x + Math.cos(P.aim) * 28, y: P.y + Math.sin(P.aim) * 28,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: superShot ? 0.42 : 0.27,
+        dmg: superShot ? 320 : 300, sup: superShot });
+    }
+    P.recoil = superShot ? 14 : 8;
+  }
+  function attack() { if (P.ammo >= 1) { P.ammo -= 1; fire(false); } }
+  function superAttack() { if (P.charge >= 1) { P.charge = 0; fire(true); } }
+
+  addEventListener('keydown', e => {
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
+    if (e.repeat) return;
+    keys[e.key.toLowerCase()] = true;
+    if (e.key === ' ') attack();
+    if (e.key.toLowerCase() === 'e') superAttack();
+  });
+  addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+  function toCanvas(e) {
+    const b = cv.getBoundingClientRect();
+    return { x: (e.clientX - b.left) * W / b.width, y: (e.clientY - b.top) * H / b.height };
+  }
+  cv.addEventListener('pointermove', e => {
+    pointer = toCanvas(e);
+    if (e.pointerType === 'touch' && moveTo) moveTo = pointer;
+  });
+  cv.addEventListener('pointerdown', e => {
+    pointer = toCanvas(e);
+    if (e.pointerType === 'touch') { moveTo = pointer; cv.setPointerCapture(e.pointerId); }
+    else attack();
+  });
+  cv.addEventListener('pointerup', () => { moveTo = null; });
+  cv.addEventListener('pointercancel', () => { moveTo = null; });
+  atkBtn.addEventListener('click', attack);
+  supBtn.addEventListener('click', superAttack);
+
+  function pop(x, y, color, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * 6.283, s = 40 + Math.random() * 120;
+      fx.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0.35, color });
+    }
+  }
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    update(dt); draw();
+    requestAnimationFrame(frame);
+  }
+
+  function update(dt) {
+    // Bewegung
+    let dx = (keys['d'] || keys['arrowright'] ? 1 : 0) - (keys['a'] || keys['arrowleft'] ? 1 : 0);
+    let dy = (keys['s'] || keys['arrowdown'] ? 1 : 0) - (keys['w'] || keys['arrowup'] ? 1 : 0);
+    if (moveTo) {
+      const tx = moveTo.x - P.x, ty = moveTo.y - P.y, d = Math.hypot(tx, ty);
+      if (d > 12) { dx = tx / d; dy = ty / d; }
+    }
+    const len = Math.hypot(dx, dy);
+    if (len) { P.x += dx / len * P.speed * dt; P.y += dy / len * P.speed * dt; }
+    P.x = Math.max(P.r, Math.min(W - P.r, P.x));
+    P.y = Math.max(P.r, Math.min(H - P.r, P.y));
+    P.aim = Math.atan2(pointer.y - P.y, pointer.x - P.x);
+    P.ammo = Math.min(3, P.ammo + dt / 1.3);
+    P.recoil = Math.max(0, P.recoil - dt * 60);
+
+    // Kugeln
+    for (const p of pellets) {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt;
+      for (const d of dummies) {
+        if (d.hp > 0 && Math.hypot(p.x - d.x, p.y - d.y) < d.r + 3) {
+          d.hp -= p.dmg; d.flash = 0.12; p.life = 0;
+          if (p.sup) { d.x += p.vx * 0.03; d.y += p.vy * 0.03; }
+          else P.charge = Math.min(1, P.charge + 0.045);
+          pop(p.x, p.y, '#fde047', 3);
+          floaters.push({ x: d.x + (Math.random() - 0.5) * 20, y: d.y - 24, t: 0.6, txt: p.dmg });
+          if (d.hp <= 0) { pop(d.x, d.y, '#f97316', 24); d.dead = 0; }
+          break;
+        }
+      }
+    }
+    pellets = pellets.filter(p => p.life > 0 && p.x > -20 && p.x < W + 20 && p.y > -20 && p.y < H + 20);
+
+    // Dummies
+    for (const d of dummies) {
+      if (d.hp <= 0) { d.dead += dt; if (d.dead > 1.5) { d.hp = d.max; d.x = 80 + Math.random() * (W - 160); d.y = 70 + Math.random() * (H - 140); } continue; }
+      d.t -= dt; if (d.t <= 0) { d.t = 1 + Math.random() * 2; const a = Math.random() * 6.283; d.vx = Math.cos(a) * 35; d.vy = Math.sin(a) * 35; }
+      d.x = Math.max(d.r, Math.min(W - d.r, d.x + d.vx * dt));
+      d.y = Math.max(d.r, Math.min(H - d.r, d.y + d.vy * dt));
+      d.flash = Math.max(0, d.flash - dt);
+    }
+    for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.life -= dt; }
+    fx = fx.filter(f => f.life > 0);
+    for (const f of floaters) { f.y -= 40 * dt; f.t -= dt; }
+    floaters = floaters.filter(f => f.t > 0);
+
+    supBtn.classList.toggle('ready', P.charge >= 1);
+    supBtn.textContent = P.charge >= 1 ? 'SUPER!' : 'Super ' + Math.floor(P.charge * 100) + '%';
+    atkBtn.textContent = 'Angriff ' + '●'.repeat(Math.floor(P.ammo)) + '○'.repeat(3 - Math.floor(P.ammo));
+  }
+
+  function drawShelly() {
+    ctx.save(); ctx.translate(P.x, P.y);
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 18, 18, 7, 0, 0, 6.283); ctx.fill();
+    // Schrotflinte
+    ctx.save(); ctx.rotate(P.aim);
+    const back = -P.recoil;
+    ctx.fillStyle = '#78350f'; ctx.fillRect(2 + back, -4, 14, 8);
+    ctx.fillStyle = '#334155'; ctx.fillRect(14 + back, -3.5, 24, 7);
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(34 + back, -3.5, 5, 7);
+    ctx.restore();
+    // Körper (lila Weste)
+    ctx.fillStyle = '#7e22ce'; ctx.beginPath(); ctx.arc(0, 4, 16, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#facc15'; ctx.fillRect(-3, -4, 6, 16);
+    // Kopf
+    ctx.fillStyle = '#e8b48a'; ctx.beginPath(); ctx.arc(0, -8, 11, 0, 6.283); ctx.fill();
+    // Lila Haare
+    ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(0, -11, 12, Math.PI, 0); ctx.fill();
+    ctx.beginPath(); ctx.arc(-11, -6, 4.5, 0, 6.283); ctx.arc(11, -6, 4.5, 0, 6.283); ctx.fill();
+    // Augen schauen zum Ziel
+    const ex = Math.cos(P.aim) * 2, ey = Math.sin(P.aim) * 1.5;
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-4, -8, 3, 0, 6.283); ctx.arc(4, -8, 3, 0, 6.283); ctx.fill();
+    ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(-4 + ex, -8 + ey, 1.5, 0, 6.283); ctx.arc(4 + ex, -8 + ey, 1.5, 0, 6.283); ctx.fill();
+    ctx.restore();
+  }
+
+  function draw() {
+    // Boden
+    ctx.fillStyle = '#166534'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(0,0,0,.08)';
+    for (let x = 0; x < W; x += 80) for (let y = 0; y < H; y += 80) if ((x + y) / 80 % 2 === 0) ctx.fillRect(x, y, 80, 80);
+
+    // Dummies
+    for (const d of dummies) {
+      if (d.hp <= 0) continue;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(d.x, d.y + 16, 18, 6, 0, 0, 6.283); ctx.fill();
+      ctx.fillStyle = d.flash > 0 ? '#fff' : '#b45309';
+      ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, 6.283); ctx.fill();
+      ctx.strokeStyle = '#78350f'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(d.x, d.y, 8, 0, 6.283); ctx.fill();
+      ctx.fillStyle = '#7f1d1d'; ctx.fillRect(d.x - 20, d.y - 34, 40, 6);
+      ctx.fillStyle = '#22c55e'; ctx.fillRect(d.x - 20, d.y - 34, 40 * d.hp / d.max, 6);
+    }
+
+    drawShelly();
+
+    // Kugeln & Effekte
+    for (const p of pellets) {
+      ctx.fillStyle = p.sup ? '#fde047' : '#fb923c';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.sup ? 4.5 : 3.5, 0, 6.283); ctx.fill();
+    }
+    for (const f of fx) { ctx.globalAlpha = Math.max(0, f.life / 0.35); ctx.fillStyle = f.color; ctx.fillRect(f.x - 2, f.y - 2, 4, 4); }
+    ctx.globalAlpha = 1;
+    ctx.font = '800 16px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3;
+    for (const f of floaters) { ctx.strokeStyle = '#000'; ctx.strokeText(f.txt, f.x, f.y); ctx.fillStyle = '#fde047'; ctx.fillText(f.txt, f.x, f.y); }
+
+    // Zielkreuz
+    ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 8, 0, 6.283); ctx.moveTo(pointer.x - 13, pointer.y); ctx.lineTo(pointer.x + 13, pointer.y);
+    ctx.moveTo(pointer.x, pointer.y - 13); ctx.lineTo(pointer.x, pointer.y + 13); ctx.stroke();
+
+    // Lebensbalken Shelly
+    ctx.fillStyle = '#1e293b'; ctx.fillRect(P.x - 24, P.y - 40, 48, 8);
+    ctx.fillStyle = '#22c55e'; ctx.fillRect(P.x - 23, P.y - 39, 46, 6);
+    ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.fillText('SHELLY', P.x, P.y - 45);
+  }
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
 </html>

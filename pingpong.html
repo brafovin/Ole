@@ -297,11 +297,11 @@
   });
   const box = (w, h, d, mat, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; return m; };
 
-  // Echter Tischtennisschläger: runder Holzschläger mit Noppengummi (vorne/hinten verschiedene Farbe), Griff, Faust und Arm.
+  // Echter Tischtennisschläger: runder Holzschläger mit Noppengummi (vorne/hinten verschiedene Farbe) und Griff – ohne Hand.
   // Das Modell schaut mit der "Vorderseite" (+z) zum Gegner; Rückseite = -z.
   function buildPaddle(frontCol, frontDot, backCol, backDot, sleeve) {
     const g = new THREE.Group(), R = .52, std = (c, r = .7) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
-    const wood = std(0xd9a066, .75), skin = std(0xf1c27d, .8);
+    const wood = std(0xd9a066, .75);
     const add = (m, x, y, z) => { m.position.set(x, y, z); m.castShadow = true; g.add(m); return m; };
     const disc = (r, th, mats, z) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, th, 56), mats); m.rotation.x = Math.PI / 2; return add(m, 0, 0, z); };
     disc(R, .07, wood, 0);
@@ -311,13 +311,6 @@
     const neck = new THREE.Mesh(new THREE.CylinderGeometry(.17, .075, .2, 16), wood); add(neck, 0, -R - .02, 0);
     const handle = new THREE.Mesh(new THREE.CylinderGeometry(.062, .08, .56, 20), wood); add(handle, 0, -R - .36, 0);
     const band = new THREE.Mesh(new THREE.CylinderGeometry(.083, .083, .05, 20), std(0x7c4a21, .6)); add(band, 0, -R - .66, 0);
-    const fist = new THREE.Mesh(new THREE.SphereGeometry(.15, 20, 14), skin); fist.scale.set(1, 1.25, 1.05); add(fist, 0, -R - .4, -.02);
-    const thumb = new THREE.Mesh(new THREE.SphereGeometry(.06, 12, 10), skin); add(thumb, .11, -R - .27, .04);
-    const dir = new THREE.Vector3(0, -.5, -.86).normalize(), arm = new THREE.Group();
-    const forearm = new THREE.Mesh(new THREE.CylinderGeometry(.11, .1, .6, 16), skin); forearm.position.y = -.3;
-    const sl = new THREE.Mesh(new THREE.CylinderGeometry(.16, .13, 2.2, 18), std(sleeve, .9)); sl.position.y = -1.6;
-    arm.add(forearm, sl); arm.position.set(0, -R - .42, -.04); arm.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), dir);
-    arm.traverse(o => { o.castShadow = true; }); g.add(arm);
     g.scale.setScalar(.66);                                   // kleiner Schläger: man sieht, wohin der Ball fliegt
     return g;
   }

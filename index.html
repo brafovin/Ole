@@ -102,8 +102,28 @@
   .upg:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
   .top[hidden]{display:none}
 
+  /* ---- Vollbild-Layout: alles füllt das Fenster ---- */
+  html,body{height:100%;overflow:hidden}
+  body{min-height:0}
+  main{max-width:none;margin:0;padding:0;gap:0;display:block;height:100vh;height:100dvh}
+  #game{border-radius:0;padding:0;height:100vh;height:100dvh;display:flex;flex-direction:column;background:#0b1020}
+  #game[hidden]{display:none}
+  .stage{flex:1;min-height:0;display:grid;place-items:center;background:#0b1020}
+  .arena-wrap{position:relative;width:min(100vw,calc((100vh - var(--bar,60px)) * 1.6));width:min(100vw,calc((100dvh - var(--bar,60px)) * 1.6))}
+  #arena{width:100%;height:auto;border-radius:0}
+  #result{border-radius:0}
+  #game .bar{margin:0;padding:8px 12px;background:var(--panel);justify-content:center;gap:8px}
+  #game .bar .act{padding:9px 14px}
+  #game .bar .coins{font-size:15px;padding:6px 12px}
+  .home{border-radius:0;height:100vh;height:100dvh}
+  .home-tr{display:flex;align-items:center;gap:10px}
+  .fs-btn{background:rgba(15,23,42,.6);border:2px solid rgba(255,255,255,.25);border-radius:12px;color:#fff;font-weight:900;font-size:18px;padding:6px 12px}
+  .fs-btn[hidden]{display:none}
+  .home-hero{width:min(64vh,78vw,620px)}
+  @media (max-width:640px){ .home{height:100vh;height:100dvh;min-height:640px} #game .bar .who,#game .bar .where{display:none} }
+
   /* ---- Startbildschirm im Brawl-Stars-Stil ---- */
-  .home{position:relative;border-radius:22px;overflow:hidden;color:#fff;isolation:isolate;height:clamp(560px,68vw,660px);
+  .home{position:relative;border-radius:22px;overflow:hidden;color:#fff;isolation:isolate;
     background:
       radial-gradient(ellipse 52% 30% at 50% 84%,rgba(251,191,36,.38),transparent 72%),
       radial-gradient(ellipse 90% 70% at 50% 0%,#7c3aed 0%,#4c1d95 45%,#1e1b4b 100%)}
@@ -140,7 +160,6 @@
     -webkit-text-stroke:5px #000;paint-order:stroke fill;text-shadow:0 4px 0 #000;font-style:italic;font-weight:900;letter-spacing:.03em}
   .start-bs:hover{filter:brightness(1.07)}
   @media (max-width:640px){
-    .home{height:740px}
     .home-hero{bottom:auto;top:134px;width:min(270px,72vw)}
     .home-left{bottom:auto;top:84px}
     .home-right{left:14px;right:14px;justify-items:stretch}
@@ -152,19 +171,13 @@
 </head>
 <body>
 <main>
-  <div class="top" id="topbar" hidden>
-    <h1>Brawler</h1>
-    <span class="coins">🪙 <span class="coin-n">0</span></span>
-    <button class="menu-btn" id="open-menu">☰ Brawler</button>
-  </div>
-
   <section class="home" id="lobby" aria-label="Startbildschirm">
     <div class="home-top">
       <div class="profile">
         <canvas id="avatar" width="64" height="64" aria-hidden="true"></canvas>
         <div><b>Spieler</b><span>🏆 <span id="trophies">0</span></span></div>
       </div>
-      <span class="coins">🪙 <span class="coin-n">0</span></span>
+      <div class="home-tr"><span class="coins">🪙 <span class="coin-n">0</span></span><button class="fs-btn fs-home" title="Vollbild (F)">⛶</button></div>
     </div>
 
     <div class="home-hero">
@@ -189,16 +202,20 @@
 
   <section class="panel" id="game" hidden>
     <div class="stage">
-      <canvas id="arena" width="800" height="500" aria-label="Arena"></canvas>
-      <div id="result" hidden></div>
+      <div class="arena-wrap">
+        <canvas id="arena" width="800" height="500" aria-label="Arena"></canvas>
+        <div id="result" hidden></div>
+      </div>
     </div>
-    <div class="bar">
+    <div class="bar" id="gamebar">
       <span class="who" id="who">Shelly</span>
       <span class="where" id="where"></span>
       <button class="act" id="atk">Angriff</button>
       <button class="act" id="sup">Super</button>
+      <span class="coins">🪙 <span class="coin-n">0</span></span>
+      <button class="act" id="open-menu" style="background:#7c3aed">☰ Brawler</button>
+      <button class="act fs-btn" style="background:#334155" title="Vollbild (F)">⛶</button>
       <button class="act" id="home" style="background:#475569">⌂ Hauptmenü</button>
-      <span class="hint">Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
     </div>
   </section>
 </main>
@@ -744,10 +761,12 @@
       }
     }
   }
-  function layers(m) {
-    if (m._l) return m._l;
-    const mk = () => { const k = document.createElement('canvas'); k.width = 800; k.height = 500; return k; };
+  function layers(m, k = 1) { // k = Auflösungsfaktor, pro Faktor einmal vorgerendert
+    m._l = m._l || {};
+    if (m._l[k]) return m._l[k];
+    const mk = () => { const cv2 = document.createElement('canvas'); cv2.width = 800 * k; cv2.height = 500 * k; return cv2; };
     const base = mk(), over = mk(), c = base.getContext('2d'), o = over.getContext('2d');
+    c.scale(k, k); o.scale(k, k);
     for (let gx = 0; gx < 16; gx++) for (let gy = 0; gy < 10; gy++) { c.fillStyle = m.g[(gx + gy) % 2]; c.fillRect(gx * T, gy * T, T, T); }
     let seed = 7; const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
     c.fillStyle = 'rgba(0,0,0,.07)'; for (let i = 0; i < 160; i++) c.fillRect(rand() * 800, rand() * 500, 3, 3);
@@ -769,7 +788,7 @@
       }
       o.fillStyle = 'rgba(255,255,255,.14)'; o.beginPath(); o.arc(cx - 3, cy - 10, 9, 0, TAU); o.fill();
     }
-    return (m._l = { base, over });
+    return (m._l[k] = { base, over });
   }
 
   /* ---------- Auswahl-Karten ---------- */
@@ -913,9 +932,19 @@
     renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
   }
   function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
+  // Vollbild: Start geht automatisch hinein, ⛶ und Taste F schalten um
+  const fsOk = !!document.fullscreenEnabled;
+  function enterFullscreen() { try { if (fsOk && !document.fullscreenElement) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); } catch (e) { /* nicht erlaubt */ } }
+  function toggleFullscreen() { try { if (document.fullscreenElement) document.exitFullscreen(); else enterFullscreen(); } catch (e) { /* ignorieren */ } }
+  document.querySelectorAll('.fs-btn').forEach(b => { b.hidden = !fsOk; b.addEventListener('click', toggleFullscreen); });
+  // Höhe der Steuerleiste an die Arena-Größe weitergeben
+  const barEl = document.getElementById('gamebar');
+  function fitArena() { document.documentElement.style.setProperty('--bar', barEl.offsetHeight + 'px'); }
+  addEventListener('resize', fitArena);
+  if (window.ResizeObserver) new ResizeObserver(fitArena).observe(barEl);
   document.getElementById('open-menu').addEventListener('click', () => openMenu('brawler'));
   document.getElementById('brawler-btn').addEventListener('click', () => openMenu('brawler'));
-  document.getElementById('start-btn').addEventListener('click', () => openMenu('map'));
+  document.getElementById('start-btn').addEventListener('click', () => { enterFullscreen(); openMenu('map'); });
   document.getElementById('upgrade-btn').addEventListener('click', () => upgrade(save.selected));
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
@@ -925,7 +954,7 @@
   const W = cv.width, H = cv.height;
   const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup'), whoEl = document.getElementById('who');
   const whereEl = document.getElementById('where'), resultEl = document.getElementById('result');
-  const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game'), topEl = document.getElementById('topbar');
+  const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game');
   let screen = 'lobby'; // 'lobby' = Hauptmenü, 'game' = laufendes Match
 
   const LIVES = 3, RESPAWN = 3, WIN_COINS = 100;
@@ -1037,13 +1066,12 @@
   function startGame(mapId) {
     M = MAPS.find(m => m.id === mapId) || MAPS[0];
     save.map = M.id; persist();
-    screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false; topEl.hidden = false;
+    screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false; fitArena();
     whereEl.textContent = '· ' + (save.mode === 'duo' ? 'Duo · ' : '') + M.name;
     newMatch(save.selected);
-    gameEl.scrollIntoView({ block: 'center' });
   }
   function goHome() {
-    screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false; topEl.hidden = true;
+    screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false;
     for (const k in keys) keys[k] = false; moveTo = null;
     renderLobby();
   }
@@ -1228,6 +1256,7 @@
     keys[e.key.toLowerCase()] = true;
     if (e.key === ' ') attack();
     if (e.key.toLowerCase() === 'e') superAttack();
+    if (e.key.toLowerCase() === 'f') toggleFullscreen();
   });
   addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
   const toCanvas = e => { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left) * W / b.width, y: (e.clientY - b.top) * H / b.height }; };
@@ -1562,9 +1591,20 @@
     ctx.textAlign = 'center';
   }
 
+  // Zeichenauflösung wächst mit der Anzeigegröße (Vollbild bleibt scharf); alle Koordinaten bleiben 800 x 500
+  let resK = 1;
+  function syncRes() {
+    const r = cv.getBoundingClientRect();
+    const k = Math.min(2.5, Math.max(1, Math.round(r.width * (window.devicePixelRatio || 1) / W * 2) / 2));
+    if (k !== resK) { resK = k; cv.width = W * k; cv.height = H * k; }
+    return k;
+  }
+
   function draw() {
-    const L = layers(M);
-    ctx.drawImage(L.base, 0, 0);
+    const K = syncRes();
+    ctx.setTransform(K, 0, 0, K, 0, 0);
+    const L = layers(M, K);
+    ctx.drawImage(L.base, 0, 0, W, H);
 
     for (const p of puddles) {
       ctx.globalAlpha = .35 + .25 * (p.t / p.max); ctx.fillStyle = p.color || '#84cc16';
@@ -1592,7 +1632,7 @@
       if (f.invis > 0 && !f.isPlayer && Math.hypot(f.x - P.x, f.y - P.y) > 110) continue; // getarnte Gegner sind unsichtbar
       drawBody(f); if (!f.isPlayer) drawBars(f);
     }
-    ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0); ctx.globalAlpha = 1;
+    ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0, W, H); ctx.globalAlpha = 1;
     if (P.alive) drawBars(P);
 
     for (const l of lobs) {

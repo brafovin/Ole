@@ -29,7 +29,7 @@
   .brawler{background:var(--panel);border-radius:16px;padding:14px;text-align:left;display:grid;gap:8px;border:3px solid transparent;border-top:6px solid var(--c)}
   .brawler:hover{background:#273449}
   .brawler.sel{border-color:var(--c);border-top-width:6px}
-  .brawler canvas{width:100%;height:96px;background:#14532d;border-radius:10px}
+  .brawler canvas{width:100%;height:auto;aspect-ratio:300/130;background:#14532d;border-radius:10px}
   .brawler h3{margin:0;font-size:20px;display:flex;justify-content:space-between;align-items:baseline}
   .brawler h3 small{font-size:12px;color:var(--muted);font-weight:600}
   .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -138,7 +138,7 @@
   .profile span{font-weight:800;color:#fde047;font-size:15px}
   .home .coins{background:rgba(15,23,42,.6);border:2px solid rgba(255,255,255,.25);font-size:20px}
   .home-hero{position:absolute;left:50%;bottom:11%;transform:translateX(-50%);display:grid;justify-items:center;z-index:1;width:min(440px,78vw)}
-  #hero{width:100%;height:auto;aspect-ratio:7/6;display:block;cursor:pointer;filter:drop-shadow(0 14px 14px rgba(0,0,0,.4))}
+  #hero{width:100%;height:auto;aspect-ratio:15/14;display:block;cursor:pointer;filter:drop-shadow(0 14px 14px rgba(0,0,0,.4))}
   .nameplate{margin-top:-14px;text-align:center;display:grid;justify-items:center;gap:6px}
   .nameplate h2{margin:0;font-size:clamp(28px,5.4vw,44px)}
   .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
@@ -181,7 +181,7 @@
     </div>
 
     <div class="home-hero">
-      <canvas id="hero" width="560" height="480" aria-label="Dein Brawler – tippen für Brawler-Auswahl"></canvas>
+      <canvas id="hero" width="600" height="560" aria-label="Dein Brawler – tippen für Brawler-Auswahl"></canvas>
       <div class="nameplate">
         <h2 class="stroke" id="hero-name">Shelly</h2>
         <div class="badges"><span class="badge" id="hero-lvl">⚡ Power 1</span><span class="badge" id="hero-trophy">🏆 0</span></div>
@@ -666,68 +666,120 @@
   for (const m of MAPS) { m.walls = m.walls || []; m.water = m.water || []; m.bushes = m.bushes || []; m.solid = [...m.walls, ...m.water]; }
 
   /* ---------- Zeichnen ---------- */
+  /* ---- Cartoon-Stil: dicke Umrisse, Schattierung, Hände an der Waffe ---- */
+  const OL = '#1b1230';
+  function shade(hex, f) { // f > 0 heller, f < 0 dunkler
+    const n = parseInt(hex.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255, t = f < 0 ? 0 : 255, a = Math.abs(f);
+    return `rgb(${Math.round(r + (t - r) * a)},${Math.round(g + (t - g) * a)},${Math.round(b + (t - b) * a)})`;
+  }
+  function oval(c, x, y, rx, ry, fill, lw = 2.4) {
+    c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, TAU); c.fillStyle = fill; c.fill(); c.lineWidth = lw; c.strokeStyle = OL; c.stroke();
+  }
+  function orect(c, x, y, w, h, r, fill, lw = 2.2) { rr(c, x, y, w, h, r); c.fillStyle = fill; c.fill(); c.lineWidth = lw; c.strokeStyle = OL; c.stroke(); }
+  const hand = (c, x, y, col) => oval(c, x, y, 4.6, 4.4, col, 2.2);
+
   function drawWeapon(c, L, recoil) {
-    const w = L.weapon, back = -recoil;
+    const w = L.weapon, back = -recoil, sk = L.skin;
     if (w === 'gun') {
-      c.fillStyle = '#78350f'; c.fillRect(2 + back, -4, 14, 8);
-      c.fillStyle = L.wc; c.fillRect(14 + back, -3.5, L.len, 7);
-      c.fillStyle = '#1e293b'; c.fillRect(14 + L.len - 4 + back, -3.5, 5, 7);
+      const len = L.len;
+      orect(c, 3 + back, -4.6, 14, 9.2, 3, '#9a6431');
+      orect(c, 14 + back, -4.2, len, 8.4, 3, L.wc);
+      c.fillStyle = 'rgba(255,255,255,.4)'; c.fillRect(17 + back, -3.2, Math.max(2, len - 6), 2);
+      orect(c, 12 + len + back, -5, 7, 10, 2.5, '#1f2937');
+      hand(c, 8 + back, 4.5, sk); hand(c, 16 + len * .5 + back, 3.4, sk);
     } else if (w === 'tube') {
-      c.fillStyle = L.wc; c.fillRect(4 + back, -6, 34, 12);
-      c.fillStyle = '#1e293b'; c.fillRect(36 + back, -7, 5, 14);
+      orect(c, 4 + back, -7, 34, 14, 5, L.wc);
+      c.fillStyle = 'rgba(0,0,0,.22)'; c.fillRect(14 + back, -7, 3, 14); c.fillRect(26 + back, -7, 3, 14);
+      c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(7 + back, -5.5, 28, 2.4);
+      orect(c, 35 + back, -8.5, 7, 17, 3, '#1f2937');
+      hand(c, 11 + back, 6, sk); hand(c, 25 + back, 5.4, sk);
     } else if (w === 'bottle') {
-      c.fillStyle = L.wc; c.fillRect(14, -5, 14, 10); c.fillRect(28, -2, 8, 4);
-      c.fillStyle = '#fef3c7'; c.fillRect(17, -3, 6, 6);
+      orect(c, 12, -6.5, 19, 13, 5, L.wc);
+      c.fillStyle = 'rgba(255,255,255,.55)'; c.fillRect(15, -4, 11, 8);
+      orect(c, 29, -3.2, 9, 6.4, 2, L.wc); orect(c, 37, -2.6, 5, 5.2, 1.5, '#f2d9a6');
+      hand(c, 15, 6, sk); hand(c, 24, 6, sk);
     } else if (w === 'guitar') {
-      c.fillStyle = L.wc; c.beginPath(); c.ellipse(18 + back, 0, 11, 9, 0, 0, TAU); c.fill();
-      c.fillStyle = '#451a03'; c.fillRect(24 + back, -2, 18, 4);
-      c.beginPath(); c.arc(18 + back, 0, 3, 0, TAU); c.fill();
+      oval(c, 18 + back, 0, 12.5, 10.5, L.wc);
+      oval(c, 18 + back, 0, 3.6, 3.6, '#2b1a0c', 1.8);
+      orect(c, 28 + back, -2.7, 19, 5.4, 2, '#5b3a1e');
+      hand(c, 14 + back, 5, sk); hand(c, 33 + back, 3, sk);
+    } else if (w === 'pick') {
+      orect(c, 4 + back, -2.8, 32, 5.6, 2, '#9a6431');
+      c.beginPath(); c.moveTo(32 + back, -13); c.quadraticCurveTo(46 + back, -3, 40 + back, 0); c.quadraticCurveTo(46 + back, 3, 32 + back, 13);
+      c.lineTo(33 + back, 3); c.lineTo(33 + back, -3); c.closePath();
+      c.fillStyle = '#cbd5e1'; c.fill(); c.lineWidth = 2.2; c.strokeStyle = OL; c.stroke();
+      hand(c, 10 + back, 4, sk); hand(c, 22 + back, 3.4, sk);
     } else if (w === 'fists') {
       const f = 22 + recoil;
-      c.fillStyle = L.glove;
-      c.beginPath(); c.arc(f, -9, 8, 0, TAU); c.arc(f, 9, 8, 0, TAU); c.fill();
-    } else if (w === 'pick') {
-      c.fillStyle = '#78350f'; c.fillRect(4 + back, -2, 32, 4);
-      c.fillStyle = '#94a3b8'; c.fillRect(32 + back, -11, 5, 22);
-    } else if (L.weapon === 'none') {
-      c.fillStyle = '#e8b48a'; c.beginPath(); c.arc(18, 0, 6, 0, TAU); c.fill();
+      for (const sy of [-10, 10]) {
+        orect(c, f - 15, sy - 3.4, 8, 6.8, 2, shade(L.glove, -.25), 2);
+        oval(c, f, sy, 9, 8.6, L.glove);
+        c.fillStyle = 'rgba(255,255,255,.4)'; c.beginPath(); c.arc(f - 2.5, sy - 2.5, 2.6, 0, TAU); c.fill();
+      }
+    } else { // keine Waffe: Zauberhände
+      hand(c, 18 + back, -7.5, sk); hand(c, 18 + back, 7.5, sk);
     }
   }
+
   function drawBrawler(c, B, x, y, aim, recoil, scale, opt = {}) {
-    const L = B.look, s = scale * B.size;
+    const L = B.look, s = scale * B.size, front = Math.sin(aim) > -.35;
     c.save(); c.translate(x, y);
-    c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(0, 18 * s, 18 * s, 7 * s, 0, 0, TAU); c.fill();
-    c.translate(0, -(opt.z || 0)); c.scale(s, s);
-    c.save(); c.rotate(aim); drawWeapon(c, L, recoil); c.restore();
+    c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(0, 22 * s, 17 * s, 6.5 * s, 0, 0, TAU); c.fill();
+    c.translate(0, -(opt.z || 0)); c.scale(s, s); c.lineJoin = 'round'; c.lineCap = 'round';
+    const weapon = () => { c.save(); c.translate(0, 6); c.rotate(aim); drawWeapon(c, L, recoil); c.restore(); };
+    for (const sx of [-7, 7]) oval(c, sx, 21.5, 6.2, 3.8, shade(L.body, -.45), 2.2); // Füße
+    if (!front) weapon();
     // Körper
-    c.fillStyle = L.body; c.beginPath(); c.arc(0, 4, 16, 0, TAU); c.fill();
-    c.fillStyle = L.accent; c.fillRect(-3, -4, 6, 16);
-    if (L.hoops) { c.fillStyle = L.accent; c.fillRect(-16, 0, 32, 3); c.fillRect(-14, 9, 28, 3); }
-    if (L.antenna) { c.strokeStyle = '#475569'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, -18); c.lineTo(0, -27); c.stroke(); c.fillStyle = '#ef4444'; c.beginPath(); c.arc(0, -28, 3, 0, TAU); c.fill(); }
-    if (L.ring) { c.strokeStyle = '#facc15'; c.lineWidth = 3; c.beginPath(); c.arc(0, -4, 7, 0, TAU); c.stroke(); }
+    const bg = c.createLinearGradient(-14, -4, 14, 22); bg.addColorStop(0, shade(L.body, .28)); bg.addColorStop(1, shade(L.body, -.28));
+    oval(c, 0, 8.5, 14, 12.5, bg);
+    c.save(); c.beginPath(); c.ellipse(0, 8.5, 14, 12.5, 0, 0, TAU); c.clip();
+    c.fillStyle = L.accent;
+    if (L.hoops) { c.fillRect(-15, 5, 30, 3.2); c.fillRect(-15, 13, 30, 3.2); } else c.fillRect(-3, -5, 6, 30);
+    c.fillStyle = 'rgba(255,255,255,.18)'; c.beginPath(); c.ellipse(-5, 3, 6, 3.4, -.5, 0, TAU); c.fill();
+    c.restore();
+    c.beginPath(); c.ellipse(0, 8.5, 14, 12.5, 0, 0, TAU); c.lineWidth = 2.4; c.strokeStyle = OL; c.stroke();
+    if (L.ring) oval(c, 0, 8, 5.2, 5.2, '#facc15', 2);
+    if (front) weapon();
     // Kopf
-    c.fillStyle = L.mask || L.skin; c.beginPath(); c.arc(0, -8, 11, 0, TAU); c.fill();
-    if (L.mask) { c.fillStyle = L.accent; c.beginPath(); c.ellipse(-4, -8, 4, 3.5, 0, 0, TAU); c.ellipse(4, -8, 4, 3.5, 0, 0, TAU); c.fill(); }
+    const base = L.mask || L.skin;
+    const hg = c.createRadialGradient(-4, -15, 2, 0, -9, 16); hg.addColorStop(0, shade(base, .32)); hg.addColorStop(1, shade(base, -.1));
+    oval(c, 0, -9, 14, 13.4, hg);
+    if (!L.mask && !L.hollow) { c.fillStyle = 'rgba(255,110,110,.28)'; c.beginPath(); c.arc(-9, -3.5, 2.8, 0, TAU); c.arc(9, -3.5, 2.8, 0, TAU); c.fill(); }
+    if (L.mask) { oval(c, -5.2, -8.6, 5.8, 5.4, L.accent, 1.6); oval(c, 5.2, -8.6, 5.8, 5.4, L.accent, 1.6); }
     if (L.hair) {
-      c.fillStyle = L.hair; c.beginPath(); c.arc(0, -11, 12, Math.PI, 0); c.fill();
-      c.beginPath(); c.arc(-11, -6, 4.5, 0, TAU); c.arc(11, -6, 4.5, 0, TAU); c.fill();
+      const hrg = c.createLinearGradient(0, -24, 0, -8); hrg.addColorStop(0, shade(L.hair, .25)); hrg.addColorStop(1, shade(L.hair, -.2));
+      c.beginPath(); c.ellipse(0, -13, 14.8, 11.6, 0, Math.PI, 0); c.closePath(); c.fillStyle = hrg; c.fill(); c.lineWidth = 2.4; c.strokeStyle = OL; c.stroke();
+      oval(c, -13.4, -6.6, 4.8, 5.8, hrg); oval(c, 13.4, -6.6, 4.8, 5.8, hrg);
     }
-    // Augen
-    const ex = Math.cos(aim) * 2, ey = Math.sin(aim) * 1.5;
-    if (L.hollow) {
-      c.fillStyle = '#0f172a'; c.beginPath(); c.arc(-4 + ex, -8 + ey, 3, 0, TAU); c.arc(4 + ex, -8 + ey, 3, 0, TAU); c.fill();
-    } else {
-      c.fillStyle = '#fff'; c.beginPath(); c.arc(-4, -8, 3, 0, TAU); c.arc(4, -8, 3, 0, TAU); c.fill();
-      c.fillStyle = '#111'; c.beginPath(); c.arc(-4 + ex, -8 + ey, 1.5, 0, TAU); c.arc(4 + ex, -8 + ey, 1.5, 0, TAU); c.fill();
+    // Gesicht
+    const ex = Math.cos(aim) * 1.5, ey = Math.sin(aim) * 1.3;
+    for (const sx of [-5.2, 5.2]) {
+      if (L.hollow) oval(c, sx, -8.6, 4.4, 5.2, '#0b0a14', 1.5);
+      else {
+        oval(c, sx, -8.6, 3.9, 4.8, '#fff', 1.8);
+        c.fillStyle = '#111'; c.beginPath(); c.arc(sx + ex, -8.6 + ey, 2.3, 0, TAU); c.fill();
+        c.fillStyle = '#fff'; c.beginPath(); c.arc(sx + ex - .8, -9.4 + ey, .85, 0, TAU); c.fill();
+      }
     }
-    if (L.goggles) {
-      c.strokeStyle = '#fde047'; c.lineWidth = 2; c.beginPath(); c.arc(-4, -8, 4, 0, TAU); c.arc(4, -8, 4, 0, TAU); c.stroke();
-    }
+    if (!L.hollow && !L.goggles) { c.strokeStyle = OL; c.lineWidth = 2.1; c.beginPath(); c.moveTo(-9.4, -15.4); c.lineTo(-2.6, -13.4); c.moveTo(9.4, -15.4); c.lineTo(2.6, -13.4); c.stroke(); }
+    if (!L.mask && !L.hollow) { c.strokeStyle = OL; c.lineWidth = 1.9; c.beginPath(); c.arc(0, -4.2, 3.2, .2 * Math.PI, .8 * Math.PI); c.stroke(); }
+    if (L.hollow) { c.fillStyle = OL; c.beginPath(); c.moveTo(0, -5); c.lineTo(-1.8, -2.4); c.lineTo(1.8, -2.4); c.fill(); }
+    if (L.goggles) for (const sx of [-5.2, 5.2]) { oval(c, sx, -8.6, 6, 6.2, 'rgba(150,220,255,.35)', 2.4); c.strokeStyle = '#fde047'; c.lineWidth = 1.6; c.beginPath(); c.ellipse(sx, -8.6, 6, 6.2, 0, 0, TAU); c.stroke(); }
+    if (L.antenna) { c.strokeStyle = OL; c.lineWidth = 3; c.beginPath(); c.moveTo(0, -22); c.lineTo(0, -31); c.stroke(); oval(c, 0, -33.5, 3.4, 3.4, '#ef4444', 2); }
     if (L.hat) {
-      c.fillStyle = L.hat; c.beginPath(); c.ellipse(0, -15, 16, 4.5, 0, 0, TAU); c.fill();
-      c.fillRect(-8, -26, 16, 11);
+      oval(c, 0, -18.4, 18.5, 5.2, shade(L.hat, -.1));
+      const cg = c.createLinearGradient(-9, 0, 9, 0); cg.addColorStop(0, shade(L.hat, .2)); cg.addColorStop(1, shade(L.hat, -.2));
+      orect(c, -9.5, -30.5, 19, 13.5, 3.5, cg);
+      c.fillStyle = L.accent; c.fillRect(-9, -21, 18, 2.8);
     }
     c.restore();
+  }
+  // Porträt in einen Rahmen einpassen (Menükarten)
+  const figTop = L => L.antenna ? 38 : L.hat ? 31 : 26;                                  // Figur über der Mitte (Modelleinheiten)
+  const figBottom = L => (L.weapon === 'fists' || L.weapon === 'pick') ? 33 : 26;        // Figur unter der Mitte
+  function drawPortrait(c, b, w, h, aim = .3) {
+    const L = b.look, th = (figTop(L) + figBottom(L)) * b.size, sc = Math.min(2.4, (h - 12) / th);
+    drawBrawler(c, b, w / 2 - 6, h - 6 - figBottom(L) * sc * b.size, aim, 0, sc);
   }
 
   /* ---------- Map-Ebenen (einmal vorgerendert) ---------- */
@@ -798,14 +850,14 @@
 
   /* ---------- Spielstand: Münzen, freigeschaltete Brawler ---------- */
   const COST = { start: 0, selten: 100, super: 300, episch: 500, mythisch: 1000, legendaer: 2000 };
-  const COIN_PER_KILL = 10;
+  const COIN_PER_KILL = 25;
   const STORE_KEY = 'brawl-menu';
   const DIFF_IDS = ['leicht', 'normal', 'schwer'];
   const MAX_LEVEL = 11;
   // Kosten für Power-Level 2..11
   const UPGRADE_COST = [0, 0, 30, 50, 100, 160, 260, 400, 600, 900, 1300, 1900];
   const powerMult = lv => 1 + .05 * (lv - 1); // +5 % Leben & Schaden pro Level
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 }, trophies: {} };
+  let save = { coins: 150, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id, diff: 'normal', mode: 'solo', levels: { shelly: 1 }, trophies: {} };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
@@ -872,7 +924,7 @@
         const el = document.createElement('div');
         el.className = 'brawler' + (owned ? ' owned' : ' locked') + (current ? ' sel' : '');
         el.dataset.id = b.id; el.style.setProperty('--c', R.color);
-        el.innerHTML = `<div class="pic"><canvas width="300" height="120"></canvas><span class="lock">🔒</span></div>
+        el.innerHTML = `<div class="pic"><canvas width="300" height="130"></canvas><span class="lock">🔒</span></div>
           <h3>${b.name}<small>${b.role}</small></h3>
           <div class="mini"><div>Leben<b>${Math.round(b.hp * powerMult(owned ? lv : 1))}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div></div>
           <div class="move"><strong>${b.atkName}:</strong> ${b.atkText}</div>
@@ -880,8 +932,8 @@
           ${owned ? `<div class="lvl"><span>⚡ Power ${lv}/${MAX_LEVEL} · +${Math.round((powerMult(lv) - 1) * 100)} % Leben & Schaden</span><i style="--p:${(lv - 1) / (MAX_LEVEL - 1) * 100}%"></i></div>` : ''}
           <div class="btns"><button class="cta main"></button></div>`;
         const pc = el.querySelector('canvas').getContext('2d');
-        pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 120);
-        drawBrawler(pc, b, 150, 70, 0.35, 0, 2.2);
+        pc.fillStyle = '#166534'; pc.fillRect(0, 0, 300, 130);
+        drawPortrait(pc, b, 300, 130);
         const btn = el.querySelector('.cta.main');
         if (owned) {
           const up = document.createElement('button'); up.className = 'cta up';
@@ -957,8 +1009,8 @@
   const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game');
   let screen = 'lobby'; // 'lobby' = Hauptmenü, 'game' = laufendes Match
 
-  const LIVES = 3, RESPAWN = 3, WIN_COINS = 100;
-  const PLACE_COINS = { 2: 50, 3: 30, 4: 20 }; // Trostpreis nach Platzierung
+  const LIVES = 3, RESPAWN = 3, WIN_COINS = 200;
+  const PLACE_COINS = { 2: 120, 3: 80, 4: 50 }; // Trostpreis nach Platzierung
   const DIFFS = {
     leicht: { dmg: .6,  err: .22, gap: [.8, 1.4],  speed: .85 },
     normal: { dmg: .85, err: .12, gap: [.5, .9],   speed: .95 },
@@ -1096,7 +1148,7 @@
     document.getElementById('notif').classList.toggle('on', news);
     // Profilbild: Kopf des gewählten Brawlers
     avatarCtx.clearRect(0, 0, 64, 64);
-    drawBrawler(avatarCtx, b, 32, 62, .3, 0, 2.4 / Math.max(1, b.size));
+    drawBrawler(avatarCtx, b, 32, 64, .3, 0, 2.3 / Math.max(1, b.size));
   }
   function drawHero(now) {
     const t = now / 1000, b = byId[save.selected], w = heroCv.width, h = heroCv.height;
@@ -1106,10 +1158,9 @@
       hctx.fillStyle = `rgba(255,255,255,${a})`; hctx.beginPath(); hctx.arc((i * 61 + 40) % (w - 40) + 20, 40 + ((i * 97) % 220), 2 + (i % 3), 0, TAU); hctx.fill();
     }
     // Größe so wählen, dass Waffe nach rechts und Hut nach oben ins Bild passen
-    const L = b.look, fists = L.weapon === 'fists', reach = fists ? 27 : 18, cx = w / 2 - 40;
-    const ext = { gun: (L.len || 20) + 19, tube: 41, bottle: 36, guitar: 42, pick: 37, fists: 30 }[L.weapon] || 26;
-    const eff = Math.min(8 * b.size / Math.max(1, b.size * .9), (w - 16 - cx) / ext, (h - 96) / (reach + 31)), sc = eff / b.size;
-    hctx.fillStyle = 'rgba(0,0,0,.35)'; hctx.beginPath(); hctx.ellipse(cx + 10, h - 78, 20 * eff, 4.2 * eff, 0, 0, TAU); hctx.fill();
+    const L = b.look, fists = L.weapon === 'fists', reach = figBottom(L), cx = w / 2 - 40;
+    const ext = { gun: (L.len || 20) + 19, tube: 42, bottle: 42, guitar: 48, pick: 47, fists: 32 }[L.weapon] || 26;
+    const eff = Math.min(8 * b.size / Math.max(1, b.size * .9), (w - 16 - cx) / ext, (h - 96) / (reach + figTop(L))), sc = eff / b.size;
     drawBrawler(hctx, b, cx, h - 84 - reach * eff + Math.sin(t * 3) * 4, .02 + Math.sin(t * 1.1) * .3, 0, sc);
   }
 
@@ -1138,7 +1189,7 @@
   }
   function endMatch(win, place) {
     matchOver = true;
-    const coins = win ? WIN_COINS : PLACE_COINS[place] || 20;
+    const coins = win ? WIN_COINS : PLACE_COINS[place] || 50;
     addCoins(coins);
     const tid = P.B.id, tBefore = trophyOf(tid), tAfter = Math.max(0, tBefore + (TROPHY_DELTA[place] || 0));
     save.trophies[tid] = tAfter; persist();
@@ -1521,7 +1572,7 @@
   function drawBody(f) {
     const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
     ctx.strokeStyle = f.color; ctx.lineWidth = 3; ctx.globalAlpha = .9;
-    ctx.beginPath(); ctx.ellipse(f.x, f.y + 17 * f.B.size, 21 * f.B.size, 8 * f.B.size, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.ellipse(f.x, f.y + 22 * f.B.size, 21 * f.B.size, 8 * f.B.size, 0, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
     if (f.invis > 0) ctx.globalAlpha = .32;
     else if (f.flash > 0) ctx.globalAlpha = .55 + Math.sin(performance.now() / 30) * .25;
     drawBrawler(ctx, f.B, f.x, f.y, f.aim, f.recoil, 1, { z });
@@ -1535,13 +1586,60 @@
       ctx.beginPath(); ctx.arc(f.x, f.y - z, 27 * f.B.size + Math.sin(performance.now() / 150) * 2, 0, TAU); ctx.stroke();
     }
   }
+  // Lebensbalken wie im Original: Zahl im Balken, Power-Abzeichen links, Grün = Team, Rot = Gegner
   function drawBars(f) {
     const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
-    const top = f.y - 44 * f.B.size - z, w = 52;
-    ctx.fillStyle = '#1e293b'; ctx.fillRect(f.x - w / 2 - 1, top, w + 2, 9);
-    ctx.fillStyle = f.isPlayer ? '#22c55e' : f.color; ctx.fillRect(f.x - w / 2, top + 1, w * Math.max(0, f.hp / f.max), 7);
-    ctx.fillStyle = '#fff'; ctx.font = '800 11px system-ui,sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText((f.isPlayer ? 'DU · ' : f.team === P.team ? 'TEAM · ' : '') + f.name.toUpperCase() + ' ⚡' + f.level, f.x, top - 4);
+    const sz = f.B.size, w = 64, h = 15, x0 = f.x - w / 2, y0 = f.y - 44 * sz - z - h;
+    const ally = f.team === P.team, pct = Math.max(0, f.hp / f.max);
+    ctx.textAlign = 'center'; ctx.lineJoin = 'round';
+    // Name
+    ctx.font = '800 11px system-ui,sans-serif'; ctx.lineWidth = 3; ctx.strokeStyle = '#000'; ctx.fillStyle = '#fff';
+    const label = ((f.isPlayer ? 'DU · ' : ally ? 'TEAM · ' : '') + f.name).toUpperCase();
+    ctx.strokeText(label, f.x, y0 - 5); ctx.fillText(label, f.x, y0 - 5);
+    // Balken
+    rr(ctx, x0, y0, w, h, 7.5); ctx.fillStyle = '#0b1020'; ctx.fill();
+    ctx.save(); rr(ctx, x0 + 1.6, y0 + 1.6, w - 3.2, h - 3.2, 6); ctx.clip();
+    const col = ally ? ['#a7f3d0', '#16a34a'] : ['#fecaca', '#dc2626'];
+    const g = ctx.createLinearGradient(0, y0, 0, y0 + h); g.addColorStop(0, col[0]); g.addColorStop(1, col[1]);
+    ctx.fillStyle = g; ctx.fillRect(x0 + 1.6, y0 + 1.6, (w - 3.2) * pct, h - 3.2);
+    ctx.fillStyle = 'rgba(0,0,0,.4)';
+    for (let k = 1000; k < f.max; k += 1000) ctx.fillRect(x0 + 1.6 + (w - 3.2) * k / f.max - .5, y0 + 1.6, 1, h - 3.2);
+    ctx.restore();
+    ctx.lineWidth = 2.2; ctx.strokeStyle = '#000'; rr(ctx, x0, y0, w, h, 7.5); ctx.stroke();
+    ctx.font = '900 11px system-ui,sans-serif'; ctx.lineWidth = 2.6; ctx.fillStyle = '#fff';
+    ctx.strokeText(Math.max(0, Math.ceil(f.hp)), f.x + 5, y0 + 11.3); ctx.fillText(Math.max(0, Math.ceil(f.hp)), f.x + 5, y0 + 11.3);
+    // Power-Abzeichen
+    ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(x0 - 1, y0 + h / 2, 9.5, 0, TAU); ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = '#000'; ctx.stroke();
+    ctx.fillStyle = '#422006'; ctx.font = '900 11px system-ui,sans-serif'; ctx.fillText(f.level, x0 - 1, y0 + h / 2 + 4);
+  }
+  // Munition (3 Segmente) und Super-Ladung unter deinem Brawler
+  function drawAmmo(f) {
+    const z = f.jump ? Math.sin(Math.PI * Math.min(1, f.jump.t / f.jump.dur)) * 80 : 0;
+    const y = f.y + 31 * f.B.size - z, segW = 16, gap = 3, tot = 3 * segW + 2 * gap, x0 = f.x - tot / 2;
+    for (let k = 0; k < 3; k++) {
+      const x = x0 + k * (segW + gap), fill = clamp(f.ammo - k, 0, 1);
+      rr(ctx, x, y, segW, 7, 3.5); ctx.fillStyle = '#0b1020'; ctx.fill();
+      if (fill > 0) { ctx.save(); rr(ctx, x, y, segW, 7, 3.5); ctx.clip(); ctx.fillStyle = fill >= 1 ? '#fb923c' : '#fdba74'; ctx.fillRect(x, y, segW * fill, 7); ctx.restore(); }
+      ctx.lineWidth = 1.8; ctx.strokeStyle = '#000'; rr(ctx, x, y, segW, 7, 3.5); ctx.stroke();
+    }
+    rr(ctx, x0, y + 10, tot, 5, 2.5); ctx.fillStyle = '#0b1020'; ctx.fill();
+    if (f.charge > 0) { ctx.save(); rr(ctx, x0, y + 10, tot, 5, 2.5); ctx.clip(); ctx.fillStyle = f.charge >= 1 ? '#fde047' : '#facc15'; ctx.fillRect(x0, y + 10, tot * f.charge, 5); ctx.restore(); }
+    ctx.lineWidth = 1.6; ctx.strokeStyle = '#000'; rr(ctx, x0, y + 10, tot, 5, 2.5); ctx.stroke();
+  }
+  // Große Lebensanzeige unten links
+  function drawHpHud() {
+    const x = 10, y = H - 44, w = 210, h = 32, hp = Math.max(0, Math.ceil(P.hp)), pct = Math.max(0, P.hp / P.max);
+    rr(ctx, x, y, w, h, 16); ctx.fillStyle = 'rgba(15,23,42,.85)'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.stroke();
+    ctx.font = '900 20px system-ui,sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#f87171'; ctx.fillText('♥', x + 10, y + 23);
+    const bx = x + 36, bw = w - 46;
+    rr(ctx, bx, y + 8, bw, 16, 8); ctx.fillStyle = '#0b1020'; ctx.fill();
+    ctx.save(); rr(ctx, bx + 1.5, y + 9.5, bw - 3, 13, 6.5); ctx.clip();
+    const g = ctx.createLinearGradient(0, y + 8, 0, y + 24); g.addColorStop(0, pct > .3 ? '#a7f3d0' : '#fecaca'); g.addColorStop(1, pct > .3 ? '#16a34a' : '#dc2626');
+    ctx.fillStyle = g; ctx.fillRect(bx + 1.5, y + 9.5, (bw - 3) * pct, 13); ctx.restore();
+    ctx.lineWidth = 2; ctx.strokeStyle = '#000'; rr(ctx, bx, y + 8, bw, 16, 8); ctx.stroke();
+    ctx.font = '900 12px system-ui,sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 3; ctx.fillStyle = '#fff';
+    const txt = hp + ' / ' + P.max; ctx.strokeText(txt, bx + bw / 2, y + 20.6); ctx.fillText(txt, bx + bw / 2, y + 20.6);
+    ctx.textAlign = 'center';
   }
   function drawGas() {
     if (matchT <= GAS_START - 10) return;
@@ -1633,7 +1731,7 @@
       drawBody(f); if (!f.isPlayer) drawBars(f);
     }
     ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0, W, H); ctx.globalAlpha = 1;
-    if (P.alive) drawBars(P);
+    if (P.alive) { drawBars(P); drawAmmo(P); }
 
     for (const l of lobs) {
       const k = l.t / l.dur, x = l.sx + (l.tx - l.sx) * k, y = l.sy + (l.ty - l.sy) * k - Math.sin(Math.PI * k) * 70;
@@ -1660,7 +1758,7 @@
     ctx.moveTo(pointer.x, pointer.y - 13); ctx.lineTo(pointer.x, pointer.y + 13); ctx.stroke();
 
     drawGas();
-    drawScore(); drawGasInfo();
+    drawScore(); drawGasInfo(); drawHpHud();
     if (P.out && !matchOver) { // Duo: du bist raus, der Teamkamerad kämpft weiter
       ctx.font = '800 14px system-ui,sans-serif'; ctx.textAlign = 'center';
       const txt = 'Du bist raus – dein Teamkamerad kämpft weiter!', tw = ctx.measureText(txt).width + 28;

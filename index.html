@@ -58,6 +58,16 @@
   .cta.cur{background:transparent;border:2px solid var(--c);cursor:default}
   .cta.buy{background:var(--yellow);color:#422006}
   .cta:disabled{background:#334155;color:#94a3b8;cursor:not-allowed}
+  .tabs{display:flex;gap:8px}
+  .tab{background:#334155;color:#cbd5e1;font-weight:800;border-radius:12px;padding:10px 22px}
+  .tab.on{background:#7c3aed;color:#fff}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chips[hidden]{display:none}
+  .chip{background:#1e293b;color:#cbd5e1;font-weight:700;border-radius:999px;padding:6px 14px;border:2px solid var(--c)}
+  .chip.on{background:var(--c);color:#0f172a}
+  .mapgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+  .brawler.mapcard canvas{height:auto;aspect-ratio:8/5;background:none}
+  .where{color:var(--muted);font-weight:600;font-size:13px}
 </style>
 </head>
 <body>
@@ -72,9 +82,10 @@
     <canvas id="arena" width="800" height="500" aria-label="Trainingsarena"></canvas>
     <div class="bar">
       <span class="who" id="who">Shelly</span>
+      <span class="where" id="where"></span>
       <button class="act" id="atk">Angriff</button>
       <button class="act" id="sup">Super</button>
-      <span class="hint">Besiege Puppen für 🪙 Münzen und schalte im Menü neue Brawler frei · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
+      <span class="hint">Besiege Puppen für 🪙 Münzen, schalte im Menü neue Brawler frei und wähle eine von 4 Maps · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
     </div>
   </section>
 </main>
@@ -86,6 +97,11 @@
       <span class="coins">🪙 <span class="coin-n">0</span></span>
       <button class="close" id="close-menu">✕ Schließen</button>
     </div>
+    <div class="tabs">
+      <button class="tab on" data-tab="brawler">Brawler</button>
+      <button class="tab" data-tab="maps">Maps</button>
+    </div>
+    <div id="chips" class="chips"></div>
     <div id="rarities" class="rarity"></div>
     <p class="note">Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
   </div>
@@ -364,6 +380,33 @@
   const byId = Object.fromEntries(BRAWLERS.map(b => [b.id, b]));
   const TAU = Math.PI * 2;
 
+  /* ---------- Maps (Raster 16 x 10 Felder à 50) ---------- */
+  const T = 50;
+  const rc = (kind, gx, gy, gw = 1, gh = 1) => ({ kind, x: gx * T, y: gy * T, w: gw * T, h: gh * T });
+  const MAPS = [
+    { id:'wiese', name:'Sonnenwiese', info:'Felsen, Büsche zum Verstecken und ein kleiner Teich.',
+      g:['#3f9142','#46a049'], bushColor:'#2e7d32', waterColor:'#3b9ae1',
+      walls:[rc('rock',3,2), rc('rock',12,2), rc('rock',3,7), rc('rock',12,7), rc('rock',7,1,2,1), rc('rock',7,8,2,1)],
+      water:[rc('water',11,4,2,2)],
+      bushes:[rc('bush',1,4,1,2), rc('bush',14,4,1,2), rc('bush',5,4,1,2), rc('bush',4,8,2,1), rc('bush',10,1,2,1)] },
+    { id:'wueste', name:'Kaktus-Canyon', info:'Kakteen und Felswände, viel offener Sand.',
+      g:['#d9b36c','#d0a95e'], bushColor:'#a16207', waterColor:'#3b9ae1',
+      walls:[rc('cactus',3,3), rc('cactus',12,2), rc('cactus',4,6), rc('cactus',11,7), rc('cactus',6,2), rc('cactus',9,7),
+        rc('rock',1,1,2,1), rc('rock',13,8,2,1), rc('rock',5,8,2,1), rc('rock',9,1,2,1)],
+      bushes:[rc('bush',13,4,1,2), rc('bush',2,5,1,1)] },
+    { id:'schnee', name:'Eisfeld', info:'Eisblöcke, verschneite Tannen und ein eiskalter See.',
+      g:['#e8f1f7','#d9e8f3'], bushColor:'#bcd7ea', waterColor:'#4aa3d8',
+      walls:[rc('ice',3,3), rc('ice',12,6), rc('ice',5,1,1,2), rc('ice',10,7,1,2),
+        rc('pine',1,1), rc('pine',14,1), rc('pine',1,8), rc('pine',14,8), rc('pine',6,6)],
+      water:[rc('water',11,2,3,2)],
+      bushes:[rc('bush',3,7,2,1)] },
+    { id:'lava', name:'Lavahöhle', info:'Dunkle Felsen und Lavaströme, die niemand betreten kann.',
+      g:['#3b2a2a','#342424'], bushColor:'#2b1d1d', waterColor:'#ff5a1f', glow:true,
+      walls:[rc('dark',3,2,1,2), rc('dark',12,6,1,2), rc('dark',6,7), rc('dark',9,2), rc('dark',5,4), rc('dark',10,5)],
+      water:[rc('water',0,4,2,2), rc('water',14,4,2,2), rc('water',7,9,2,1)] },
+  ];
+  for (const m of MAPS) { m.walls = m.walls || []; m.water = m.water || []; m.bushes = m.bushes || []; m.solid = [...m.walls, ...m.water]; }
+
   /* ---------- Zeichnen ---------- */
   function drawWeapon(c, L, recoil) {
     const w = L.weapon, back = -recoil;
@@ -429,6 +472,65 @@
     c.restore();
   }
 
+  /* ---------- Map-Ebenen (einmal vorgerendert) ---------- */
+  const BOX = { rock:['#8b8f98','#5b5f68'], dark:['#4a3a3a','#1f1515'], ice:['#bfe6ff','#6fb7e6'] };
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+  function tilesOf(r) {
+    const a = [];
+    for (let i = 0; i < r.w / T; i++) for (let j = 0; j < r.h / T; j++) a.push([r.x + i * T + T / 2, r.y + j * T + T / 2]);
+    return a;
+  }
+  function drawWall(c, r) {
+    if (BOX[r.kind]) {
+      const [f, e] = BOX[r.kind], x = r.x + 3, y = r.y + 3, w = r.w - 6, h = r.h - 6;
+      c.fillStyle = 'rgba(0,0,0,.25)'; rr(c, x + 5, y + 7, w, h, 8); c.fill();
+      c.fillStyle = f; rr(c, x, y, w, h, 8); c.fill(); c.strokeStyle = e; c.lineWidth = 3; c.stroke();
+      c.fillStyle = 'rgba(255,255,255,.2)'; rr(c, x + 4, y + 4, w - 8, (h - 8) / 2.4, 5); c.fill();
+      return;
+    }
+    for (const [cx, cy] of tilesOf(r)) {
+      c.fillStyle = 'rgba(0,0,0,.25)'; c.beginPath(); c.ellipse(cx + 4, cy + 17, 20, 8, 0, 0, TAU); c.fill();
+      if (r.kind === 'cactus') {
+        c.fillStyle = '#3f9a4a'; c.strokeStyle = '#2a6e33'; c.lineWidth = 3;
+        for (const [x, y, w, h] of [[-7, -22, 14, 40], [-19, -6, 12, 8], [-19, -16, 8, 14], [7, -2, 12, 8], [11, -12, 8, 14]]) { rr(c, cx + x, cy + y, w, h, 4); c.fill(); c.stroke(); }
+      } else if (r.kind === 'pine') {
+        c.fillStyle = '#6d4c2a'; c.fillRect(cx - 4, cy + 4, 8, 14);
+        c.fillStyle = '#1f6b43'; c.beginPath(); c.moveTo(cx, cy - 26); c.lineTo(cx - 21, cy + 10); c.lineTo(cx + 21, cy + 10); c.closePath(); c.fill();
+        c.fillStyle = '#fff'; c.beginPath(); c.moveTo(cx, cy - 26); c.lineTo(cx - 9, cy - 9); c.lineTo(cx + 9, cy - 9); c.closePath(); c.fill();
+      }
+    }
+  }
+  function layers(m) {
+    if (m._l) return m._l;
+    const mk = () => { const k = document.createElement('canvas'); k.width = 800; k.height = 500; return k; };
+    const base = mk(), over = mk(), c = base.getContext('2d'), o = over.getContext('2d');
+    for (let gx = 0; gx < 16; gx++) for (let gy = 0; gy < 10; gy++) { c.fillStyle = m.g[(gx + gy) % 2]; c.fillRect(gx * T, gy * T, T, T); }
+    let seed = 7; const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+    c.fillStyle = 'rgba(0,0,0,.07)'; for (let i = 0; i < 160; i++) c.fillRect(rand() * 800, rand() * 500, 3, 3);
+    for (const r of m.water) {
+      c.fillStyle = m.waterColor; c.fillRect(r.x, r.y, r.w, r.h);
+      c.strokeStyle = m.glow ? 'rgba(255,230,120,.55)' : 'rgba(255,255,255,.35)'; c.lineWidth = 2;
+      for (let y = r.y + 12; y < r.y + r.h; y += 18) {
+        c.beginPath();
+        for (let x = r.x; x <= r.x + r.w; x += 10) { const yy = y + Math.sin(x * .15 + y) * 3; if (x === r.x) c.moveTo(x, yy); else c.lineTo(x, yy); }
+        c.stroke();
+      }
+      c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = 4; c.strokeRect(r.x + 2, r.y + 2, r.w - 4, r.h - 4);
+    }
+    for (const r of [...m.walls].sort((a, b) => a.y - b.y)) drawWall(c, r);
+    c.strokeStyle = 'rgba(0,0,0,.3)'; c.lineWidth = 8; c.strokeRect(0, 0, 800, 500);
+    for (const r of m.bushes) for (const [cx, cy] of tilesOf(r)) {
+      for (const [dx, dy, rad] of [[-9, 6, 17], [9, 6, 17], [0, -7, 19]]) {
+        o.fillStyle = m.bushColor; o.beginPath(); o.arc(cx + dx, cy + dy, rad, 0, TAU); o.fill();
+      }
+      o.fillStyle = 'rgba(255,255,255,.14)'; o.beginPath(); o.arc(cx - 3, cy - 10, 9, 0, TAU); o.fill();
+    }
+    return (m._l = { base, over });
+  }
+
   /* ---------- Auswahl-Karten ---------- */
   const rangeOf = a => a.range || a.sp * a.life;
   const rangeLabel = r => r < 220 ? 'Kurz' : r < 380 ? 'Mittel' : 'Lang';
@@ -438,13 +540,13 @@
   const COST = { start: 0, selten: 100, super: 300, episch: 500 };
   const COIN_PER_KILL = 10;
   const STORE_KEY = 'brawl-menu';
-  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly' };
+  let save = { coins: 30, unlocked: ['shelly'], selected: 'shelly', map: MAPS[0].id };
   try {
     const s = JSON.parse(localStorage.getItem(STORE_KEY));
     if (s && typeof s === 'object') {
       const unlocked = new Set(['shelly', ...(Array.isArray(s.unlocked) ? s.unlocked : [])].filter(id => byId[id]));
       save = { coins: Number.isFinite(s.coins) && s.coins >= 0 ? Math.floor(s.coins) : save.coins, unlocked: [...unlocked],
-        selected: unlocked.has(s.selected) ? s.selected : 'shelly' };
+        selected: unlocked.has(s.selected) ? s.selected : 'shelly', map: MAPS.some(m => m.id === s.map) ? s.map : MAPS[0].id };
     }
   } catch (e) { /* ohne Speicher weiterspielen */ }
   const persist = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(save)); } catch (e) { /* ignorieren */ } };
@@ -454,9 +556,41 @@
   function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
   function addCoins(n) { save.coins += n; persist(); showCoins(); if (menuOpen) renderMenu(); }
 
+  let menuTab = 'brawler', menuFilter = 'all';
   function renderMenu() {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === menuTab));
+    const chips = document.getElementById('chips');
+    chips.hidden = menuTab !== 'brawler';
+    if (menuTab === 'maps') { chips.innerHTML = ''; renderMaps(); return; }
+    chips.innerHTML = '';
+    for (const [id, label, color] of [['all', 'Alle', '#e2e8f0'], ...RARITIES.map(r => [r.id, r.name, r.color])]) {
+      const b = document.createElement('button');
+      b.className = 'chip' + (menuFilter === id ? ' on' : ''); b.style.setProperty('--c', color); b.textContent = label;
+      b.addEventListener('click', () => { menuFilter = id; renderMenu(); });
+      chips.appendChild(b);
+    }
+    renderBrawlers();
+  }
+  function renderMaps() {
+    root.innerHTML = '';
+    const grid = document.createElement('div'); grid.className = 'grid mapgrid';
+    for (const m of MAPS) {
+      const cur = m.id === M.id, el = document.createElement('div');
+      el.className = 'brawler mapcard owned' + (cur ? ' sel' : ''); el.style.setProperty('--c', '#facc15');
+      el.innerHTML = `<div class="pic"><canvas width="300" height="188"></canvas></div>
+        <h3>${m.name}</h3><div class="move">${m.info}</div>
+        <button class="cta ${cur ? 'cur' : 'pick'}">${cur ? '✓ Aktiv' : 'Spielen'}</button>`;
+      const pc = el.querySelector('canvas').getContext('2d'), L = layers(m);
+      pc.drawImage(L.base, 0, 0, 300, 188); pc.drawImage(L.over, 0, 0, 300, 188);
+      el.addEventListener('click', () => { applyMap(m.id); closeMenu(); });
+      grid.appendChild(el);
+    }
+    root.appendChild(grid);
+  }
+  function renderBrawlers() {
     root.innerHTML = '';
     for (const R of RARITIES) {
+      if (menuFilter !== 'all' && menuFilter !== R.id) continue;
       const cost = COST[R.id];
       const sec = document.createElement('section'); sec.className = 'rarity';
       sec.innerHTML = `<h2><i class="dot" style="--c:${R.color}"></i>${R.name}<span>${R.info}${cost ? ` · ${cost} 🪙 pro Brawler` : ''}</span></h2><div class="grid"></div>`;
@@ -506,6 +640,7 @@
     renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
   }
   function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { menuTab = t.dataset.tab; renderMenu(); }));
   document.getElementById('open-menu').addEventListener('click', openMenu);
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
@@ -522,7 +657,35 @@
   let pointer = { x: W / 2 + 100, y: H / 2 }, moveTo = null;
 
   const rnd = (a, b) => a + Math.random() * (b - a);
-  const spawnPos = d => { d.x = rnd(80, W - 80); d.y = rnd(70, H - 70); };
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  let M = MAPS.find(m => m.id === save.map) || MAPS[0];
+  const whereEl = document.getElementById('where');
+
+  // Hindernisse: Brawler, Puppen und Bär stoßen sich an Wänden und Wasser
+  function pushOut(e, r) {
+    for (let it = 0; it < 2; it++) for (const s of M.solid) {
+      const cx = clamp(e.x, s.x, s.x + s.w), cy = clamp(e.y, s.y, s.y + s.h), dx = e.x - cx, dy = e.y - cy, d = Math.hypot(dx, dy);
+      if (d >= r) continue;
+      if (d > 0) { e.x += dx / d * (r - d); e.y += dy / d * (r - d); }
+      else {
+        const l = e.x - s.x, rt = s.x + s.w - e.x, t = e.y - s.y, b = s.y + s.h - e.y, m = Math.min(l, rt, t, b);
+        if (m === l) e.x = s.x - r; else if (m === rt) e.x = s.x + s.w + r; else if (m === t) e.y = s.y - r; else e.y = s.y + s.h + r;
+      }
+    }
+    e.x = clamp(e.x, r, W - r); e.y = clamp(e.y, r, H - r);
+  }
+  // Kugeln werden nur von Wänden gestoppt, nicht von Wasser
+  const wallHit = (x, y, r) => M.walls.find(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
+  const inSolid = (x, y, r) => M.solid.some(s => x > s.x - r && x < s.x + s.w + r && y > s.y - r && y < s.y + s.h + r);
+
+  function spawnPos(d) {
+    for (let i = 0; i < 80; i++) {
+      const x = rnd(70, W - 70), y = rnd(60, H - 60);
+      if (Math.hypot(x - P.x, y - P.y) < 110 || inSolid(x, y, d.r + 6)) continue;
+      d.x = x; d.y = y; return;
+    }
+    d.x = W - 80; d.y = 80;
+  }
   for (let i = 0; i < 4; i++) { const d = { r: 20, hp: 3000, max: 3000, flash: 0, vx: 0, vy: 0, t: 0, dead: 0 }; spawnPos(d); dummies.push(d); }
 
   function select(id) {
@@ -530,6 +693,13 @@
     Object.assign(P, { x: W / 2, y: H / 2, ammo: 3, charge: 0, recoil: 0, dash: null, jump: null, shield: 0 });
     shots = []; lobs = []; puddles = []; timers = []; bears = []; rings = []; turrets = [];
     whoEl.textContent = B.name;
+  }
+  function applyMap(id) {
+    M = MAPS.find(m => m.id === id) || MAPS[0];
+    save.map = M.id; persist();
+    select(B.id);
+    for (const d of dummies) { d.hp = d.max; d.dead = 0; d.flash = 0; spawnPos(d); }
+    whereEl.textContent = '· ' + M.name;
   }
 
   function pop(x, y, color, n) {
@@ -549,8 +719,7 @@
     rings.push({ x, y, r, t: .3 }); pop(x, y, '#fb923c', 14);
     for (const d of dummies) if (d.hp > 0 && Math.hypot(d.x - x, d.y - y) < r + d.r) hit(d, dmg, src);
   }
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const toward = (len) => ({ x: clamp(P.x + Math.cos(P.aim) * len, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * len, 20, H - 20) });
+  const toward =(len) => ({ x: clamp(P.x + Math.cos(P.aim) * len, 20, W - 20), y: clamp(P.y + Math.sin(P.aim) * len, 20, H - 20) });
   const muzzle = () => 26 * B.size;
 
   function pellets(a, src) {
@@ -660,8 +829,8 @@
       if (moveTo) { const tx = moveTo.x - P.x, ty = moveTo.y - P.y, d = Math.hypot(tx, ty); if (d > 12) { dx = tx / d; dy = ty / d; } }
       const len = Math.hypot(dx, dy), sp = B.speed * (P.shield > 0 ? 1.4 : 1);
       if (len) { P.x += dx / len * sp * dt; P.y += dy / len * sp * dt; }
-      P.x = clamp(P.x, R, W - R); P.y = clamp(P.y, R, H - R);
     }
+    if (!P.jump) pushOut(P, R);
     P.aim = Math.atan2(pointer.y - P.y, pointer.x - P.x);
     P.ammo = Math.min(3, P.ammo + dt / 1.3);
     P.recoil = Math.max(0, P.recoil - dt * 60);
@@ -682,6 +851,14 @@
         if (p.bounces > 0) {
           if (p.x < 0 || p.x > W) { p.vx = -p.vx; p.x = clamp(p.x, 0, W); p.bounces--; }
           if (p.y < 0 || p.y > H) { p.vy = -p.vy; p.y = clamp(p.y, 0, H); p.bounces--; }
+        }
+        const w = wallHit(p.x, p.y, p.r * .5);
+        if (w) {
+          if (p.bounces > 0) {
+            const px = p.x - p.vx * dt, py = p.y - p.vy * dt;
+            if (px > w.x - 1 && px < w.x + w.w + 1) p.vy = -p.vy; else p.vx = -p.vx;
+            p.x = px; p.y = py; p.bounces--;
+          } else { p.life = 0; if (!p.aoe) continue; }
         }
       }
       for (const d of dummies) {
@@ -721,7 +898,7 @@
       let tg = null, best = 1e9;
       for (const d of dummies) { const m = Math.hypot(d.x - b.x, d.y - b.y); if (d.hp > 0 && m < best) { best = m; tg = d; } }
       if (tg) {
-        if (best > 34) { b.x += (tg.x - b.x) / best * 170 * dt; b.y += (tg.y - b.y) / best * 170 * dt; }
+        if (best > 34) { b.x += (tg.x - b.x) / best * 170 * dt; b.y += (tg.y - b.y) / best * 170 * dt; pushOut(b, 17); }
         else if (b.cd <= 0) { b.cd = .5; hit(tg, 400, 'sup'); pop(tg.x, tg.y, '#fde047', 6); }
       }
     }
@@ -747,7 +924,7 @@
     for (const d of dummies) {
       if (d.hp <= 0) { d.dead += dt; if (d.dead > 1.5) { d.hp = d.max; spawnPos(d); } continue; }
       d.t -= dt; if (d.t <= 0) { d.t = rnd(1, 3); const a = rnd(0, TAU); d.vx = Math.cos(a) * 35; d.vy = Math.sin(a) * 35; }
-      d.x = clamp(d.x + d.vx * dt, d.r, W - d.r); d.y = clamp(d.y + d.vy * dt, d.r, H - d.r);
+      d.x += d.vx * dt; d.y += d.vy * dt; pushOut(d, d.r);
       d.flash = Math.max(0, d.flash - dt);
     }
     for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.life -= dt; }
@@ -763,9 +940,8 @@
   }
 
   function draw() {
-    ctx.fillStyle = '#166534'; ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(0,0,0,.08)';
-    for (let x = 0; x < W; x += 80) for (let y = 0; y < H; y += 80) if ((x + y) / 80 % 2 === 0) ctx.fillRect(x, y, 80, 80);
+    const L = layers(M);
+    ctx.drawImage(L.base, 0, 0);
 
     for (const p of puddles) {
       ctx.globalAlpha = .35 + .25 * (p.t / p.max); ctx.fillStyle = '#84cc16';
@@ -804,6 +980,7 @@
       ctx.strokeStyle = 'rgba(134,239,172,.8)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(P.x, P.y, 30 * B.size, 0, TAU); ctx.stroke();
       ctx.fillStyle = 'rgba(134,239,172,.2)'; ctx.fill();
     }
+    ctx.globalAlpha = .93; ctx.drawImage(L.over, 0, 0); ctx.globalAlpha = 1;
 
     for (const l of lobs) {
       const k = l.t / l.dur, x = l.sx + (l.tx - l.sx) * k, y = l.sy + (l.ty - l.sy) * k - Math.sin(Math.PI * k) * 70;
@@ -834,6 +1011,7 @@
 
   showCoins();
   select(save.selected);
+  whereEl.textContent = '· ' + M.name;
   requestAnimationFrame(frame);
 })();
 </script>

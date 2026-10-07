@@ -75,6 +75,21 @@
   .mapgrid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
   .brawler.mapcard canvas{height:auto;aspect-ratio:8/5;background:none}
   .where{color:var(--muted);font-weight:600;font-size:13px}
+  .hero{display:grid;grid-template-columns:minmax(220px,360px) 1fr;gap:20px;align-items:center}
+  @media (max-width:640px){.hero{grid-template-columns:1fr}}
+  #hero{width:100%;height:auto;aspect-ratio:9/7;display:block;border-radius:14px}
+  .eyebrow{margin:0;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .hero-info h2{margin:2px 0;font-size:clamp(28px,6vw,44px)}
+  .hero-role{margin:0 0 12px;color:var(--muted)}
+  .hero-info .mini{margin-bottom:10px}
+  .hero-info .move{margin-top:4px}
+  .start{display:block;width:100%;margin-top:18px;font-weight:900;font-size:clamp(24px,6vw,36px);padding:18px;border-radius:18px;
+    background:linear-gradient(#fde047,#facc15);color:#422006;box-shadow:0 5px 0 #a16207;text-transform:uppercase;letter-spacing:.05em}
+  .start:hover{filter:brightness(1.06)}
+  .start:active{transform:translateY(3px);box-shadow:0 2px 0 #a16207}
+  .lobby-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+  #result .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  #result .act.alt{background:#475569}
 </style>
 </head>
 <body>
@@ -82,10 +97,34 @@
   <div class="top">
     <h1>Brawler</h1>
     <span class="coins">🪙 <span class="coin-n">0</span></span>
-    <button class="menu-btn" id="open-menu">☰ Menü</button>
+    <button class="menu-btn" id="open-menu">☰ Brawler</button>
   </div>
 
-  <section class="panel">
+  <section class="panel" id="lobby">
+    <div class="hero">
+      <canvas id="hero" width="360" height="280" aria-label="Dein Brawler"></canvas>
+      <div class="hero-info">
+        <p class="eyebrow">Dein Brawler</p>
+        <h2 id="hero-name">Shelly</h2>
+        <p class="hero-role" id="hero-role"></p>
+        <div class="mini" id="hero-stats"></div>
+        <div class="move" id="hero-atk"></div>
+        <div class="move" id="hero-sup"></div>
+      </div>
+    </div>
+    <button class="start" id="start-btn">▶ Start</button>
+    <div class="lobby-row">
+      <button class="menu-btn" id="brawler-btn">☰ Brawler wählen</button>
+      <select id="diff" aria-label="Schwierigkeit der Bots">
+        <option value="leicht">Bots: Leicht</option>
+        <option value="normal">Bots: Normal</option>
+        <option value="schwer">Bots: Schwer</option>
+      </select>
+    </div>
+    <p class="note" style="margin-top:12px">Drück auf Start und wähle eine Map. Dann kämpfst du gegen 3 Bots: Wer zuerst 10 Kills hat, gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Siege geben 🪙 Münzen für neue Brawler.</p>
+  </section>
+
+  <section class="panel" id="game" hidden>
     <div class="stage">
       <canvas id="arena" width="800" height="500" aria-label="Arena"></canvas>
       <div id="result" hidden></div>
@@ -95,12 +134,8 @@
       <span class="where" id="where"></span>
       <button class="act" id="atk">Angriff</button>
       <button class="act" id="sup">Super</button>
-      <select id="diff" aria-label="Schwierigkeit der Bots">
-        <option value="leicht">Bots: Leicht</option>
-        <option value="normal">Bots: Normal</option>
-        <option value="schwer">Bots: Schwer</option>
-      </select>
-      <span class="hint">Besiege die 3 Bots: Wer zuerst 10 Kills hat, gewinnt – nach 45 s zieht eine Giftwolke zur Mitte zu. Kills und Siege geben 🪙 Münzen für neue Brawler im Menü · Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
+      <button class="act" id="home" style="background:#475569">⌂ Hauptmenü</button>
+      <span class="hint">Bewegen: WASD / Pfeiltasten oder Finger ziehen · Zielen: Maus · Angriff: Klick / Leertaste · Super: E</span>
     </div>
   </section>
 </main>
@@ -108,17 +143,13 @@
 <div id="menu" hidden role="dialog" aria-modal="true" aria-label="Brawler-Menü">
   <div class="menu-in">
     <div class="menu-head">
-      <h2>Brawler</h2>
+      <h2 id="menu-title">Brawler</h2>
       <span class="coins">🪙 <span class="coin-n">0</span></span>
       <button class="close" id="close-menu">✕ Schließen</button>
     </div>
-    <div class="tabs">
-      <button class="tab on" data-tab="brawler">Brawler</button>
-      <button class="tab" data-tab="maps">Maps</button>
-    </div>
     <div id="chips" class="chips"></div>
     <div id="rarities" class="rarity"></div>
-    <p class="note">Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
+    <p class="note" id="menu-note">Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.</p>
   </div>
 </div>
 
@@ -644,13 +675,12 @@
   function showCoins() { document.querySelectorAll('.coin-n').forEach(e => { e.textContent = save.coins; }); }
   function addCoins(n) { save.coins += n; persist(); showCoins(); if (menuOpen) renderMenu(); }
 
-  let menuTab = 'brawler', menuFilter = 'all';
+  let menuMode = 'brawler', menuFilter = 'all';
   function renderMenu() {
-    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === menuTab));
     const chips = document.getElementById('chips');
-    chips.hidden = menuTab !== 'brawler';
-    if (menuTab === 'maps') { chips.innerHTML = ''; renderMaps(); return; }
     chips.innerHTML = '';
+    chips.hidden = menuMode === 'map';
+    if (menuMode === 'map') { renderMaps(); return; }
     for (const [id, label, color] of [['all', 'Alle', '#e2e8f0'], ...RARITIES.map(r => [r.id, r.name, r.color])]) {
       const b = document.createElement('button');
       b.className = 'chip' + (menuFilter === id ? ' on' : ''); b.style.setProperty('--c', color); b.textContent = label;
@@ -663,14 +693,14 @@
     root.innerHTML = '';
     const grid = document.createElement('div'); grid.className = 'grid mapgrid';
     for (const m of MAPS) {
-      const cur = m.id === M.id, el = document.createElement('div');
+      const cur = m.id === save.map, el = document.createElement('div');
       el.className = 'brawler mapcard owned' + (cur ? ' sel' : ''); el.style.setProperty('--c', '#facc15');
       el.innerHTML = `<div class="pic"><canvas width="300" height="188"></canvas></div>
-        <h3>${m.name}</h3><div class="move">${m.info}</div>
-        <button class="cta ${cur ? 'cur' : 'pick'}">${cur ? '✓ Aktiv' : 'Spielen'}</button>`;
+        <h3>${m.name}${cur ? '<small>zuletzt gespielt</small>' : ''}</h3><div class="move">${m.info}</div>
+        <button class="cta pick">▶ Spielen</button>`;
       const pc = el.querySelector('canvas').getContext('2d'), L = layers(m);
       pc.drawImage(L.base, 0, 0, 300, 188); pc.drawImage(L.over, 0, 0, 300, 188);
-      el.addEventListener('click', () => { applyMap(m.id); closeMenu(); });
+      el.addEventListener('click', () => { closeMenu(); startGame(m.id); });
       grid.appendChild(el);
     }
     root.appendChild(grid);
@@ -723,13 +753,19 @@
     if (!isOwned(id)) return;
     save.selected = id; persist(); select(id); closeMenu();
   }
-  function openMenu() {
-    menuOpen = true; for (const k in keys) keys[k] = false; moveTo = null;
+  function openMenu(mode = 'brawler') {
+    menuOpen = true; menuMode = mode; for (const k in keys) keys[k] = false; moveTo = null;
+    document.getElementById('menu-title').textContent = mode === 'map' ? 'Map wählen' : 'Brawler';
+    document.getElementById('close-menu').textContent = mode === 'map' ? '✕ Zurück' : '✕ Schließen';
+    document.getElementById('menu-note').textContent = mode === 'map'
+      ? 'Wähle eine Map – das Spiel startet sofort. Wände und Wasser blockieren, Büsche geben Deckung.'
+      : 'Brawler antippen zum Wählen, gesperrte mit Münzen freischalten. Werte sind nur ungefähr und dienen dem Training in der Arena.';
     renderMenu(); menuEl.hidden = false; menuEl.scrollTop = 0; document.body.style.overflow = 'hidden';
   }
   function closeMenu() { menuOpen = false; menuEl.hidden = true; document.body.style.overflow = ''; }
-  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { menuTab = t.dataset.tab; renderMenu(); }));
-  document.getElementById('open-menu').addEventListener('click', openMenu);
+  document.getElementById('open-menu').addEventListener('click', () => openMenu('brawler'));
+  document.getElementById('brawler-btn').addEventListener('click', () => openMenu('brawler'));
+  document.getElementById('start-btn').addEventListener('click', () => openMenu('map'));
   document.getElementById('close-menu').addEventListener('click', closeMenu);
   menuEl.addEventListener('click', e => { if (e.target === menuEl) closeMenu(); });
 
@@ -738,6 +774,8 @@
   const W = cv.width, H = cv.height;
   const atkBtn = document.getElementById('atk'), supBtn = document.getElementById('sup'), whoEl = document.getElementById('who');
   const whereEl = document.getElementById('where'), resultEl = document.getElementById('result'), diffEl = document.getElementById('diff');
+  const lobbyEl = document.getElementById('lobby'), gameEl = document.getElementById('game');
+  let screen = 'lobby'; // 'lobby' = Hauptmenü, 'game' = laufendes Match
 
   const KILLS_TO_WIN = 10, RESPAWN = 3, WIN_COINS = 100, LOSE_COINS = 20;
   const DIFFS = {
@@ -823,12 +861,38 @@
     fighters.forEach((f, i) => respawn(f, i === 0));
     whoEl.textContent = pb.name;
   }
-  const select = id => newMatch(id);
-  function applyMap(id) {
-    M = MAPS.find(m => m.id === id) || MAPS[0];
+  const select = id => { if (screen === 'game') newMatch(id); else renderLobby(); };
+  function startGame(mapId) {
+    M = MAPS.find(m => m.id === mapId) || MAPS[0];
     save.map = M.id; persist();
+    screen = 'game'; lobbyEl.hidden = true; gameEl.hidden = false;
     whereEl.textContent = '· ' + M.name;
-    newMatch(P ? P.B.id : save.selected);
+    newMatch(save.selected);
+    gameEl.scrollIntoView({ block: 'center' });
+  }
+  function goHome() {
+    screen = 'lobby'; resultEl.hidden = true; gameEl.hidden = true; lobbyEl.hidden = false;
+    for (const k in keys) keys[k] = false; moveTo = null;
+    renderLobby();
+  }
+
+  /* ----- Hauptmenü ----- */
+  const heroCv = document.getElementById('hero'), hctx = heroCv.getContext('2d');
+  function renderLobby() {
+    const b = byId[save.selected];
+    document.getElementById('hero-name').textContent = b.name;
+    document.getElementById('hero-role').textContent = b.role + ' · ' + RARITIES.find(r => r.id === b.rarity).name;
+    document.getElementById('hero-stats').innerHTML =
+      `<div>Leben<b>${b.hp}</b></div><div>Tempo<b>${b.speed >= 205 ? 'Schnell' : 'Normal'}</b></div><div>Reichweite<b>${rangeLabel(rangeOf(b.atk))}</b></div>`;
+    document.getElementById('hero-atk').innerHTML = `<strong>${b.atkName}:</strong> ${b.atkText}`;
+    document.getElementById('hero-sup').innerHTML = `<strong>${b.supName}:</strong> ${b.supText}`;
+  }
+  function drawHero(now) {
+    const t = now / 1000, b = byId[save.selected], w = heroCv.width, h = heroCv.height;
+    const g = hctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#1e3a8a'); g.addColorStop(.62, '#38bdf8'); g.addColorStop(.62, '#2f7d3a'); g.addColorStop(1, '#25652f');
+    hctx.fillStyle = g; hctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 6; i++) { hctx.fillStyle = 'rgba(255,255,255,.55)'; hctx.beginPath(); hctx.ellipse((i * 83 + t * 8) % (w + 80) - 40, 40 + (i % 3) * 28, 38, 11, 0, 0, TAU); hctx.fill(); }
+    drawBrawler(hctx, b, 150, 188 + Math.sin(t * 3) * 3, .25 + Math.sin(t * 1.1) * .35, 0, 3.4);
   }
 
   function pop(x, y, color, n) {
@@ -850,9 +914,10 @@
     resultEl.innerHTML = `<h2>${win ? 'Sieg!' : 'Niederlage'}</h2>
       <p>${win ? 'Du hast' : w.name + ' (Bot) hat'} ${KILLS_TO_WIN} Kills erreicht.</p>
       <p>Deine Kills: ${P.kills} · +${coins} 🪙</p>
-      <button class="act" id="again">Nochmal</button>`;
+      <div class="row"><button class="act" id="again">Nochmal</button><button class="act alt" id="to-home">Hauptmenü</button></div>`;
     resultEl.hidden = false;
     document.getElementById('again').addEventListener('click', () => newMatch(P.B.id));
+    document.getElementById('to-home').addEventListener('click', goHome);
   }
   function hit(t, dmg, src, o) {
     if (!t.alive || matchOver) return;
@@ -962,6 +1027,7 @@
   cv.addEventListener('pointercancel', () => { moveTo = null; });
   atkBtn.addEventListener('click', () => attack());
   supBtn.addEventListener('click', () => superAttack());
+  document.getElementById('home').addEventListener('click', goHome);
   diffEl.value = save.diff;
   diffEl.addEventListener('change', () => { save.diff = diffEl.value; DIFF = DIFFS[save.diff]; persist(); diffEl.blur(); });
 
@@ -1058,10 +1124,14 @@
   }
 
   let last = performance.now();
-  function frame(now) { const dt = Math.min(.05, (now - last) / 1000); last = now; update(dt); draw(); requestAnimationFrame(frame); }
+  function frame(now) {
+    const dt = Math.min(.05, (now - last) / 1000); last = now;
+    if (screen === 'game') { update(dt); draw(); } else drawHero(now);
+    requestAnimationFrame(frame);
+  }
 
   function update(dt) {
-    if (menuOpen) return;
+    if (menuOpen || screen !== 'game') return;
     if (!matchOver) {
       for (const f of fighters) {
         if (!f.alive) { f.dead += dt; if (f.dead >= RESPAWN) respawn(f); continue; }
@@ -1319,8 +1389,7 @@
   }
 
   showCoins();
-  whereEl.textContent = '· ' + M.name;
-  newMatch(save.selected);
+  renderLobby();
   requestAnimationFrame(frame);
 })();
 </script>

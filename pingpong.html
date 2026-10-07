@@ -159,9 +159,9 @@
     hit.x = ball.x; hit.dir = dir; hit.landed = false; (server === 'p' ? P : B).swing = 1;
     state = 'play'; sndHit(0);
   }
-  const HP = 1.2, BALL_R = .12;                       // Schlaghöhe, sichtbarer Ballradius (3D)
+  const HP = .8, BALL_R = .12;                       // Schlaghöhe, sichtbarer Ballradius (3D)
   function ballH() {                                   // Flughöhe über dem Tisch: Aufsetzer auf der Seite des Gegners
-    if (state === 'serve') return HP + .62 + Math.sin(time * 3) * .05;   // Ball wird hochgeworfen
+    if (state === 'serve') return HP + .35 + Math.sin(time * 3) * .05;   // Ball wird hochgeworfen
     const span = TB.r - TB.l, u0 = (hit.x - TB.l) / span, ul = hit.dir > 0 ? .72 : .28, u1 = hit.dir > 0 ? .9 : .1, u = (ball.x - TB.l) / span;
     const t = clamp((u - u0) / (ul - u0), 0, 9);
     if (t < 1) return HP * (1 - t) + 4 * .7 * t * (1 - t);

@@ -55,6 +55,8 @@
   .hero{padding:36px 0 18px}
   .hero h1{margin:0 0 6px;font-size:clamp(28px,5vw,44px);line-height:1.1}
   .hero p{margin:0;color:var(--muted)}
+  .salebar{display:inline-block;margin:0 0 12px;padding:8px 14px;border-radius:999px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:14px}
+  .tag{letter-spacing:.02em}
   .tools{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:14px 0 18px;flex-wrap:wrap}
   .tools select{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
   .count{color:var(--muted);font-size:14px}
@@ -223,6 +225,7 @@
 <main class="wrap">
   <section class="hero">
     <h1>Rare Form</h1>
+    <div class="salebar" id="salebar" hidden></div>
     <p data-ih="hero.sub">Streetwear · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert.</p>
   </section>
   <div class="tools">
@@ -287,7 +290,7 @@
       'count.one': '{n} Artikel', 'count.many': '{n} Artikel',
       'type.tshirt': 'T-Shirt', 'type.hose': 'Hose', 'type.zubehoer': 'Accessoire', 'type.haarpflege': 'Haarpflege',
       'sec.tshirt': 'T-Shirts', 'sec.hose': 'Hosen', 'sec.zubehoer': 'Accessoires', 'sec.haarpflege': 'Haarpflege',
-      'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
+      'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'sale.bar': '🍂 Herbst-Sale: −{pct} % auf alles · nur bis {date}', 'sale.tag': '−{pct} %', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
       'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
@@ -316,7 +319,7 @@
       'a.return': 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ',
       'a.sizes.h': 'Verfügbare Größen:', 'a.sizes.t': 'Das Rare Form Shirt hat einen lockeren, oversized Schnitt und die Baggy-Jeans sind locker geschnitten – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.',
       'a.pay': 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.',
-      'a.price.h': 'Preise (inkl. MwSt.):', 'a.price.t': 'Rabattcodes gibt es aktuell nicht.', 'a.prod.t': 'Angaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.',
+      'a.price.h': 'Preise (inkl. MwSt.):', 'a.price.t': 'Rabattcodes gibt es aktuell nicht.', 'a.sale': 'Aktuell läuft der Herbst-Sale: −{pct} % auf alle Artikel bis {date}. Die Preise unten sind schon reduziert, der alte Preis steht durchgestrichen daneben.', 'a.prod.t': 'Angaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.',
       'a.order': 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ',
       'a.cart.empty': 'Dein Warenkorb ist leer. Klick beim Shirt auf „Kaufen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.',
       'a.cart.full': 'In deinem Warenkorb: {items}.\nZwischensumme {sub}, Versand {ship}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.', 'a.cart.free': 'kostenlos',
@@ -334,7 +337,7 @@
       'count.one': '{n} item', 'count.many': '{n} items',
       'type.tshirt': 'T-shirt', 'type.hose': 'Trousers', 'type.zubehoer': 'Accessory', 'type.haarpflege': 'Hair care',
       'sec.tshirt': 'T-Shirts', 'sec.hose': 'Trousers', 'sec.zubehoer': 'Accessories', 'sec.haarpflege': 'Hair care',
-      'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
+      'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'sale.bar': '🍂 Autumn Sale: {pct}% off everything · until {date} only', 'sale.tag': '−{pct}%', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
       'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'line.color': '{color} · ', 'colors.n': '{n} colours',
@@ -363,7 +366,7 @@
       'a.return': 'You have a 14-day right of return. Details of the return process have not been added yet. ',
       'a.sizes.h': 'Available sizes:', 'a.sizes.t': 'The Rare Form Shirt has a relaxed, oversized fit and the baggy jeans are cut loose – if you do not like it that wide, go one size down. I do not have an exact size chart yet.',
       'a.pay': 'At checkout you can pay with PayPal, credit or debit card (Visa, Mastercard, American Express, Maestro and more), Klarna or on invoice. The shop is currently a demo: nothing is actually paid or charged.',
-      'a.price.h': 'Prices (incl. VAT):', 'a.price.t': 'There are no discount codes at the moment.', 'a.prod.t': 'I do not have details on material and care yet – they will be added.',
+      'a.price.h': 'Prices (incl. VAT):', 'a.price.t': 'There are no discount codes at the moment.', 'a.sale': 'The Autumn Sale is on: {pct}% off all items until {date}. The prices below are already reduced; the old price is shown crossed out.', 'a.prod.t': 'I do not have details on material and care yet – they will be added.',
       'a.order': 'This is a demo shop: orders are only saved in the browser and not actually shipped. Once the shop is live you will receive a confirmation by email. ',
       'a.cart.empty': 'Your cart is empty. Tap “Buy” on a product, choose your size and add it to the cart. Use “Cart” at the top right to check out.',
       'a.cart.full': 'In your cart: {items}.\nSubtotal {sub}, shipping {ship}. Use “Cart” at the top right to check out.', 'a.cart.free': 'free',
@@ -457,12 +460,23 @@
     Object.defineProperty(p, 'name', { get: () => (LANG === 'en' && e ? e.name : de.name), enumerable: true });
     Object.defineProperty(p, 'desc', { get: () => (LANG === 'en' && e ? e.desc : de.desc), enumerable: true });
   });
+  // Herbst-Sale: gilt für alle Artikel bis einschließlich 31. Oktober 2026, ab 1. November ist er automatisch weg.
+  // Prozentsatz hier ändern (PERCENT). Geprüft wird die Uhr im Browser – das ist nur für die Demo; ein echter Shop prüft das auf dem Server.
+  const SALE = { PERCENT: 20, END: new Date(2026, 10, 1) };   // END = 1. November 2026, 00:00 Uhr (Monat 10 = November)
+  const saleOn = () => Date.now() < SALE.END.getTime();
+  PRODUCTS.forEach(p => {
+    const base = p.price;
+    Object.defineProperty(p, 'price', { get: () => (saleOn() ? Math.round(base * (100 - SALE.PERCENT)) / 100 : base), enumerable: true });
+    Object.defineProperty(p, 'old', { get: () => (saleOn() ? base : undefined), enumerable: true });
+  });
   const FREE_UP_TO = 100, SHIPPING = 4.90, MAX_QTY = 10;
   const loc = () => (LANG === 'en' ? 'en-IE' : 'de-DE');
   const eur = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR' });
   const eur0 = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
   const colorLabel = c => t('col.' + c);
   const colorKeys = p => (p.colors ? Object.keys(p.colors) : []);
+  const saleVars = () => ({ pct: SALE.PERCENT, date: new Date(SALE.END.getTime() - 864e5).toLocaleDateString(loc(), { day: 'numeric', month: 'long' }) });
+  function renderSale() { const b = $('salebar'); b.hidden = !saleOn(); if (saleOn()) b.textContent = t('sale.bar', saleVars()); }
   const sizeLabel = s => (s === 'Einheitsgröße' ? t('onesize') : s);
   const $ = id => document.getElementById(id);
   const byId = id => PRODUCTS.find(p => p.id === id);
@@ -608,7 +622,7 @@
     if (sortBy === 'ab') list = [...list].sort((a, b) => b.price - a.price);
     if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, LANG));
     $('count').textContent = t(list.length === 1 ? 'count.one' : 'count.many', { n: list.length });
-    const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(t('view', { name: p.name }))}">${picture(p)}${p.old ? `<span class="tag">${t('sale')}</span>` : ''}</div>
+    const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(t('view', { name: p.name }))}">${picture(p)}${p.old ? `<span class="tag">${t('sale.tag', { pct: SALE.PERCENT })}</span>` : ''}</div>
       <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${t('type.' + p.type)}${p.colors ? ' · ' + t('colors.n', { n: colorKeys(p).length }) : ''}${p.sizes.length ? ' · ' + p.sizes.map(sizeLabel).join(' ') : ''}</div>
       <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">${t('buy')}</button></div></article>`;
     // T-Shirts oben, Hosen darunter
@@ -747,7 +761,7 @@
     { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben', 'return', 'refund', 'exchange', 'send back', 'withdraw'], a: () => t('a.return') + contact() },
     { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt', 'size', 'sizes', 'fit', 'measure', 'small', 'large'], a: () => `${t('a.sizes.h')}\n${list(PRODUCTS.filter(p => p.sizes.length), p => `• ${p.name}: ${p.sizes.map(sizeLabel).join(', ')}`)}\n${t('a.sizes.t')}` },
     { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung', 'pay', 'payment', 'card', 'invoice', 'credit'], a: () => t('a.pay') },
-    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale', 'price', 'cost', 'expensive', 'discount', 'coupon', 'voucher'], a: () => `${t('a.price.h')}\n${list(PRODUCTS, p => `• ${p.name}: ${eur(p.price)}`)}\n${t('a.price.t')}` },
+    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale', 'price', 'cost', 'expensive', 'discount', 'coupon', 'voucher'], a: () => `${saleOn() ? t('a.sale', saleVars()) + '\n' : ''}${t('a.price.h')}\n${list(PRODUCTS, p => `• ${p.name}: ${eur(p.price)}`)}\n${t('a.price.t')}` },
     { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib', 'fabric', 'cotton', 'wash', 'care', 'quality', 'product', 'colour', 'color', 'white', 'describe'], a: () => list(PRODUCTS, p => `• ${p.name}: ${p.desc}`) + '\n' + t('a.prod.t') },
     { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung', 'parcel', 'package', 'confirmation', 'not arrived'], a: () => t('a.order') + contact() },
     { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen', 'cart', 'basket', 'buy', 'add to', 'how do i order'], a: () => {
@@ -815,6 +829,7 @@
     $('langbtn').textContent = t('lang.btn'); $('langbtn').setAttribute('aria-label', t('lang.aria')); $('langbtn').title = t('lang.aria');
     $('chips').innerHTML = t('chips').map(c => `<button type="button">${esc(c)}</button>`).join('');
     if (typeof applyTheme === 'function') applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+    renderSale();
     if (rerender) { renderGrid(); renderCart(); $('chatlog').innerHTML = ''; history.length = 0; if (!$('chat').hidden) say('bot', t('chat.hello')); if (openEl === $('modal') && cur) openProduct(cur.id); }
   }
 
@@ -844,6 +859,9 @@
     try { localStorage.setItem('rare-form-lang', l); } catch (e) { /* ignorieren */ }
   });
   applyLang(savedLang === 'en' ? 'en' : 'de', false);
+  // Sale-Ende: bei offener Seite um Mitternacht automatisch Preise und Banner zurücksetzen
+  let wasSale = saleOn();
+  setInterval(() => { if (wasSale && !saleOn()) { wasSale = false; renderSale(); renderGrid(); renderCart(); if (openEl === $('modal') && cur) openProduct(cur.id); } }, 30000);
   renderGrid(); renderCart();
   // Web-App: Offline-Speicher (Service Worker) nur über http(s), nie aus einer lokalen Datei
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* ignorieren */ } }

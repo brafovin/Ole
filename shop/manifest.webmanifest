@@ -1,10 +1,10 @@
 {
-  "id": "./shop.html",
+  "id": "./",
   "name": "Rare Form",
   "short_name": "Rare Form",
   "description": "Streetwear: T-Shirts, Baggy-Jeans und Accessoires",
   "lang": "de",
-  "start_url": "./shop.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

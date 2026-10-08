@@ -6,6 +6,7 @@
 <title>Rare Form – Streetwear</title>
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0d0d0f">
+<script>try{var t=localStorage.getItem("rare-form-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -14,7 +15,10 @@
 <meta name="apple-mobile-web-app-title" content="Rare Form">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
-  :root{color-scheme:dark;--bg:#0d0d0f;--card:#17171a;--text:#f2efea;--muted:#9b968f;--line:#2a2a2f;--accent:#e4d3a8;--accent-d:#f1e5c4;--on-accent:#17130a;--ok:#4fbf86;--bad:#e5484d}
+  :root{color-scheme:dark;--bg:#0d0d0f;--card:#17171a;--text:#f2efea;--muted:#9b968f;--line:#2a2a2f;--accent:#e4d3a8;--accent-d:#f1e5c4;--on-accent:#17130a;--ok:#4fbf86;--bad:#e5484d;
+    --btn:#fff;--btn-h:#e6e6e6;--on-btn:#111;--pic:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);--logo-filter:none;--panel-shadow:rgba(0,0,0,.6)}
+  :root[data-theme="light"]{color-scheme:light;--bg:#f5f3ef;--card:#fff;--text:#17171a;--muted:#6b665f;--line:#e2ded6;--accent:#1b1b1f;--accent-d:#3b3b42;--on-accent:#f5f3ef;--ok:#1f8a58;--bad:#d1343a;
+    --btn:#17171a;--btn-h:#3b3b42;--on-btn:#fff;--pic:radial-gradient(ellipse at 50% 36%,#e9e6e0 0%,#d9d5ce 60%,#cbc6be 100%);--logo-filter:invert(1);--panel-shadow:rgba(0,0,0,.22)}
   *{box-sizing:border-box}
   [hidden]{display:none !important}
   html{scroll-behavior:smooth}
@@ -26,7 +30,7 @@
   .bar{display:flex;align-items:center;gap:16px;height:60px}
   .logo{font-weight:800;font-size:20px;letter-spacing:.02em;text-decoration:none;color:var(--text)}
   .logo{display:flex;align-items:center;gap:11px}
-  .logo img{display:block;width:auto}
+  .logo img{display:block;width:auto;filter:var(--logo-filter)}
   .lg-mark{height:36px}
   .lg-word{height:15px}
   @media (max-width:380px){.lg-mark{height:30px}.lg-word{height:12px}.logo{gap:8px}.cartbtn{padding:7px 10px;font-size:13px}}
@@ -41,6 +45,8 @@
     nav::-webkit-scrollbar{display:none}
   }
   .spacer{flex:1}
+  .themebtn{background:var(--card);border:1px solid var(--line);border-radius:12px;width:40px;height:38px;font-size:18px;line-height:1;display:grid;place-items:center;padding:0}
+  .themebtn:hover{border-color:var(--accent)}
   .cartbtn{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:700}
   .cartbtn b{position:absolute;top:-7px;right:-7px;background:var(--bad);color:#fff;border-radius:999px;min-width:20px;height:20px;font-size:12px;display:grid;place-items:center;padding:0 5px}
   .cartbtn b[hidden]{display:none}
@@ -54,7 +60,7 @@
   .sec h2{margin:6px 0 14px;font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
   #grid{padding-bottom:18px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-  .pic{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);cursor:pointer;position:relative;overflow:hidden}
+  .pic{aspect-ratio:1/1;display:grid;place-items:center;background:var(--pic);cursor:pointer;position:relative;overflow:hidden}
   .pic svg{width:86%;height:86%}
   .pic img{width:100%;height:100%;object-fit:cover;display:block}
   .views{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;background:rgba(0,0,0,.6);padding:4px;border-radius:999px;backdrop-filter:blur(6px)}
@@ -74,8 +80,8 @@
   .primary:disabled{opacity:.45;cursor:not-allowed}
   .ghost{background:none;border:1px solid var(--line);border-radius:12px;padding:10px 16px;font-weight:600}
   .card .primary{margin-top:auto}
-  .card .primary{background:#fff;color:#111}
-  .card .primary:hover{background:#e6e6e6}
+  .card .primary{background:var(--btn);color:var(--on-btn)}
+  .card .primary:hover{background:var(--btn-h)}
   /* Dialoge */
   .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none}
   .scrim.open{display:block}
@@ -134,9 +140,9 @@
   .done{text-align:center;padding:12px 0}
   .done .ok{font-size:48px}
   /* Hilfe-Chat */
-  .chatbtn{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:15;background:#fff;color:#111;border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
-  .chatbtn:hover{background:#e6e6e6}
-  .chat{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:16;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100vh - 36px));background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
+  .chatbtn{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:15;background:var(--btn);color:var(--on-btn);border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px var(--panel-shadow);display:flex;gap:8px;align-items:center}
+  .chatbtn:hover{background:var(--btn-h)}
+  .chat{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:16;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100vh - 36px));background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px var(--panel-shadow);display:flex;flex-direction:column;overflow:hidden}
   .chat header{position:static;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
   .chat header small{display:block;color:var(--muted);font-size:12px}
   .chat header button{background:none;border:1px solid var(--line);border-radius:50%;width:32px;height:32px}
@@ -185,6 +191,7 @@
       <button data-cat="haarpflege">Haarpflege</button>
     </nav>
     <div class="spacer"></div>
+    <button class="themebtn" id="themebtn" aria-label="Zwischen hellem und dunklem Modus wechseln" title="Hell / Dunkel"></button>
     <button class="cartbtn" id="cartbtn" aria-label="Warenkorb öffnen">🛒 Warenkorb <b id="cartcount" hidden>0</b></button>
   </div>
 </header>
@@ -590,6 +597,20 @@
 
   if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
   document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_UP_TO).replace(',00', ''); });   // Schwelle für kostenlosen Versand
+  // Hell/Dunkel: Auswahl wird im Browser gespeichert; Standard ist dunkel
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    $('themebtn').textContent = t === 'light' ? '🌙' : '☀️';
+    $('themebtn').title = t === 'light' ? 'Dunkler Modus' : 'Heller Modus';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'light' ? '#f5f3ef' : '#0d0d0f');
+    document.querySelector('meta[name="color-scheme"]').setAttribute('content', t);
+  }
+  let saved = null; try { saved = localStorage.getItem('rare-form-theme'); } catch (e) { /* ignorieren */ }
+  applyTheme(saved === 'light' || saved === 'dark' ? saved : (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'));
+  $('themebtn').addEventListener('click', () => {
+    const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(t); try { localStorage.setItem('rare-form-theme', t); } catch (e) { /* ignorieren */ }
+  });
   renderGrid(); renderCart();
   // Web-App: Offline-Speicher (Service Worker) nur über http(s), nie aus einer lokalen Datei
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* ignorieren */ } }

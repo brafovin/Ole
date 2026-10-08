@@ -177,6 +177,7 @@
       <button data-cat="tshirt">T-Shirts</button>
       <button data-cat="hose">Hosen</button>
       <button data-cat="zubehoer">Accessoires</button>
+      <button data-cat="haarpflege">Haarpflege</button>
     </nav>
     <div class="spacer"></div>
     <button class="cartbtn" id="cartbtn" aria-label="Warenkorb öffnen">🛒 Warenkorb <b id="cartcount" hidden>0</b></button>
@@ -211,7 +212,7 @@
     <h2 id="mtitle"></h2>
     <div class="price" id="mprice"></div>
     <p id="mdesc"></p>
-    <div><b>Größe</b></div>
+    <div id="msizelabel"><b>Größe</b></div>
     <div class="sizes" id="msizes"></div>
     <div class="err" id="merr"></div>
     <button class="primary" id="madd">In den Warenkorb</button>
@@ -255,6 +256,9 @@
     // PLATZHALTER: Name, Länge/Größe der Kette sind noch nicht bestätigt (Preis 9,99 € laut Auftrag)
     { id: 'rf6', type: 'zubehoer', name: 'Panzerkette (Silberfarben)', price: 9.99, color: '#c9c9c9', img: 'fotos/kette.webp', allSizes: ['Einheitsgröße'], sizes: ['Einheitsgröße'],
       desc: 'Kette im Panzerketten-Stil in Silberfarbe mit Federring-Verschluss.' },
+    // PLATZHALTER: Preis ist noch nicht bestätigt; die Flasche ist ein nachgebautes Mockup, kein Foto des echten Produkts
+    { id: 'rf7', type: 'haarpflege', name: 'Rare Form Texture Powder', price: 14.99, color: '#232323', img: 'fotos/texture-powder.webp', allSizes: [], sizes: [],
+      desc: 'Texture Powder in schwarzer Flasche mit „Rare Form“-Aufdruck.' },
   ];
   const FREE_UP_TO = 100, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -356,7 +360,7 @@
   let cart = [];   // { id, size, qty }
   try {
     const c = JSON.parse(localStorage.getItem(CART_KEY));
-    if (Array.isArray(c)) cart = c.filter(l => byId(l.id) && byId(l.id).sizes.includes(l.size) && l.qty > 0).map(l => ({ id: l.id, size: l.size, qty: Math.min(MAX_QTY, l.qty | 0) }));
+    if (Array.isArray(c)) cart = c.filter(l => byId(l.id) && (!byId(l.id).sizes.length || byId(l.id).sizes.includes(l.size)) && l.qty > 0).map(l => ({ id: l.id, size: l.size, qty: Math.min(MAX_QTY, l.qty | 0) }));
   } catch (e) { /* leerer Warenkorb */ }
   const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* ignorieren */ } };
   const subtotal = () => cart.reduce((s, l) => s + byId(l.id).price * l.qty, 0);
@@ -372,7 +376,7 @@
     const n = itemCount(); $('cartcount').textContent = n; $('cartcount').hidden = n === 0;
     $('lines').innerHTML = cart.length ? cart.map((l, i) => {
       const p = byId(l.id);
-      return `<div class="line"><div class="pic">${picture(p)}</div><div><h4>${esc(p.name)}</h4><div class="meta">Größe ${l.size} · ${eur(p.price)}</div>
+      return `<div class="line"><div class="pic">${picture(p)}</div><div><h4>${esc(p.name)}</h4><div class="meta">${l.size ? `Größe ${l.size} · ` : ''}${eur(p.price)}</div>
         <div class="qty"><button data-q="${i}" data-d="-1" aria-label="weniger">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="mehr">+</button></div>
         <button class="rm" data-rm="${i}">Entfernen</button></div><b>${eur(p.price * l.qty)}</b></div>`;
     }).join('') : '<div class="empty">Dein Warenkorb ist leer.</div>';
@@ -401,10 +405,10 @@
     if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'de'));
     $('count').textContent = list.length + (list.length === 1 ? ' Artikel' : ' Artikel');
     const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(p.name)} ansehen">${picture(p)}${p.old ? '<span class="tag">Angebot</span>' : ''}</div>
-      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${{ tshirt: 'T-Shirt', hose: 'Hose', zubehoer: 'Accessoire' }[p.type]} · ${p.sizes.join(' ')}</div>
+      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${{ tshirt: 'T-Shirt', hose: 'Hose', zubehoer: 'Accessoire', haarpflege: 'Haarpflege' }[p.type]}${p.sizes.length ? ' · ' + p.sizes.join(' ') : ''}</div>
       <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">Kaufen</button></div></article>`;
     // T-Shirts oben, Hosen darunter
-    const SECTIONS = [['tshirt', 'T-Shirts'], ['hose', 'Hosen'], ['zubehoer', 'Accessoires']];
+    const SECTIONS = [['tshirt', 'T-Shirts'], ['hose', 'Hosen'], ['zubehoer', 'Accessoires'], ['haarpflege', 'Haarpflege']];
     $('grid').innerHTML = SECTIONS.map(([t, title]) => { const items = list.filter(p => p.type === t); return items.length ? `<section class="sec"><h2>${title}</h2><div class="grid">${items.map(card).join('')}</div></section>` : ''; }).join('');
   }
   $('nav').addEventListener('click', e => {
@@ -435,6 +439,7 @@
     setView('front'); $('mtitle').textContent = cur.name;
     $('mprice').innerHTML = eur(cur.price) + (cur.old ? `<s>${eur(cur.old)}</s>` : '');
     $('mdesc').textContent = cur.desc; $('merr').textContent = '';
+    const hasSizes = cur.sizes.length > 0; $('msizelabel').hidden = !hasSizes; $('msizes').hidden = !hasSizes;
     $('msizes').innerHTML = (cur.allSizes || ALL_SIZES).map(s => `<button data-size="${s}" ${cur.sizes.includes(s) ? '' : 'disabled title="ausverkauft"'}>${s}</button>`).join('');
     show($('modal'));
   }
@@ -444,8 +449,8 @@
     document.querySelectorAll('#msizes button').forEach(x => x.classList.toggle('on', x === b));
   });
   $('madd').addEventListener('click', () => {
-    if (!pick) { $('merr').textContent = 'Bitte wähle eine Größe.'; return; }
-    addToCart(cur.id, pick); closeAll(); toast(`${cur.name} (${pick}) im Warenkorb`);
+    if (cur.sizes.length && !pick) { $('merr').textContent = 'Bitte wähle eine Größe.'; return; }
+    addToCart(cur.id, pick || ''); closeAll(); toast(`${cur.name}${pick ? ` (${pick})` : ''} im Warenkorb`);
   });
 
   /* ---------- Kasse (Demo: keine echte Zahlung) ---------- */
@@ -525,7 +530,7 @@
     { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Der Versand ist bis ${eur(FREE_UP_TO)} Bestellwert kostenlos. Bei Bestellungen darüber kostet er ${eur(SHIPPING)}.` },
     { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
     { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
-    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Verfügbare Größen:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nDas Rare Form Shirt hat einen lockeren, oversized Schnitt und die Baggy-Jeans sind locker geschnitten – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.` },
+    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Verfügbare Größen:\n${PRODUCTS.filter(p => p.sizes.length).map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nDas Rare Form Shirt hat einen lockeren, oversized Schnitt und die Baggy-Jeans sind locker geschnitten – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.` },
     { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.' },
     { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Preise (inkl. MwSt.):\n${PRODUCTS.map(p => `• ${p.name}: ${eur(p.price)}`).join('\n')}\nRabattcodes gibt es aktuell nicht.` },
     { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => PRODUCTS.map(p => `• ${p.name}: ${p.desc}`).join('\n') + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
@@ -534,7 +539,7 @@
       if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Kaufen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
       return `In deinem Warenkorb: ${cart.map(l => `${l.qty}× ${byId(l.id).name} (${l.size})`).join(', ')}.\nZwischensumme ${eur(subtotal())}, Versand ${shipping() ? eur(shipping()) : 'kostenlos'}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.`;
     } },
-    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nEine Lagerzahl kann ich nicht sehen.` },
+    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell:\n${PRODUCTS.map(p => `• ${p.name}${p.sizes.length ? ': ' + p.sizes.join(', ') : ''}`).join('\n')}\nEine Lagerzahl kann ich nicht sehen.` },
     { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem'], a: () => 'Das tut mir leid! Versuch bitte, die Seite neu zu laden (dein Warenkorb bleibt erhalten). Wenn es dann immer noch nicht klappt: ' + contact() },
     { k: ['mensch', 'mitarbeiter', 'support', 'kontakt', 'telefon', 'mail', 'beschwerde', 'impressum', 'echte person', 'jemand'], a: () => 'Ich bin ein automatischer Assistent. Für alles Weitere: ' + contact() },
   ];

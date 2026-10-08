@@ -373,7 +373,7 @@
     $('count').textContent = list.length + (list.length === 1 ? ' Artikel' : ' Artikel');
     $('grid').innerHTML = list.map(p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(p.name)} ansehen">${picture(p)}${p.old ? '<span class="tag">Angebot</span>' : ''}</div>
       <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${p.type === 'tshirt' ? 'T-Shirt' : 'Hose'} · ${p.sizes.join(' ')}</div>
-      <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">Größe wählen</button></div></article>`).join('');
+      <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">Kaufen</button></div></article>`).join('');
   }
   $('nav').addEventListener('click', e => {
     const b = e.target.closest('[data-cat]'); if (!b) return;
@@ -492,7 +492,7 @@
     { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => PRODUCTS.map(p => `• ${p.name}: ${p.desc}`).join('\n') + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
     { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung'], a: () => 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ' + contact() },
     { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen'], a: () => {
-      if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Größe wählen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
+      if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Kaufen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
       return `In deinem Warenkorb: ${cart.map(l => `${l.qty}× ${byId(l.id).name} (${l.size})`).join(', ')}.\nZwischensumme ${eur(subtotal())}, Versand ${shipping() ? eur(shipping()) : 'kostenlos'}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.`;
     } },
     { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nEine Lagerzahl kann ich nicht sehen.` },

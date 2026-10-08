@@ -2,9 +2,16 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rare Form – Streetwear</title>
 <meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0d0d0f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rare Form">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
   :root{color-scheme:dark;--bg:#0d0d0f;--card:#17171a;--text:#f2efea;--muted:#9b968f;--line:#2a2a2f;--accent:#e4d3a8;--accent-d:#f1e5c4;--on-accent:#17130a;--ok:#4fbf86;--bad:#e5484d}
   *{box-sizing:border-box}
@@ -13,7 +20,7 @@
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
   button,input,select{font:inherit;color:inherit}
   button{cursor:pointer}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
   header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
   .bar{display:flex;align-items:center;gap:16px;height:60px}
   .logo{font-weight:800;font-size:20px;letter-spacing:.02em;text-decoration:none;color:var(--text)}
@@ -21,6 +28,13 @@
   nav{display:flex;gap:6px;margin-left:8px}
   nav button{background:none;border:0;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted)}
   nav button.on{background:var(--accent);color:var(--on-accent)}
+  nav button{white-space:nowrap}
+  .logo{white-space:nowrap}
+  @media (max-width:640px){
+    .bar{flex-wrap:wrap;height:auto;padding-block:10px;gap:8px 12px}
+    nav{order:3;width:100%;margin-left:0;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+    nav::-webkit-scrollbar{display:none}
+  }
   .spacer{flex:1}
   .cartbtn{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:700}
   .cartbtn b{position:absolute;top:-7px;right:-7px;background:var(--bad);color:#fff;border-radius:999px;min-width:20px;height:20px;font-size:12px;display:grid;place-items:center;padding:0 5px}
@@ -62,7 +76,7 @@
   .scrim.open{display:block}
   .modal{position:fixed;z-index:21;left:50%;top:50%;transform:translate(-50%,-50%);width:min(760px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--card);border-radius:18px;display:none}
   .modal.open{display:grid;grid-template-columns:1fr 1fr}
-  @media (max-width:640px){.modal.open{grid-template-columns:1fr}}
+  @media (max-width:640px){.modal.open{grid-template-columns:1fr}.modal .pic{aspect-ratio:1313/1198;min-height:0}}
   .modal .pic{aspect-ratio:auto;min-height:280px;cursor:default}
   .detail{padding:22px;display:flex;flex-direction:column;gap:10px}
   .detail h2{margin:0;padding-right:44px}
@@ -96,10 +110,10 @@
   .checkout{position:fixed;z-index:22;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--card);border-radius:18px;padding:22px;display:none}
   .checkout.open{display:block}
   .checkout h2{margin:0 0 4px}
-  .checkout form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-  .checkout label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+  .checkout form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .checkout label{min-width:0;display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
   .checkout label.full{grid-column:1/-1}
-  .checkout input,.checkout select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--text)}
+  .checkout input,.checkout select{min-width:0;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--text)}
   .checkout input:invalid:not(:placeholder-shown){border-color:var(--bad)}
   .pays{grid-column:1/-1;display:grid;gap:8px;margin-top:2px}
   .pays>b{font-size:13px;color:var(--muted);font-weight:600}
@@ -115,9 +129,9 @@
   .done{text-align:center;padding:12px 0}
   .done .ok{font-size:48px}
   /* Hilfe-Chat */
-  .chatbtn{position:fixed;right:18px;bottom:18px;z-index:15;background:#fff;color:#111;border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
+  .chatbtn{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:15;background:#fff;color:#111;border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
   .chatbtn:hover{background:#e6e6e6}
-  .chat{position:fixed;right:18px;bottom:18px;z-index:16;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100vh - 36px));background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
+  .chat{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:max(18px,env(safe-area-inset-bottom));z-index:16;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100vh - 36px));background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
   .chat header{position:static;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
   .chat header small{display:block;color:var(--muted);font-size:12px}
   .chat header button{background:none;border:1px solid var(--line);border-radius:50%;width:32px;height:32px}
@@ -133,7 +147,7 @@
   #chatform input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text)}
   #chatform .primary{padding:10px 14px}
   @media (max-width:520px){.chat{right:0;bottom:0;width:100vw;height:min(78vh,560px);border-radius:18px 18px 0 0}}
-  footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:13px}
+  footer{border-top:1px solid var(--line);padding:22px 0 calc(22px + env(safe-area-inset-bottom));color:var(--muted);font-size:13px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-weight:600}
   .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -564,6 +578,8 @@
   if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
   document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_UP_TO).replace(',00', ''); });   // Schwelle für kostenlosen Versand
   renderGrid(); renderCart();
+  // Web-App: Offline-Speicher (Service Worker) nur über http(s), nie aus einer lokalen Datei
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* ignorieren */ } }
   window.__shop = { PRODUCTS, get cart() { return cart; }, addToCart, subtotal, shipping, placeOrder };
 })();
 </script>

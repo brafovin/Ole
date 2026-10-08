@@ -25,16 +25,17 @@
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
   button,input,select{font:inherit;color:inherit}
   button{cursor:pointer}
-  /* Hintergrund: großer, langsam kreisender schwarzer Stern (hinter allem, nur Transform-Animationen) */
-  .bgstar{position:fixed;inset:0;z-index:-1;display:grid;place-items:center;pointer-events:none;overflow:hidden;
-    background:radial-gradient(circle at 50% 50%,var(--star-glow) 0%,transparent 55%)}
-  .bgstar svg{width:min(120vmin,1100px);height:min(120vmin,1100px);overflow:visible;animation:starspin 70s linear infinite;will-change:transform}
-  .bgstar .core{fill:var(--star);stroke:var(--star-rim);stroke-width:1.4;stroke-linejoin:round;transform-origin:0 0;animation:starpulse 7s ease-in-out infinite;filter:drop-shadow(0 0 14px var(--star-rim))}
-  .bgstar .ring{fill:none;stroke:var(--star-rim);stroke-width:.5;stroke-dasharray:2 5;opacity:.7;transform-origin:0 0;animation:starspin 120s linear infinite reverse}
+  /* Hintergrund: schwarze Sterne, die beim Scrollen mit der Seite nach oben wandern (je ~900 px einer; nur Transform-Animationen) */
+  body{position:relative}
+  .bgstar{position:absolute;left:0;top:0;width:100%;z-index:-1;pointer-events:none;overflow:hidden}
+  .bgstar svg{position:absolute;overflow:visible;animation:starspin 70s linear infinite;will-change:transform}
+  .bgstar svg:nth-child(even){animation-direction:reverse;animation-duration:95s}
+  .bgstar .core{fill:var(--star);stroke:var(--star-rim);stroke-width:1.4;stroke-linejoin:round}
+  .bgstar .glow{fill:url(#starglow)}
+  .bgstar .ring{fill:none;stroke:var(--star-rim);stroke-width:.5;stroke-dasharray:2 5;opacity:.7}
   :root[data-theme="light"] .bgstar svg{opacity:.5}
   @keyframes starspin{to{transform:rotate(360deg)}}
-  @keyframes starpulse{0%,100%{transform:scale(.94)}50%{transform:scale(1.04)}}
-  @media (prefers-reduced-motion:reduce){.bgstar svg,.bgstar .core,.bgstar .ring{animation:none}}
+  @media (prefers-reduced-motion:reduce){.bgstar svg{animation:none}}
   .wrap{max-width:1120px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
   header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .bar{display:flex;align-items:center;gap:16px;height:60px}
@@ -201,6 +202,7 @@
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <defs>
+    <radialGradient id="starglow"><stop offset="0" stop-color="var(--star-glow)"/><stop offset="1" stop-color="var(--star-glow)" stop-opacity="0"/></radialGradient>
     <linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".24"/></linearGradient>
     <linearGradient id="gH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".16" stop-color="#000" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
     <radialGradient id="gL" cx=".32" cy=".24" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
@@ -215,7 +217,7 @@
     <clipPath id="tClip"><path id="tPath" d="M150 46 C128 52 104 62 82 72 L16 138 Q10 146 16 154 L52 196 Q58 202 66 198 L96 178 C99 235 97 305 92 372 Q200 388 308 372 C303 305 301 235 304 178 L334 198 Q342 202 348 196 L384 154 Q390 146 384 138 L318 72 C296 62 272 52 250 46 C238 96 162 96 150 46 Z"/></clipPath>
   </defs>
 </svg>
-<div class="bgstar" aria-hidden="true"><svg viewBox="-100 -100 200 200"><circle class="ring" r="98"/><polygon class="core" points="0.0,-90.0 21.7,-29.9 85.6,-27.8 35.2,11.4 52.9,72.8 0.0,37.0 -52.9,72.8 -35.2,11.4 -85.6,-27.8 -21.7,-29.9"/></svg></div>
+<div class="bgstar" id="bgstar" aria-hidden="true"></div>
 <header>
   <div class="wrap bar">
     <a class="logo" href="#" data-i-aria="logo.aria" aria-label="Rare Form – Startseite"><img class="lg-mark" src="logo/mark.png" alt=""><img class="lg-word" src="logo/wordmark.png" alt="Rare Form"></a>
@@ -870,6 +872,24 @@
     try { localStorage.setItem('rare-form-lang', l); } catch (e) { /* ignorieren */ }
   });
   applyLang(savedLang === 'en' ? 'en' : 'de', false);
+  // Sterne im Hintergrund: einer pro ~900 px Seitenhöhe, wandert beim Scrollen mit nach oben; wird bei Größenänderung neu verteilt
+  const STAR = '<svg viewBox="-100 -100 200 200"><circle class="glow" r="100"/><circle class="ring" r="98"/><polygon class="core" points="0.0,-90.0 21.7,-29.9 85.6,-27.8 35.2,11.4 52.9,72.8 0.0,37.0 -52.9,72.8 -35.2,11.4 -85.6,-27.8 -21.7,-29.9"/></svg>';
+  function layoutStars() {
+    const box = $('bgstar'), ft = document.querySelector('footer'); if (!box || !ft) return;
+    const h = Math.max(innerHeight, Math.round(ft.getBoundingClientRect().bottom + scrollY));
+    const size = Math.round(Math.min(innerWidth * 1.05, 760)), gap = 900, n = Math.max(1, Math.ceil(h / gap));
+    if (box.dataset.k !== n + ':' + size) {
+      box.dataset.k = n + ':' + size;
+      box.innerHTML = Array.from({ length: n }, (_, i) => {
+        const x = [0.5, 0.12, 0.88][i % 3] * innerWidth - size / 2, y = i * gap + gap / 2 - size / 2 + 40;
+        return STAR.replace('<svg ', `<svg style="left:${Math.round(x)}px;top:${Math.round(y)}px;width:${size}px;height:${size}px;animation-delay:-${(i * 13) % 60}s" `);
+      }).join('');
+    }
+    box.style.height = h + 'px';
+  }
+  addEventListener('resize', layoutStars); addEventListener('load', layoutStars);
+  if (window.ResizeObserver) new ResizeObserver(layoutStars).observe(document.querySelector('main'));
+  layoutStars();
   // Sale-Ende: bei offener Seite um Mitternacht automatisch Preise und Banner zurücksetzen
   let wasSale = saleOn();
   setInterval(() => { if (wasSale && !saleOn()) { wasSale = false; renderSale(); renderGrid(); renderCart(); if (openEl === $('modal') && cur) openProduct(cur.id); } }, 30000);

@@ -1,5 +1,11 @@
 {
   "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "ole-shop.*" }],
+      "destination": "/shop.html",
+      "permanent": false
+    },
     { "source": "/", "destination": "/pingpong.html", "permanent": false }
   ]
 }

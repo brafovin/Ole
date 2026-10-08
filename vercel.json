@@ -2,7 +2,7 @@
   "redirects": [
     {
       "source": "/",
-      "has": [{ "type": "host", "value": "(ole-shop|oles-shop).*" }],
+      "has": [{ "type": "host", "value": "(ole-shop|oles-shop|rare-form).*" }],
       "destination": "/shop/",
       "permanent": false
     },

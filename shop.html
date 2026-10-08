@@ -32,9 +32,10 @@
   .count{color:var(--muted);font-size:14px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;padding-bottom:48px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-  .pic{aspect-ratio:1/1;display:grid;place-items:center;background:linear-gradient(160deg,#ece8e1,#dcd6cc);cursor:pointer;position:relative}
-  @media (prefers-color-scheme:dark){.pic{background:linear-gradient(160deg,#2b2a28,#222120)}}
-  .pic svg{width:78%;height:78%;filter:drop-shadow(0 8px 10px rgba(0,0,0,.18))}
+  .pic{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 38%,#f4f2ef 0%,#e3dfd9 60%,#d2cdc6 100%);cursor:pointer;position:relative;overflow:hidden}
+  @media (prefers-color-scheme:dark){.pic{background:radial-gradient(ellipse at 50% 38%,#34322f 0%,#262523 70%,#1d1c1b 100%)}}
+  .pic svg{width:86%;height:86%}
+  .pic img{width:100%;height:100%;object-fit:cover;display:block}
   .tag{position:absolute;top:10px;left:10px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
   .info{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
   .info h3{margin:0;font-size:16px}
@@ -103,6 +104,22 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="gV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".24"/></linearGradient>
+    <linearGradient id="gH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".16" stop-color="#000" stop-opacity="0"/><stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
+    <radialGradient id="gL" cx=".32" cy=".24" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <filter id="b2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="b4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4.5"/></filter>
+    <filter id="b8" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="weave" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9 .75" numOctaves="3" seed="7"/><feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .2 .2 .2 0 -.24"/></filter>
+    <pattern id="knit" width="2.6" height="3" patternUnits="userSpaceOnUse"><rect width="1.3" height="3" fill="#000" fill-opacity=".07"/><rect x="1.3" width="1.3" height="1.5" fill="#fff" fill-opacity=".03"/></pattern>
+    <pattern id="rib" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="2" height="4" fill="#000" fill-opacity=".18"/><rect x="2" width="1" height="4" fill="#fff" fill-opacity=".12"/></pattern>
+    <pattern id="twill" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(58)"><rect width="2.5" height="5" fill="#fff" fill-opacity=".1"/><rect x="2.5" width="2.5" height="5" fill="#000" fill-opacity=".1"/></pattern>
+    <pattern id="linen" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="1.4" fill="#000" fill-opacity=".1"/><rect width="1.4" height="6" fill="#fff" fill-opacity=".14"/><rect x="3" y="3" width="2" height="1" fill="#000" fill-opacity=".08"/></pattern>
+    <clipPath id="tClip"><path id="tPath" d="M150 46 C128 52 104 62 82 72 L16 138 Q10 146 16 154 L52 196 Q58 202 66 198 L96 178 C99 235 97 305 92 372 Q200 388 308 372 C303 305 301 235 304 178 L334 198 Q342 202 348 196 L384 154 Q390 146 384 138 L318 72 C296 62 272 52 250 46 C238 96 162 96 150 46 Z"/></clipPath>
+  </defs>
+</svg>
 <header>
   <div class="wrap bar">
     <a class="logo" href="#">MEIN<span>SHOP</span></a>
@@ -163,21 +180,22 @@
 <script>
 (() => {
   /* ---------- Produkte (hier einfach bearbeiten) ---------- */
-  // type: tshirt | hose · colors: [Name, Farbe] · sizes: verfügbare Größen · old: alter Preis (optional)
+  // type: tshirt | hose · color: Stofffarbe · sizes: verfügbare Größen · old: alter Preis (optional)
+  // img: Pfad zu einem echten Produktfoto (z. B. 'fotos/basic-tee-weiss.jpg') – ersetzt dann die gezeichnete Ansicht
   const ALL_SIZES = ['S', 'M', 'L', 'XL'];
   const PRODUCTS = [
     { id: 't1', type: 'tshirt', name: 'Basic Tee Weiß',      price: 19.90, color: '#f4f2ee', sizes: ['S','M','L','XL'], desc: 'Weiches Jersey aus 100 % Baumwolle, normale Passform, Rundhals. Das T-Shirt für alles.' },
     { id: 't2', type: 'tshirt', name: 'Basic Tee Schwarz',   price: 19.90, color: '#232323', sizes: ['S','M','L','XL'], desc: 'Weiches Jersey aus 100 % Baumwolle, normale Passform, Rundhals. Bleibt tief schwarz.' },
-    { id: 't3', type: 'tshirt', name: 'Heavy Tee Navy',      price: 27.90, color: '#223a63', sizes: ['M','L','XL'],     desc: 'Schweres 220-g-Jersey, leicht oversized. Hält die Form auch nach vielen Wäschen.' },
-    { id: 't4', type: 'tshirt', name: 'Heavy Tee Salbei',    price: 27.90, color: '#8fa58a', sizes: ['S','M','L'],      desc: 'Schweres 220-g-Jersey in sanftem Grün, leicht oversized.' },
+    { id: 't3', type: 'tshirt', heavy: true, name: 'Heavy Tee Navy',      price: 27.90, color: '#223a63', sizes: ['M','L','XL'],     desc: 'Schweres 220-g-Jersey, leicht oversized. Hält die Form auch nach vielen Wäschen.' },
+    { id: 't4', type: 'tshirt', heavy: true, name: 'Heavy Tee Salbei',    price: 27.90, color: '#8fa58a', sizes: ['S','M','L'],      desc: 'Schweres 220-g-Jersey in sanftem Grün, leicht oversized.' },
     { id: 't5', type: 'tshirt', name: 'Streifen Tee',        price: 24.90, old: 29.90, color: '#c8d3e2', stripe: '#223a63', sizes: ['S','M','L','XL'], desc: 'Klassisches Bretonshirt-Muster auf fließender Baumwolle. Jetzt im Angebot.' },
     { id: 't6', type: 'tshirt', name: 'Pocket Tee Rot',      price: 22.90, color: '#b3382c', sizes: ['S','M','L','XL'], desc: 'Mit aufgesetzter Brusttasche. Kräftiges Rot, das nicht ausbleicht.' },
-    { id: 'h1', type: 'hose',   name: 'Chino Sand',          price: 49.90, color: '#c9b48f', sizes: ['S','M','L','XL'], desc: 'Gerade geschnittene Chino aus elastischer Baumwolle. Passt zu Büro und Wochenende.' },
-    { id: 'h2', type: 'hose',   name: 'Jeans Slim Blau',     price: 59.90, color: '#34527a', sizes: ['S','M','L','XL'], desc: 'Slim-Fit-Jeans aus Stretch-Denim. Fünf Taschen, stabile Nähte.' },
-    { id: 'h3', type: 'hose',   name: 'Jogger Grau',         price: 39.90, color: '#8a8d92', sizes: ['S','M','L','XL'], desc: 'Bequeme Jogginghose mit Bund zum Binden und Bündchen am Saum.' },
-    { id: 'h4', type: 'hose',   name: 'Cargo Oliv',          price: 54.90, old: 64.90, color: '#6b6f3f', sizes: ['M','L','XL'], desc: 'Robuste Cargohose mit großen Seitentaschen. Jetzt im Angebot.' },
-    { id: 'h5', type: 'hose',   name: 'Leinenhose Natur',    price: 44.90, color: '#d9cdb6', sizes: ['S','M','L'],      desc: 'Luftige Sommerhose aus Leinenmix mit Gummizug.' },
-    { id: 'h6', type: 'hose',   name: 'Stoffhose Schwarz',   price: 64.90, color: '#252525', sizes: ['S','M','L','XL'], desc: 'Schmal geschnittene Stoffhose mit Bügelfalte. Für alles, was schick sein soll.' },
+    { id: 'h1', type: 'hose', style: 'chino', name: 'Chino Sand',          price: 49.90, color: '#c9b48f', sizes: ['S','M','L','XL'], desc: 'Gerade geschnittene Chino aus elastischer Baumwolle. Passt zu Büro und Wochenende.' },
+    { id: 'h2', type: 'hose', style: 'jeans', name: 'Jeans Slim Blau',     price: 59.90, color: '#34527a', sizes: ['S','M','L','XL'], desc: 'Slim-Fit-Jeans aus Stretch-Denim. Fünf Taschen, stabile Nähte.' },
+    { id: 'h3', type: 'hose', style: 'jogger', name: 'Jogger Grau',         price: 39.90, color: '#8a8d92', sizes: ['S','M','L','XL'], desc: 'Bequeme Jogginghose mit Bund zum Binden und Bündchen am Saum.' },
+    { id: 'h4', type: 'hose', style: 'cargo', name: 'Cargo Oliv',          price: 54.90, old: 64.90, color: '#6b6f3f', sizes: ['M','L','XL'], desc: 'Robuste Cargohose mit großen Seitentaschen. Jetzt im Angebot.' },
+    { id: 'h5', type: 'hose', style: 'linen', name: 'Leinenhose Natur',    price: 44.90, color: '#d9cdb6', sizes: ['S','M','L'],      desc: 'Luftige Sommerhose aus Leinenmix mit Gummizug.' },
+    { id: 'h6', type: 'hose', style: 'dress', name: 'Stoffhose Schwarz',   price: 64.90, color: '#252525', sizes: ['S','M','L','XL'], desc: 'Schmal geschnittene Stoffhose mit Bügelfalte. Für alles, was schick sein soll.' },
   ];
   const FREE_SHIP = 60, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -185,27 +203,93 @@
   const byId = id => PRODUCTS.find(p => p.id === id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  /* ---------- Bilder (gezeichnet, damit keine Fotos nötig sind) ---------- */
+  /* ---------- Bilder: gerenderte Produktansichten (Stoff, Falten, Nähte, Licht) – oder echte Fotos über p.img ---------- */
   function shade(hex, k) { // k < 0 dunkler, k > 0 heller
     const n = parseInt(hex.slice(1), 16), f = c => Math.max(0, Math.min(255, Math.round(c + (k < 0 ? c * k : (255 - c) * k))));
     return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(f).map(v => v.toString(16).padStart(2, '0')).join('');
   }
+  const fold = (d, o, w = 9, blur = 'b4', col = '#000') => `<path d="${d}" fill="none" stroke="${col}" stroke-opacity="${o}" stroke-width="${w}" stroke-linecap="round" filter="url(#${blur})"/>`;
+  const stitch = (d, col, o = .55, w = 1.3, dash = '4.5 3') => `<path d="${d}" fill="none" stroke="${col}" stroke-opacity="${o}" stroke-width="${w}" stroke-dasharray="${dash}" stroke-linecap="round"/>`;
+  const mirror = d => d.replace(/([MLCQ])([^MLCQZ]*)/g, (m, c, args) => c + args.trim().split(/[\s,]+/).map((v, i) => i % 2 === 0 ? +(400 - +v).toFixed(1) : v).join(' ') + ' ');
+  const cloth = (c, extra = '') => `<rect width="400" height="520" fill="url(#gV)"/><rect width="400" height="520" fill="url(#gH)"/><rect width="400" height="520" fill="url(#gL)"/>${extra}` +
+    `<rect width="400" height="520" fill="url(#knit)" opacity=".8"/><rect width="400" height="520" filter="url(#weave)"/>`;
+
+  function shirtSVG(p) {
+    const c = p.color, d = shade(c, -.3), dk = shade(c, -.14), heavy = !!p.heavy;
+    const SH = document.getElementById('tPath').getAttribute('d');
+    const stripes = p.stripe ? Array.from({ length: 16 }, (_, i) => `<rect x="0" y="${70 + i * 22}" width="400" height="9" fill="${p.stripe}"/>`).join('') : '';
+    const pocket = p.name.includes('Pocket') ? `<g><path d="M236 124 H280 V166 Q258 176 236 166 Z" fill="${shade(c, -.04)}" stroke="${d}" stroke-opacity=".6" stroke-width="1.2"/>${stitch('M241 129 H275 V160 Q258 168 241 160 Z', d, .5, 1)}<path d="M236 168 Q258 178 280 168" fill="none" stroke="#000" stroke-opacity=".25" stroke-width="3" filter="url(#b2)"/></g>` : '';
+    const collarW = heavy ? 15 : 12;
+    return `<svg viewBox="0 0 400 420" role="img" aria-label="${esc(p.name)}">
+      <path d="${SH}" transform="translate(8 14)" fill="#000" opacity=".3" filter="url(#b8)"/>
+      <path d="${SH}" fill="${c}"/>
+      <g clip-path="url(#tClip)">
+        ${stripes}
+        ${cloth(c)}
+        <path d="M150 46 Q200 24 250 46 C238 96 162 96 150 46 Z" fill="${shade(c, -.42)}"/>
+        ${fold('M104 186 C120 216 132 236 152 250', .26, 11)}${fold('M296 186 C280 216 268 236 248 250', .32, 11)}
+        ${fold('M122 292 C160 306 212 300 256 318', .14, 9)}${fold('M120 306 C160 320 212 314 258 332', .16, 6, 'b4', '#fff')}
+        ${fold('M88 82 C72 112 54 152 44 190', .16, 9)}${fold(mirror('M88 82 C72 112 54 152 44 190'), .22, 9)}
+        ${fold('M96 76 C130 64 150 58 164 52', .3, 7, 'b4', '#fff')}${fold('M126 150 C148 190 150 240 140 290', .12, 20, 'b8', '#fff')}
+        ${fold('M150 62 C168 114 232 114 250 62', .22, 12)}${fold('M92 364 Q200 382 308 364', .2, 12)}
+        ${fold('M262 250 C268 290 262 330 272 366', .1, 12, 'b8')}
+        ${pocket}
+      </g>
+      <path d="${SH}" fill="none" stroke="${d}" stroke-opacity=".7" stroke-width="1.4" stroke-linejoin="round"/>
+      ${stitch('M152 52 C130 60 106 70 84 79', d)}${stitch(mirror('M152 52 C130 60 106 70 84 79'), d)}
+      <path d="M84 78 C102 112 101 150 96 178" fill="none" stroke="${d}" stroke-opacity=".35" stroke-width="1.2"/><path d="${mirror('M84 78 C102 112 101 150 96 178')}" fill="none" stroke="${d}" stroke-opacity=".35" stroke-width="1.2"/>
+      ${stitch('M26 145 L60 187', d)}${stitch(mirror('M26 145 L60 187'), d)}
+      ${stitch('M96 358 Q200 374 304 358', d, .55, 1.3)}${stitch('M96 364 Q200 380 304 364', d, .45, 1.1)}
+      <path d="M150 46 C162 96 238 96 250 46" fill="none" stroke="${shade(c, -.1)}" stroke-width="${collarW}" stroke-linecap="round"/>
+      <path d="M150 46 C162 96 238 96 250 46" fill="none" stroke="url(#rib)" stroke-width="${collarW}" stroke-linecap="round"/>
+      <path d="M152 49 C164 98 236 98 248 49" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="2"/>
+      ${stitch('M156 56 C168 100 232 100 244 56', d, .55, 1.1, '3 2.4')}
+      <path d="M150 46 Q200 24 250 46" fill="none" stroke="${dk}" stroke-width="7" stroke-linecap="round"/><path d="M150 46 Q200 24 250 46" fill="none" stroke="url(#rib)" stroke-width="7" stroke-linecap="round"/>
+      <g transform="translate(188 31)"><rect width="25" height="14" rx="1.5" fill="#f3f1ea" stroke="#000" stroke-opacity=".25" stroke-width=".8"/><path d="M4 4 H21 M4 7.5 H17 M4 11 H19" stroke="#000" stroke-opacity=".4" stroke-width="1"/></g>
+    </svg>`;
+  }
+
+  function pantsSVG(p) {
+    const st = p.style || 'chino', c = p.color, d = shade(c, -.32), jeans = st === 'jeans', jog = st === 'jogger', cargo = st === 'cargo', linen = st === 'linen', crease = st === 'chino' || st === 'dress';
+    const t = jog ? 16 : 0, id = 'pc' + p.id;
+    const PA = `M110 22 L290 22 L300 76 C312 170 324 340 ${318 - t} 478 L${222 + t} 482 L206 214 Q200 202 194 214 L${178 - t} 482 L${82 + t} 478 C76 340 88 170 100 76 Z`;
+    const sc = jeans ? '#d9a04a' : d, so = jeans ? .85 : .55;
+    const loops = (!jog && !linen) ? [128, 166, 232, 270].map(x => `<rect x="${x}" y="19" width="9" height="36" rx="2" fill="${shade(c, -.06)}" stroke="${d}" stroke-opacity=".5" stroke-width="1"/>`).join('') : '';
+    const pk = 'M122 48 C118 80 126 114 160 130', pkM = mirror(pk);
+    const cg = cargo ? `<g>${[92, 266].map(x => `<rect x="${x}" y="262" width="42" height="72" rx="3" fill="${shade(c, -.05)}" stroke="${d}" stroke-opacity=".6" stroke-width="1.2"/><path d="M${x} 282 H${x + 42}" stroke="${d}" stroke-opacity=".55" stroke-width="1.2"/><rect x="${x + 16}" y="276" width="10" height="9" rx="1.5" fill="${shade(c, -.2)}"/>`).join('')}${stitch('M96 267 H130 V330 H96 Z', d, .4, 1)}${stitch('M270 267 H304 V330 H270 Z', d, .4, 1)}</g>` : '';
+    const wash = jeans ? `<ellipse cx="136" cy="160" rx="34" ry="70" fill="#fff" opacity=".16" filter="url(#b8)"/><ellipse cx="264" cy="160" rx="34" ry="70" fill="#fff" opacity=".12" filter="url(#b8)"/><ellipse cx="132" cy="330" rx="20" ry="30" fill="#fff" opacity=".14" filter="url(#b8)"/><ellipse cx="268" cy="330" rx="20" ry="30" fill="#fff" opacity=".1" filter="url(#b8)"/>` : '';
+    const fabric = jeans ? `<rect width="400" height="520" fill="url(#twill)"/>` : linen ? `<rect width="400" height="520" fill="url(#linen)"/>` : '';
+    const waist = jog || linen
+      ? `<rect x="100" y="22" width="200" height="26" fill="${shade(c, -.06)}"/><rect x="100" y="22" width="200" height="26" fill="url(#rib)"/><path d="M100 48 L300 48" stroke="#000" stroke-opacity=".28" stroke-width="2" filter="url(#b2)"/>`
+      : `<rect x="100" y="22" width="200" height="26" fill="${shade(c, -.05)}"/><path d="M100 48 L300 48" stroke="#000" stroke-opacity=".3" stroke-width="2.5" filter="url(#b2)"/>`;
+    const cord = (jog || linen) ? `<g fill="none" stroke="${shade(c, .35)}" stroke-width="3.2" stroke-linecap="round"><path d="M188 38 C186 70 178 90 176 112"/><path d="M212 38 C214 72 224 96 228 122"/></g><circle cx="176" cy="114" r="3.4" fill="${shade(c, .35)}"/><circle cx="228" cy="124" r="3.4" fill="${shade(c, .35)}"/><ellipse cx="200" cy="36" rx="9" ry="3.6" fill="#000" opacity=".4"/>` : '';
+    const fly = (jog || linen) ? '' : `${stitch('M200 50 L200 118 Q200 134 180 138', sc, so, 1.3, '4 2.6')}${stitch('M205 50 L205 116 Q205 140 184 144', sc, so * .7, 1.1, '4 2.6')}<rect x="200" y="22" width="30" height="26" fill="${shade(c, -.1)}" stroke="${d}" stroke-opacity=".5"/><circle cx="215" cy="35" r="5.2" fill="${jeans ? '#b97b36' : shade(c, -.38)}" stroke="#000" stroke-opacity=".35"/>`;
+    const cuff = jog ? `<rect x="${82 + t}" y="458" width="${96 - 2 * t}" height="24" fill="url(#rib)"/><rect x="${222 + t}" y="458" width="${96 - 2 * t}" height="24" fill="url(#rib)"/>` : '';
+    return `<svg viewBox="0 0 400 500" role="img" aria-label="${esc(p.name)}">
+      <clipPath id="${id}"><path d="${PA}"/></clipPath>
+      <path d="${PA}" transform="translate(9 14)" fill="#000" opacity=".3" filter="url(#b8)"/>
+      <path d="${PA}" fill="${c}"/>
+      <g clip-path="url(#${id})">
+        ${cloth(c, fabric)}${wash}
+        ${waist}
+        ${crease ? `${fold('M148 120 L132 482', .3, 3.5, 'b2', '#fff')}${fold('M153 120 L137 482', .22, 4, 'b2')}${fold(mirror('M148 120 L132 482'), .3, 3.5, 'b2', '#fff')}${fold(mirror('M153 120 L137 482'), .22, 4, 'b2')}` : ''}
+        ${fold('M200 214 C182 236 170 250 150 262', .26, 10)}${fold('M200 214 C220 236 232 250 252 262', .3, 10)}
+        ${fold('M104 322 C124 332 146 330 168 342', .22, 8)}${fold('M104 336 C124 346 146 344 168 356', .16, 6, 'b4', '#fff')}
+        ${fold('M232 326 C256 336 276 334 296 344', .24, 8)}${fold('M232 340 C256 350 276 348 296 358', .14, 6, 'b4', '#fff')}
+        ${fold('M104 60 C118 130 106 250 94 380', .12, 18, 'b8', '#fff')}${fold(`M${88 + t} 466 H${178 - t}`, .22, 12)}${fold(`M${222 + t} 466 H${312 - t}`, .22, 12)}
+        ${cg}
+      </g>
+      ${loops}
+      <path d="${PA}" fill="none" stroke="${d}" stroke-opacity=".75" stroke-width="1.4" stroke-linejoin="round"/>
+      ${stitch(pk, sc, so)}${stitch(pkM, sc, so)}${stitch('M127 48 C123 80 131 110 162 124', sc, so * .7, 1.1)}${stitch(mirror('M127 48 C123 80 131 110 162 124'), sc, so * .7, 1.1)}
+      ${jeans ? `<circle cx="123" cy="52" r="3.4" fill="#b97b36" stroke="#000" stroke-opacity=".3"/><circle cx="277" cy="52" r="3.4" fill="#b97b36" stroke="#000" stroke-opacity=".3"/><circle cx="164" cy="128" r="3" fill="#b97b36"/><circle cx="236" cy="128" r="3" fill="#b97b36"/>` : ''}
+      ${fly}${cord}${cuff}
+      ${stitch(`M${86 + t} 462 L${176 - t} 464`, sc, so, 1.3)}${stitch(`M${224 + t} 464 L${314 - t} 462`, sc, so, 1.3)}
+    </svg>`;
+  }
   function picture(p) {
-    const c = p.color, d = shade(c, -.18), l = shade(c, .18);
-    if (p.type === 'tshirt') {
-      const stripes = p.stripe ? Array.from({ length: 7 }, (_, i) => `<rect x="40" y="${84 + i * 24}" width="120" height="9" fill="${p.stripe}" clip-path="url(#cl${p.id})"/>`).join('') : '';
-      const pocket = p.name.includes('Pocket') ? `<rect x="118" y="82" width="26" height="30" rx="3" fill="${d}" opacity=".55"/>` : '';
-      const body = 'M62 24 L38 36 L10 70 L34 90 L50 76 L50 188 Q100 198 150 188 L150 76 L166 90 L190 70 L162 36 L138 24 Q100 44 62 24 Z';
-      return `<svg viewBox="0 0 200 210" role="img" aria-label="${esc(p.name)}"><defs><clipPath id="cl${p.id}"><path d="${body}"/></clipPath></defs>
-        <path d="${body}" fill="${c}" stroke="${d}" stroke-width="2" stroke-linejoin="round"/>${stripes}
-        <path d="M62 24 Q100 44 138 24 Q100 56 62 24 Z" fill="${d}" opacity=".55"/><path d="M50 76 L50 188 Q60 190 70 191 L70 80 Z" fill="${l}" opacity=".18"/>${pocket}</svg>`;
-    }
-    const body = 'M52 14 L148 14 L156 70 L152 196 L108 196 L100 92 L92 196 L48 196 L44 70 Z';
-    return `<svg viewBox="0 0 200 210" role="img" aria-label="${esc(p.name)}">
-      <path d="${body}" fill="${c}" stroke="${d}" stroke-width="2" stroke-linejoin="round"/>
-      <rect x="52" y="14" width="96" height="12" fill="${d}" opacity=".5"/><path d="M100 26 L100 92" stroke="${d}" stroke-width="2" opacity=".6"/>
-      <path d="M62 38 Q76 52 76 66" stroke="${d}" stroke-width="2" fill="none" opacity=".5"/><path d="M138 38 Q124 52 124 66" stroke="${d}" stroke-width="2" fill="none" opacity=".5"/>
-      <path d="M48 196 L92 196 L90 172 L50 172 Z M108 196 L152 196 L150 172 L110 172 Z" fill="${d}" opacity=".18"/></svg>`;
+    if (p.img) return `<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy">`;
+    return p.type === 'tshirt' ? shirtSVG(p) : pantsSVG(p);
   }
 
   /* ---------- Warenkorb ---------- */

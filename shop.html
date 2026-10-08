@@ -96,6 +96,16 @@
   .checkout label.full{grid-column:1/-1}
   .checkout input,.checkout select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--text)}
   .checkout input:invalid:not(:placeholder-shown){border-color:var(--bad)}
+  .pays{grid-column:1/-1;display:grid;gap:8px;margin-top:2px}
+  .pays>b{font-size:13px;color:var(--muted);font-weight:600}
+  .checkout .pay{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--bg);color:var(--text);font-size:15px;font-weight:600}
+  .checkout .pay:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .checkout .pay input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+  .checkout .pay span{display:grid;gap:1px;flex:1}
+  .checkout .pay small{color:var(--muted);font-size:12.5px;font-weight:400}
+  .checkout .pay em{font-style:normal;font-size:11px;font-weight:800;border:1px solid var(--line);border-radius:6px;padding:2px 6px;color:var(--muted);white-space:nowrap}
+  .paystep{text-align:center;display:grid;gap:12px;justify-items:center;padding:6px 0}
+  .paystep .badge{font-size:12px;font-weight:800;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:3px 10px}
   .note{grid-column:1/-1;font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px}
   .done{text-align:center;padding:12px 0}
   .done .ok{font-size:48px}
@@ -398,6 +408,16 @@
   });
 
   /* ---------- Kasse (Demo: keine echte Zahlung) ---------- */
+  // Zahlarten. Echte Zahlungen laufen immer über einen Zahlungsanbieter (z. B. Stripe, Mollie, Adyen oder direkt PayPal/Klarna):
+  // CHECKOUT_ENDPOINT = Adresse deines Servers, der die Bestellung entgegennimmt, beim Anbieter eine Zahlung anlegt und
+  // {url:"…"} zurückgibt (Weiterleitung zur Bezahlseite). Geheime Schlüssel gehören nur auf den Server, nie in diese Seite.
+  const CHECKOUT_ENDPOINT = '';
+  const PAYMENTS = {
+    paypal:  { name: 'PayPal', note: 'Bezahle mit deinem PayPal-Konto', tag: 'PayPal', step: 'Du wirst zu PayPal weitergeleitet, meldest dich dort an und bestätigst die Zahlung.' },
+    card:    { name: 'Kredit- oder Debitkarte', note: 'Visa, Mastercard, American Express, Maestro u. a.', tag: 'Karte', step: 'Hier würde der Zahlungsanbieter deine Kartendaten sicher abfragen. Deine Kartennummer wird nie auf dieser Seite eingegeben.' },
+    klarna:  { name: 'Klarna', note: 'Später bezahlen oder in Raten', tag: 'Klarna', step: 'Du wirst zu Klarna weitergeleitet, wählst dort die Zahlungsart und bestätigst.' },
+    invoice: { name: 'Rechnung', note: 'Erst die Ware erhalten, dann bezahlen', tag: 'Rechnung', step: null },
+  };
   function openCheckout() {
     if (!cart.length) return;
     const sub = subtotal(), sh = shipping();
@@ -409,7 +429,7 @@
         <label class="full">Straße und Hausnummer<input name="street" required autocomplete="street-address" placeholder=" "></label>
         <label>PLZ<input name="zip" required pattern="[0-9]{5}" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder=" "></label>
         <label>Ort<input name="city" required autocomplete="address-level2" placeholder=" "></label>
-        <label class="full">Zahlung<select name="pay"><option>Rechnung (Demo)</option><option>Vorkasse (Demo)</option></select></label>
+        <div class="pays" role="radiogroup" aria-label="Zahlungsart"><b>Zahlungsart</b>${Object.entries(PAYMENTS).map(([k, m], i) => `<label class="pay"><input type="radio" name="pay" value="${k}" ${i === 0 ? 'checked' : ''}><span><b>${m.name}</b><small>${m.note}</small></span><em>${m.tag}</em></label>`).join('')}</div>
         <div class="note">Das ist ein Demo-Shop: Es wird nichts bezahlt, versendet oder an einen Server geschickt. Die Bestellung bleibt nur in deinem Browser gespeichert.</div>
         <div class="err full" id="cerr" style="grid-column:1/-1"></div>
         <button type="button" class="ghost" id="cback">Zurück</button><button class="primary" type="submit">Jetzt kaufen · ${eur(sub + sh)}</button>
@@ -420,15 +440,32 @@
       e.preventDefault();
       const f = e.target; const bad = [...f.elements].find(x => x.name && x.willValidate && !x.checkValidity());
       if (bad) { $('cerr').textContent = 'Bitte prüfe deine Angaben: ' + (bad.parentElement.firstChild.textContent || bad.name) + '.'; bad.focus(); return; }
-      placeOrder(Object.fromEntries(new FormData(f)));
+      startPayment(Object.fromEntries(new FormData(f)));
     });
+  }
+  // Zahlung starten: mit Server → Weiterleitung zum Anbieter; ohne Server → simulierter Zahlungsschritt (Demo)
+  async function startPayment(data) {
+    const m = PAYMENTS[data.pay] || PAYMENTS.invoice;
+    if (CHECKOUT_ENDPOINT) {
+      try {
+        const r = await fetch(CHECKOUT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: data, items: cart, method: data.pay }) });
+        const j = await r.json(); if (j && j.url) { location.href = j.url; return; }
+        $('cerr').textContent = 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.'; return;
+      } catch (e) { $('cerr').textContent = 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.'; return; }
+    }
+    if (!m.step) return placeOrder(data);
+    const total = subtotal() + shipping();
+    $('checkout').innerHTML = `<div class="paystep"><span class="badge">DEMO – keine echte Zahlung</span><h2 id="ctitle">Zahlung mit ${m.name}</h2><p style="color:var(--muted);margin:0">${m.step}</p><p style="margin:0"><b>${eur(total)}</b> würden jetzt bezahlt.</p>
+      <button class="primary" id="payok">Zahlung bestätigen (Demo)</button><button class="ghost" id="payback">Zurück</button></div>`;
+    $('payok').addEventListener('click', () => placeOrder(data));
+    $('payback').addEventListener('click', openCheckout);
   }
   function placeOrder(data) {
     const sub = subtotal(), sh = shipping(), no = 'B-' + Date.now().toString(36).toUpperCase();
-    const order = { no, date: new Date().toISOString(), customer: data, items: cart.map(l => ({ ...l, name: byId(l.id).name, price: byId(l.id).price })), subtotal: sub, shipping: sh, total: sub + sh };
+    const order = { no, date: new Date().toISOString(), customer: data, payment: data.pay, items: cart.map(l => ({ ...l, name: byId(l.id).name, price: byId(l.id).price })), subtotal: sub, shipping: sh, total: sub + sh };
     try { const o = JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; o.push(order); localStorage.setItem(ORDERS_KEY, JSON.stringify(o)); } catch (e) { /* ignorieren */ }
     cart = []; saveCart(); renderCart();
-    $('checkout').innerHTML = `<div class="done"><div class="ok">✅</div><h2>Danke, ${esc(data.first)}!</h2><p>Deine Bestellung <b>${no}</b> über <b>${eur(order.total)}</b> ist eingegangen (Demo).<br>Eine Bestätigung ginge an ${esc(data.mail)}.</p><button class="primary" id="cdone">Weiter einkaufen</button></div>`;
+    $('checkout').innerHTML = `<div class="done"><div class="ok">✅</div><h2>Danke, ${esc(data.first)}!</h2><p>Deine Bestellung <b>${no}</b> über <b>${eur(order.total)}</b> ist eingegangen (Demo).<br>Zahlungsart: ${(PAYMENTS[data.pay] || PAYMENTS.invoice).name}${data.pay === 'invoice' ? ' – die Rechnung käme per E-Mail' : ''}.<br>Eine Bestätigung ginge an ${esc(data.mail)}.</p><button class="primary" id="cdone">Weiter einkaufen</button></div>`;
     $('cdone').addEventListener('click', closeAll);
   }
 
@@ -448,7 +485,7 @@
     { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
     { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
     { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Das Rare Form Shirt gibt es in ${ALL_SIZES.join(', ')}. Es hat einen lockeren, oversized Schnitt. Eine genaue Maßtabelle habe ich noch nicht – wenn du es nicht so weit magst, nimm eher eine Größe kleiner.` },
-    { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'Der Shop ist aktuell eine Demo: In der Kasse kannst du „Rechnung“ oder „Vorkasse“ wählen, es wird aber nichts wirklich bezahlt oder abgebucht. Echte Zahlungsarten kommen erst mit dem Start des Shops.' },
+    { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.' },
     { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Das Rare Form Shirt kostet ${eur(byId('rf1').price)} (inkl. MwSt.). Rabattcodes gibt es aktuell nicht.` },
     { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => byId('rf1').desc + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
     { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung'], a: () => 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ' + contact() },

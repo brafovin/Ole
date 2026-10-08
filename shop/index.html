@@ -224,6 +224,7 @@
     <nav id="nav">
       <button data-cat="alle" class="on" data-i="nav.all">Alle</button>
       <button data-cat="tshirt" data-i="nav.tshirt">T-Shirts</button>
+      <button data-cat="jacken" data-i="nav.jack">Jacken</button>
       <button data-cat="hose" data-i="nav.hose">Hosen</button>
       <button data-cat="zubehoer" data-i="nav.zub">Accessoires</button>
       <button data-cat="haarpflege" data-i="nav.hair">Haarpflege</button>
@@ -297,14 +298,14 @@
   // Texte stehen hier an einer Stelle. Werte mit {…} werden über t('key', { … }) gefüllt, Funktionen bekommen die Werte direkt.
   const I18N = {
     de: {
-      'nav.all': 'Alle', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Hosen', 'nav.zub': 'Accessoires', 'nav.hair': 'Haarpflege', 'nav.perf': 'Parfüm', 'nav.shoes': 'Schuhe',
+      'nav.all': 'Alle', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Hosen', 'nav.zub': 'Accessoires', 'nav.hair': 'Haarpflege', 'nav.perf': 'Parfüm', 'nav.jack': 'Jacken', 'nav.shoes': 'Schuhe',
       'logo.aria': 'Rare Form – Startseite', 'cart': 'Warenkorb', 'cart.open': 'Warenkorb öffnen',
       'hero.sub': 'Streetwear · Versand kostenlos bis <span class="fs">{fs}</span> Bestellwert.',
       'footer': '© Rare Form · Preise inkl. MwSt. · Versand kostenlos bis <span class="fs">{fs}</span> Bestellwert (darüber {ship}) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.',
       'sort.aria': 'Sortierung', 'sort.rec': 'Empfohlen', 'sort.asc': 'Preis aufsteigend', 'sort.desc': 'Preis absteigend', 'sort.name': 'Name A–Z',
       'count.one': '{n} Artikel', 'count.many': '{n} Artikel',
-      'type.tshirt': 'T-Shirt', 'type.hose': 'Hose', 'type.zubehoer': 'Accessoire', 'type.haarpflege': 'Haarpflege', 'type.parfum': 'Parfüm', 'type.schuhe': 'Schuhe',
-      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Hosen', 'sec.zubehoer': 'Accessoires', 'sec.haarpflege': 'Haarpflege', 'sec.parfum': 'Parfüm', 'sec.schuhe': 'Schuhe',
+      'type.tshirt': 'T-Shirt', 'type.hose': 'Hose', 'type.zubehoer': 'Accessoire', 'type.haarpflege': 'Haarpflege', 'type.parfum': 'Parfüm', 'type.jacken': 'Jacke', 'type.schuhe': 'Schuhe',
+      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Hosen', 'sec.zubehoer': 'Accessoires', 'sec.haarpflege': 'Haarpflege', 'sec.parfum': 'Parfüm', 'sec.jacken': 'Jacken', 'sec.schuhe': 'Schuhe',
       'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'sale.bar': '🍂 Herbst-Sale: −{pct} % auf alles · nur bis {date}', 'sale.tag': '−{pct} %', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
@@ -344,14 +345,14 @@
       'a.unknown': 'Dazu habe ich leider keine sichere Antwort. Ich kann dir bei Versand, Größen, Rückgabe, Zahlung und dem Warenkorb helfen. ',
     },
     en: {
-      'nav.all': 'All', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Trousers', 'nav.zub': 'Accessories', 'nav.hair': 'Hair care', 'nav.perf': 'Fragrance', 'nav.shoes': 'Shoes',
+      'nav.all': 'All', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Trousers', 'nav.zub': 'Accessories', 'nav.hair': 'Hair care', 'nav.perf': 'Fragrance', 'nav.jack': 'Jackets', 'nav.shoes': 'Shoes',
       'logo.aria': 'Rare Form – Home', 'cart': 'Cart', 'cart.open': 'Open cart',
       'hero.sub': 'Streetwear · Free shipping up to <span class="fs">{fs}</span> order value.',
       'footer': '© Rare Form · Prices incl. VAT · Free shipping up to <span class="fs">{fs}</span> order value ({ship} above) · 14-day returns · Demo shop: nothing is actually ordered or paid.',
       'sort.aria': 'Sort', 'sort.rec': 'Featured', 'sort.asc': 'Price: low to high', 'sort.desc': 'Price: high to low', 'sort.name': 'Name A–Z',
       'count.one': '{n} item', 'count.many': '{n} items',
-      'type.tshirt': 'T-shirt', 'type.hose': 'Trousers', 'type.zubehoer': 'Accessory', 'type.haarpflege': 'Hair care', 'type.parfum': 'Fragrance', 'type.schuhe': 'Shoes',
-      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Trousers', 'sec.zubehoer': 'Accessories', 'sec.haarpflege': 'Hair care', 'sec.parfum': 'Fragrance', 'sec.schuhe': 'Shoes',
+      'type.tshirt': 'T-shirt', 'type.hose': 'Trousers', 'type.zubehoer': 'Accessory', 'type.haarpflege': 'Hair care', 'type.parfum': 'Fragrance', 'type.jacken': 'Jacket', 'type.schuhe': 'Shoes',
+      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Trousers', 'sec.zubehoer': 'Accessories', 'sec.haarpflege': 'Hair care', 'sec.parfum': 'Fragrance', 'sec.jacken': 'Jackets', 'sec.schuhe': 'Shoes',
       'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'sale.bar': '🍂 Autumn Sale: {pct}% off everything · until {date} only', 'sale.tag': '−{pct}%', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
@@ -425,6 +426,9 @@
     // PLATZHALTER: Preis ist noch nicht bestätigt; die Flasche ist ein nachgebautes Mockup, kein Foto des echten Produkts
     { id: 'rf7', type: 'haarpflege', name: 'Rare Form Texture Powder', price: 14.99, color: '#232323', img: 'fotos/texture-powder.webp', allSizes: [], sizes: [],
       desc: 'Texture Powder in schwarzer Flasche mit „Rare Form“-Aufdruck.' },
+    // Preis 39,99 € laut Auftrag; alle Größen wie bei den anderen Produkten; Foto ist ein bearbeitetes Fremdfoto (Logo, Rücken und Fellrand nachträglich eingefügt) – vor dem Verkauf durch eigenes ersetzen
+    { id: 'rf13', type: 'jacken', name: 'Rare Form Zip Hoodie mit Fellrand', price: 39.99, color: '#161616', img: 'fotos/rare-form-hoodie.webp', back: 'fotos/rare-form-hoodie-back.webp', sizes: ['XS','S','M','L','XL','XXL'],
+      desc: 'Schwarze Kapuzenjacke mit durchgehendem Reißverschluss, Kordeln und Kängurutasche. Der Fellrand an der Kapuze ist abnehmbar – ohne Rand trägst du sie als normalen Zip-Hoodie. Kleines Rare-Form-Logo auf der Brust, großes Logo auf dem Rücken und ein Label am Saum.' },
     // Preis 14,99 € laut Auftrag; Größen 38–39 und 42–43 = die häufigsten Damen-/Herrengrößen (Annahme, kein Kundenwunsch); Foto ist ein bearbeitetes Fremdfoto – vor dem Verkauf durch eigenes ersetzen
     { id: 'rf12', type: 'schuhe', name: 'Rare Form Fluffy Slides', price: 14.99, color: '#161616', img: 'fotos/rare-form-slides.webp', colors: { black: 'fotos/rare-form-slides.webp', white: 'fotos/rare-form-slides-white.webp', grey: 'fotos/rare-form-slides-grey.webp' }, allSizes: ['38–39','42–43'], sizes: ['38–39','42–43'],
       desc: 'Pantoffel (Slides) in Schwarz, Weiß oder Grau mit flauschigem Teddy-Fell-Look, offener Zehenpartie und breitem Riemen mit Rare-Form-Logo. Die Größen fallen in Doppelgrößen aus: 38–39 und 42–43.' },
@@ -449,6 +453,10 @@
     "rf4": {
       "name": "Urban Artifacts Black Baggy Denim (Washed Black)",
       "desc": "Unisex baggy jeans in washed black, relaxed fit. With subtle streetwear details: embroidery on the thigh and a “Street Culture” label on the leg."
+    },
+    "rf13": {
+      "name": "Rare Form Zip Hoodie with Fur Trim",
+      "desc": "Black zip-up hoodie with a full-length zip, drawcords and a kangaroo pocket. The fur trim on the hood is detachable – without it you wear it as a regular zip hoodie. Small Rare Form logo on the chest, large logo on the back and a label at the hem."
     },
     "rf12": {
       "name": "Rare Form Fluffy Slides",
@@ -655,7 +663,7 @@
       <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${t('type.' + p.type)}${p.colors ? ' · ' + t('colors.n', { n: colorKeys(p).length }) : ''}${p.sizes.length ? ' · ' + p.sizes.map(sizeLabel).join(' ') : ''}</div>
       <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">${t('buy')}</button></div></article>`;
     // T-Shirts oben, Hosen darunter
-    const SECTIONS = ['tshirt', 'hose', 'zubehoer', 'haarpflege', 'schuhe', 'parfum'];
+    const SECTIONS = ['tshirt', 'jacken', 'hose', 'zubehoer', 'haarpflege', 'schuhe', 'parfum'];
     $('grid').innerHTML = SECTIONS.map(ty => { const items = list.filter(p => p.type === ty); return items.length ? `<section class="sec"><h2>${t('sec.' + ty)}</h2><div class="grid">${items.map(card).join('')}</div></section>` : ''; }).join('');
   }
   $('nav').addEventListener('click', e => {

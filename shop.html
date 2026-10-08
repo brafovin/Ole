@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rare Form – T-Shirts &amp; Hosen</title>
+<title>Rare Form – Streetwear</title>
 <meta name="color-scheme" content="dark">
 <style>
   :root{color-scheme:dark;--bg:#0d0d0f;--card:#17171a;--text:#f2efea;--muted:#9b968f;--line:#2a2a2f;--accent:#e4d3a8;--accent-d:#f1e5c4;--on-accent:#17130a;--ok:#4fbf86;--bad:#e5484d}
   *{box-sizing:border-box}
+  [hidden]{display:none !important}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
   button,input,select{font:inherit;color:inherit}
@@ -35,6 +36,7 @@
   .pic{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);cursor:pointer;position:relative;overflow:hidden}
   .pic svg{width:86%;height:86%}
   .pic img{width:100%;height:100%;object-fit:cover;display:block}
+  .card .pic.photo{aspect-ratio:1313/1198}
   .tag{position:absolute;top:10px;left:10px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
   .info{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
   .info h3{margin:0;font-size:16px}
@@ -134,8 +136,8 @@
 
 <main class="wrap">
   <section class="hero">
-    <h1>T-Shirts &amp; Hosen für jeden Tag</h1>
-    <p>Bequem, ehrlich im Preis – ab 60 € versandkostenfrei.</p>
+    <h1>Rare Form</h1>
+    <p>Streetwear · Ab 60 € versandkostenfrei.</p>
   </section>
   <div class="tools">
     <span class="count" id="count"></span>
@@ -183,18 +185,8 @@
   // img: Pfad zu einem echten Produktfoto (z. B. 'fotos/basic-tee-weiss.jpg') – ersetzt dann die gezeichnete Ansicht
   const ALL_SIZES = ['S', 'M', 'L', 'XL'];
   const PRODUCTS = [
-    { id: 't1', type: 'tshirt', name: 'Basic Tee Weiß',      price: 19.90, color: '#f4f2ee', sizes: ['S','M','L','XL'], desc: 'Weiches Jersey aus 100 % Baumwolle, normale Passform, Rundhals. Das T-Shirt für alles.' },
-    { id: 't2', type: 'tshirt', name: 'Basic Tee Schwarz',   price: 19.90, color: '#232323', sizes: ['S','M','L','XL'], desc: 'Weiches Jersey aus 100 % Baumwolle, normale Passform, Rundhals. Bleibt tief schwarz.' },
-    { id: 't3', type: 'tshirt', heavy: true, name: 'Heavy Tee Navy',      price: 27.90, color: '#223a63', sizes: ['M','L','XL'],     desc: 'Schweres 220-g-Jersey, leicht oversized. Hält die Form auch nach vielen Wäschen.' },
-    { id: 't4', type: 'tshirt', heavy: true, name: 'Heavy Tee Salbei',    price: 27.90, color: '#8fa58a', sizes: ['S','M','L'],      desc: 'Schweres 220-g-Jersey in sanftem Grün, leicht oversized.' },
-    { id: 't5', type: 'tshirt', name: 'Streifen Tee',        price: 24.90, old: 29.90, color: '#c8d3e2', stripe: '#223a63', sizes: ['S','M','L','XL'], desc: 'Klassisches Bretonshirt-Muster auf fließender Baumwolle. Jetzt im Angebot.' },
-    { id: 't6', type: 'tshirt', name: 'Pocket Tee Rot',      price: 22.90, color: '#b3382c', sizes: ['S','M','L','XL'], desc: 'Mit aufgesetzter Brusttasche. Kräftiges Rot, das nicht ausbleicht.' },
-    { id: 'h1', type: 'hose', style: 'chino', name: 'Chino Sand',          price: 49.90, color: '#c9b48f', sizes: ['S','M','L','XL'], desc: 'Gerade geschnittene Chino aus elastischer Baumwolle. Passt zu Büro und Wochenende.' },
-    { id: 'h2', type: 'hose', style: 'jeans', name: 'Jeans Slim Blau',     price: 59.90, color: '#34527a', sizes: ['S','M','L','XL'], desc: 'Slim-Fit-Jeans aus Stretch-Denim. Fünf Taschen, stabile Nähte.' },
-    { id: 'h3', type: 'hose', style: 'jogger', name: 'Jogger Grau',         price: 39.90, color: '#8a8d92', sizes: ['S','M','L','XL'], desc: 'Bequeme Jogginghose mit Bund zum Binden und Bündchen am Saum.' },
-    { id: 'h4', type: 'hose', style: 'cargo', name: 'Cargo Oliv',          price: 54.90, old: 64.90, color: '#6b6f3f', sizes: ['M','L','XL'], desc: 'Robuste Cargohose mit großen Seitentaschen. Jetzt im Angebot.' },
-    { id: 'h5', type: 'hose', style: 'linen', name: 'Leinenhose Natur',    price: 44.90, color: '#d9cdb6', sizes: ['S','M','L'],      desc: 'Luftige Sommerhose aus Leinenmix mit Gummizug.' },
-    { id: 'h6', type: 'hose', style: 'dress', name: 'Stoffhose Schwarz',   price: 64.90, color: '#252525', sizes: ['S','M','L','XL'], desc: 'Schmal geschnittene Stoffhose mit Bügelfalte. Für alles, was schick sein soll.' },
+    { id: 'rf1', type: 'tshirt', name: 'Rare Form Shirt', price: 20.00, color: '#f4f2ee', img: 'fotos/rare-form-shirt.webp', sizes: ['S','M','L','XL'],
+      desc: 'Streetwear-T-Shirt in Weiß mit lockerem, oversized Schnitt. Frontprint mit Engel-Motiv und „Chaotic“-Schriftzug, Prints an beiden Ärmeln und ein schwarzes Label am Saum.' },
   ];
   const FREE_SHIP = 60, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -341,7 +333,7 @@
     if (sortBy === 'ab') list = [...list].sort((a, b) => b.price - a.price);
     if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'de'));
     $('count').textContent = list.length + (list.length === 1 ? ' Artikel' : ' Artikel');
-    $('grid').innerHTML = list.map(p => `<article class="card"><div class="pic" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(p.name)} ansehen">${picture(p)}${p.old ? '<span class="tag">Angebot</span>' : ''}</div>
+    $('grid').innerHTML = list.map(p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(p.name)} ansehen">${picture(p)}${p.old ? '<span class="tag">Angebot</span>' : ''}</div>
       <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${p.type === 'tshirt' ? 'T-Shirt' : 'Hose'} · ${p.sizes.join(' ')}</div>
       <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">Größe wählen</button></div></article>`).join('');
   }
@@ -417,6 +409,7 @@
   let tt;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
 
+  if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
   renderGrid(); renderCart();
   window.__shop = { PRODUCTS, get cart() { return cart; }, addToCart, subtotal, shipping, placeOrder };
 })();

@@ -1,9 +1,9 @@
 /* Service Worker für die Rare-Form-Web-App: Seite und Fotos werden gespeichert, damit der Shop auch offline startet.
    Bei einer neuen Version von Seite oder Fotos CACHE hochzählen. */
-const CACHE = 'rare-form-v5';
+const CACHE = 'rare-form-v6';
 const FILES = [
   './shop.html', './manifest.webmanifest',
-  './logo/mark.png', './logo/mark-dark.png', './logo/wordmark.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
+  './logo/mark.png',  './logo/wordmark.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
   './fotos/rare-form-shirt.webp', './fotos/urban-artifacts-tee.webp', './fotos/urban-artifacts-baggy-denim.webp',
   './fotos/urban-artifacts-black-baggy-denim.webp', './fotos/urban-artifacts-belt.webp', './fotos/kette.webp', './fotos/texture-powder.webp',
 ];

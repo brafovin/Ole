@@ -16,17 +16,27 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style>
   :root{color-scheme:dark;--bg:#0d0d0f;--card:#17171a;--text:#f2efea;--muted:#9b968f;--line:#2a2a2f;--accent:#e4d3a8;--accent-d:#f1e5c4;--on-accent:#17130a;--ok:#4fbf86;--bad:#e5484d;
-    --btn:#fff;--btn-h:#e6e6e6;--on-btn:#111;--pic:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);--logo-filter:none;--panel-shadow:rgba(0,0,0,.6)}
+    --btn:#fff;--btn-h:#e6e6e6;--on-btn:#111;--pic:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);--logo-filter:none;--panel-shadow:rgba(0,0,0,.6);--star:#000;--star-rim:rgba(228,211,168,.22);--star-glow:rgba(228,211,168,.07)}
   :root[data-theme="light"]{color-scheme:light;--bg:#f5f3ef;--card:#fff;--text:#17171a;--muted:#6b665f;--line:#e2ded6;--accent:#1b1b1f;--accent-d:#3b3b42;--on-accent:#f5f3ef;--ok:#1f8a58;--bad:#d1343a;
-    --btn:#17171a;--btn-h:#3b3b42;--on-btn:#fff;--pic:radial-gradient(ellipse at 50% 36%,#e9e6e0 0%,#d9d5ce 60%,#cbc6be 100%);--logo-filter:invert(1);--panel-shadow:rgba(0,0,0,.22)}
+    --btn:#17171a;--btn-h:#3b3b42;--on-btn:#fff;--pic:radial-gradient(ellipse at 50% 36%,#e9e6e0 0%,#d9d5ce 60%,#cbc6be 100%);--logo-filter:invert(1);--panel-shadow:rgba(0,0,0,.22);--star:#0a0a0b;--star-rim:rgba(0,0,0,.18);--star-glow:rgba(0,0,0,.05)}
   *{box-sizing:border-box}
   [hidden]{display:none !important}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
   button,input,select{font:inherit;color:inherit}
   button{cursor:pointer}
+  /* Hintergrund: großer, langsam kreisender schwarzer Stern (hinter allem, nur Transform-Animationen) */
+  .bgstar{position:fixed;inset:0;z-index:-1;display:grid;place-items:center;pointer-events:none;overflow:hidden;
+    background:radial-gradient(circle at 50% 50%,var(--star-glow) 0%,transparent 55%)}
+  .bgstar svg{width:min(120vmin,1100px);height:min(120vmin,1100px);overflow:visible;animation:starspin 70s linear infinite;will-change:transform}
+  .bgstar .core{fill:var(--star);stroke:var(--star-rim);stroke-width:1.4;stroke-linejoin:round;transform-origin:0 0;animation:starpulse 7s ease-in-out infinite;filter:drop-shadow(0 0 14px var(--star-rim))}
+  .bgstar .ring{fill:none;stroke:var(--star-rim);stroke-width:.5;stroke-dasharray:2 5;opacity:.7;transform-origin:0 0;animation:starspin 120s linear infinite reverse}
+  :root[data-theme="light"] .bgstar svg{opacity:.5}
+  @keyframes starspin{to{transform:rotate(360deg)}}
+  @keyframes starpulse{0%,100%{transform:scale(.94)}50%{transform:scale(1.04)}}
+  @media (prefers-reduced-motion:reduce){.bgstar svg,.bgstar .core,.bgstar .ring{animation:none}}
   .wrap{max-width:1120px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
-  header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+  header{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 80%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
   .bar{display:flex;align-items:center;gap:16px;height:60px}
   .logo{font-weight:800;font-size:20px;letter-spacing:.02em;text-decoration:none;color:var(--text)}
   .logo{display:flex;align-items:center;gap:11px}
@@ -205,6 +215,7 @@
     <clipPath id="tClip"><path id="tPath" d="M150 46 C128 52 104 62 82 72 L16 138 Q10 146 16 154 L52 196 Q58 202 66 198 L96 178 C99 235 97 305 92 372 Q200 388 308 372 C303 305 301 235 304 178 L334 198 Q342 202 348 196 L384 154 Q390 146 384 138 L318 72 C296 62 272 52 250 46 C238 96 162 96 150 46 Z"/></clipPath>
   </defs>
 </svg>
+<div class="bgstar" aria-hidden="true"><svg viewBox="-100 -100 200 200"><circle class="ring" r="98"/><polygon class="core" points="0.0,-90.0 21.7,-29.9 85.6,-27.8 35.2,11.4 52.9,72.8 0.0,37.0 -52.9,72.8 -35.2,11.4 -85.6,-27.8 -21.7,-29.9"/></svg></div>
 <header>
   <div class="wrap bar">
     <a class="logo" href="#" data-i-aria="logo.aria" aria-label="Rare Form – Startseite"><img class="lg-mark" src="logo/mark.png" alt=""><img class="lg-word" src="logo/wordmark.png" alt="Rare Form"></a>

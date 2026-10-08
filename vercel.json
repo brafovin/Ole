@@ -3,7 +3,7 @@
     {
       "source": "/",
       "has": [{ "type": "host", "value": "(ole-shop|oles-shop).*" }],
-      "destination": "/shop.html",
+      "destination": "/shop/",
       "permanent": false
     },
     { "source": "/", "destination": "/pingpong.html", "permanent": false }

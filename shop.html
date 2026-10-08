@@ -86,8 +86,6 @@
   .sum .row{display:flex;justify-content:space-between}
   .sum .total{font-size:19px;font-weight:800}
   .ship{font-size:13px;color:var(--muted)}
-  .bar2{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
-  .bar2 i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
   .empty{color:var(--muted);text-align:center;padding:48px 0}
   /* Kasse */
   .checkout{position:fixed;z-index:22;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:var(--card);border-radius:18px;padding:22px;display:none}
@@ -168,7 +166,7 @@
 <main class="wrap">
   <section class="hero">
     <h1>Rare Form</h1>
-    <p>Streetwear · Ab <span class="fs">100 €</span> versandkostenfrei.</p>
+    <p>Streetwear · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert.</p>
   </section>
   <div class="tools">
     <span class="count" id="count"></span>
@@ -182,7 +180,7 @@
   <div class="grid" id="grid"></div>
 </main>
 
-<footer><div class="wrap">© Rare Form · Preise inkl. MwSt. · Versand 4,90 € (ab <span class="fs">100 €</span> gratis) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
+<footer><div class="wrap">© Rare Form · Preise inkl. MwSt. · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert (darüber 4,90 €) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
 
 <div class="scrim" id="scrim"></div>
 
@@ -228,7 +226,7 @@
     { id: 'rf2', type: 'tshirt', name: 'Urban Artifacts Graphic Tee (White Edition)', price: 19.99, color: '#f4f2ee', img: 'fotos/urban-artifacts-tee.webp', sizes: ['XS','S','M','L','XL','XXL'],
       desc: 'Unisex-Streetwear-T-Shirt in Weiß mit markantem, modernem Grafikdesign auf der Vorderseite: Urban-Art-, Cyberpunk- und Graffiti-Elemente.' },
   ];
-  const FREE_SHIP = 100, SHIPPING = 4.90, MAX_QTY = 10;
+  const FREE_UP_TO = 100, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
   const $ = id => document.getElementById(id);
   const byId = id => PRODUCTS.find(p => p.id === id);
@@ -332,7 +330,7 @@
   } catch (e) { /* leerer Warenkorb */ }
   const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* ignorieren */ } };
   const subtotal = () => cart.reduce((s, l) => s + byId(l.id).price * l.qty, 0);
-  const shipping = () => (cart.length === 0 || subtotal() >= FREE_SHIP ? 0 : SHIPPING);
+  const shipping = () => (cart.length === 0 || subtotal() <= FREE_UP_TO ? 0 : SHIPPING);
   const itemCount = () => cart.reduce((s, l) => s + l.qty, 0);
 
   function addToCart(id, size) {
@@ -348,10 +346,9 @@
         <div class="qty"><button data-q="${i}" data-d="-1" aria-label="weniger">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="mehr">+</button></div>
         <button class="rm" data-rm="${i}">Entfernen</button></div><b>${eur(p.price * l.qty)}</b></div>`;
     }).join('') : '<div class="empty">Dein Warenkorb ist leer.</div>';
-    const sub = subtotal(), sh = shipping(), rest = Math.max(0, FREE_SHIP - sub);
+    const sub = subtotal(), sh = shipping();
     $('sum').innerHTML = cart.length ? `
-      <div class="ship">${rest > 0 ? `Noch ${eur(rest)} bis zum kostenlosen Versand` : 'Du bekommst kostenlosen Versand 🎉'}</div>
-      <div class="bar2"><i style="width:${Math.min(100, sub / FREE_SHIP * 100)}%"></i></div>
+      <div class="ship">${sh ? `Bei Bestellungen über ${eur(FREE_UP_TO)} kostet der Versand ${eur(SHIPPING)}.` : `Versand kostenlos bis ${eur(FREE_UP_TO)} Bestellwert.`}</div>
       <div class="row"><span>Zwischensumme</span><span>${eur(sub)}</span></div>
       <div class="row"><span>Versand</span><span>${sh ? eur(sh) : 'gratis'}</span></div>
       <div class="row total"><span>Gesamt</span><span>${eur(sub + sh)}</span></div>
@@ -485,7 +482,7 @@
   const FAQ = [
     { k: ['hallo', 'hi ', 'hey', 'moin', 'servus', 'guten tag', 'guten morgen', 'guten abend'], a: () => 'Hallo! Ich bin der automatische Assistent von Rare Form. Wobei kann ich dir helfen?' },
     { k: ['danke', 'dankeschon', 'super', 'perfekt', 'top '], a: () => 'Sehr gern! Sag Bescheid, wenn du noch etwas wissen möchtest.' },
-    { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Versand kostet ${eur(SHIPPING)}. Ab ${eur(FREE_SHIP)} Warenwert ist der Versand kostenlos. Im Warenkorb siehst du live, wie viel dir noch bis dahin fehlt.` },
+    { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Der Versand ist bis ${eur(FREE_UP_TO)} Bestellwert kostenlos. Bei Bestellungen darüber kostet er ${eur(SHIPPING)}.` },
     { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
     { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
     { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Verfügbare Größen:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nDas Rare Form Shirt hat einen lockeren, oversized Schnitt – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.` },
@@ -542,7 +539,7 @@
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
 
   if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
-  document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_SHIP).replace(',00', ''); });   // Schwelle für kostenlosen Versand
+  document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_UP_TO).replace(',00', ''); });   // Schwelle für kostenlosen Versand
   renderGrid(); renderCart();
   window.__shop = { PRODUCTS, get cart() { return cart; }, addToCart, subtotal, shipping, placeOrder };
 })();

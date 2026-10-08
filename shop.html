@@ -58,7 +58,7 @@
   @media (max-width:640px){.modal.open{grid-template-columns:1fr}}
   .modal .pic{aspect-ratio:auto;min-height:280px;cursor:default}
   .detail{padding:22px;display:flex;flex-direction:column;gap:10px}
-  .detail h2{margin:0}
+  .detail h2{margin:0;padding-right:44px}
   .detail p{margin:0;color:var(--muted)}
   .sizes{display:flex;gap:8px;flex-wrap:wrap}
   .sizes button{min-width:48px;padding:9px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
@@ -219,10 +219,12 @@
   /* ---------- Produkte (hier einfach bearbeiten) ---------- */
   // type: tshirt | hose · color: Stofffarbe · sizes: verfügbare Größen · old: alter Preis (optional)
   // img: Pfad zu einem echten Produktfoto (z. B. 'fotos/basic-tee-weiss.jpg') – ersetzt dann die gezeichnete Ansicht
-  const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XXL'];
+  const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const PRODUCTS = [
     { id: 'rf1', type: 'tshirt', name: 'Rare Form Shirt', price: 19.99, color: '#f4f2ee', img: 'fotos/rare-form-shirt.webp', sizes: ['XS','S','M','L','XXL'],
       desc: 'Streetwear-T-Shirt in Weiß mit lockerem, oversized Schnitt. Frontprint mit Engel-Motiv und „Chaotic“-Schriftzug, Prints an beiden Ärmeln und ein schwarzes Label am Saum.' },
+    { id: 'rf2', type: 'tshirt', name: 'Urban Artifacts Graphic Tee (White Edition)', price: 19.99, color: '#f4f2ee', img: 'fotos/urban-artifacts-tee.webp', sizes: ['XS','S','M','L','XL','XXL'],
+      desc: 'Unisex-Streetwear-T-Shirt in Weiß mit markantem, modernem Grafikdesign auf der Vorderseite: Urban-Art-, Cyberpunk- und Graffiti-Elemente.' },
   ];
   const FREE_SHIP = 60, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
@@ -484,16 +486,16 @@
     { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Versand kostet ${eur(SHIPPING)}. Ab ${eur(FREE_SHIP)} Warenwert ist der Versand kostenlos. Im Warenkorb siehst du live, wie viel dir noch bis dahin fehlt.` },
     { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
     { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
-    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Das Rare Form Shirt gibt es in ${ALL_SIZES.join(', ')}. Es hat einen lockeren, oversized Schnitt. Eine genaue Maßtabelle habe ich noch nicht – wenn du es nicht so weit magst, nimm eher eine Größe kleiner.` },
+    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Verfügbare Größen:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nDas Rare Form Shirt hat einen lockeren, oversized Schnitt – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.` },
     { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.' },
-    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Das Rare Form Shirt kostet ${eur(byId('rf1').price)} (inkl. MwSt.). Rabattcodes gibt es aktuell nicht.` },
-    { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => byId('rf1').desc + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
+    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Preise (inkl. MwSt.):\n${PRODUCTS.map(p => `• ${p.name}: ${eur(p.price)}`).join('\n')}\nRabattcodes gibt es aktuell nicht.` },
+    { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => PRODUCTS.map(p => `• ${p.name}: ${p.desc}`).join('\n') + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
     { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung'], a: () => 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ' + contact() },
     { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen'], a: () => {
       if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Größe wählen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
       return `In deinem Warenkorb: ${cart.map(l => `${l.qty}× ${byId(l.id).name} (${l.size})`).join(', ')}.\nZwischensumme ${eur(subtotal())}, Versand ${shipping() ? eur(shipping()) : 'kostenlos'}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.`;
     } },
-    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell die Größen ${byId('rf1').sizes.join(', ')}. Eine Lagerzahl kann ich nicht sehen.` },
+    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell:\n${PRODUCTS.map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nEine Lagerzahl kann ich nicht sehen.` },
     { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem'], a: () => 'Das tut mir leid! Versuch bitte, die Seite neu zu laden (dein Warenkorb bleibt erhalten). Wenn es dann immer noch nicht klappt: ' + contact() },
     { k: ['mensch', 'mitarbeiter', 'support', 'kontakt', 'telefon', 'mail', 'beschwerde', 'impressum', 'echte person', 'jemand'], a: () => 'Ich bin ein automatischer Assistent. Für alles Weitere: ' + contact() },
   ];

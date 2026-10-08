@@ -7,6 +7,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0d0d0f">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -24,7 +25,11 @@
   header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
   .bar{display:flex;align-items:center;gap:16px;height:60px}
   .logo{font-weight:800;font-size:20px;letter-spacing:.02em;text-decoration:none;color:var(--text)}
-  .logo span{color:var(--accent)}
+  .logo{display:flex;align-items:center;gap:11px}
+  .logo img{display:block;width:auto}
+  .lg-mark{height:36px}
+  .lg-word{height:15px}
+  @media (max-width:380px){.lg-mark{height:30px}.lg-word{height:12px}.logo{gap:8px}.cartbtn{padding:7px 10px;font-size:13px}}
   nav{display:flex;gap:6px;margin-left:8px}
   nav button{background:none;border:0;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted)}
   nav button.on{background:var(--accent);color:var(--on-accent)}
@@ -171,7 +176,7 @@
 </svg>
 <header>
   <div class="wrap bar">
-    <a class="logo" href="#">RARE <span>FORM</span></a>
+    <a class="logo" href="#" aria-label="Rare Form – Startseite"><img class="lg-mark" src="logo/mark.png" alt=""><img class="lg-word" src="logo/wordmark.png" alt="Rare Form"></a>
     <nav id="nav">
       <button data-cat="alle" class="on">Alle</button>
       <button data-cat="tshirt">T-Shirts</button>

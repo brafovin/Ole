@@ -111,7 +111,7 @@
   .colors button{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .colors button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(128,128,128,.6);display:inline-block}
-  .sw-white{background:#f4f2ee}.sw-black{background:#161616}.sw-grey{background:#8d8d8f}
+  .sw-white{background:#f4f2ee}.sw-black{background:#161616}.sw-grey{background:#8d8d8f}.sw-darkgrey{background:#48484a}
   .sizes{display:flex;gap:8px;flex-wrap:wrap}
   .sizes button{min-width:48px;padding:9px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .sizes button.on{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
@@ -309,7 +309,7 @@
       'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'sale.bar': '🍂 Herbst-Sale: −{pct} % auf alles · nur bis {date}', 'sale.tag': '−{pct} %', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
-      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.grey': 'Grau', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
+      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.grey': 'Grau', 'col.darkgrey': 'Dunkelgrau', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
       'ship.over': 'Bei Bestellungen über {limit} kostet der Versand {ship}.', 'ship.free': 'Versand kostenlos bis {limit} Bestellwert.',
       'sum.sub': 'Zwischensumme', 'sum.ship': 'Versand', 'sum.free': 'gratis', 'sum.total': 'Gesamt', 'tocheckout': 'Zur Kasse',
       'co.title': 'Bestellung abschließen', 'co.sub': '{n} Artikel · Gesamt {total} (inkl. MwSt.)',
@@ -356,7 +356,7 @@
       'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'sale.bar': '🍂 Autumn Sale: {pct}% off everything · until {date} only', 'sale.tag': '−{pct}%', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
-      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'col.grey': 'Grey', 'line.color': '{color} · ', 'colors.n': '{n} colours',
+      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'col.grey': 'Grey', 'col.darkgrey': 'Dark grey', 'line.color': '{color} · ', 'colors.n': '{n} colours',
       'ship.over': 'Orders over {limit} cost {ship} to ship.', 'ship.free': 'Free shipping up to {limit} order value.',
       'sum.sub': 'Subtotal', 'sum.ship': 'Shipping', 'sum.free': 'free', 'sum.total': 'Total', 'tocheckout': 'Checkout',
       'co.title': 'Complete your order', 'co.sub': '{n} items · Total {total} (incl. VAT)',
@@ -409,8 +409,8 @@
     { id: 'rf4', type: 'hose', name: 'Urban Artifacts Black Baggy Denim (Washed Black)', price: 39.99, color: '#232323', img: 'fotos/urban-artifacts-black-baggy-denim.webp', sizes: ['XS','S','M','L','XL','XXL'],
       desc: 'Unisex-Baggy-Jeans in verwaschenem Schwarz, locker geschnitten. Mit dezenten Streetwear-Details: Stickerei am Oberschenkel und ein „Street Culture“-Label am Bein.' },
     // Größen laut Auftrag: S, X, XS, L, M, XXL – „X“ als XL gelesen (XL fehlte sonst in der Liste)
-    { id: 'rf10', type: 'hose', name: 'Rare Form Sweatpants (Grau meliert)', price: 24.99, color: '#8d8d8d', img: 'fotos/rare-form-sweatpants.webp', sizes: ['XS','S','M','L','XL','XXL'],
-      desc: 'Jogginghose in meliertem Grau, weit geschnitten mit geradem Bein. Elastischer Bund mit Kordelzug, seitliche Eingrifftaschen und ein „Rare Form“-Schriftzug am Bein.' },
+    { id: 'rf10', type: 'hose', name: 'Rare Form Sweatpants', price: 24.99, color: '#8d8d8d', img: 'fotos/rare-form-sweatpants.webp', colors: { grey: 'fotos/rare-form-sweatpants.webp', darkgrey: 'fotos/rare-form-sweatpants-darkgrey.webp', black: 'fotos/rare-form-sweatpants-black.webp' }, sizes: ['XS','S','M','L','XL','XXL'],
+      desc: 'Jogginghose in meliertem Grau, Dunkelgrau oder Schwarz, weit geschnitten mit geradem Bein. Elastischer Bund mit Kordelzug, seitliche Eingrifftaschen und ein „Rare Form“-Schriftzug am Bein.' },
     // Größen laut Auftrag: XS, S, M, XL, XXL (L nicht genannt; "x" in der Liste war unklar)
     { id: 'rf8', type: 'tshirt', name: 'Rare Form Waffle Long Sleeve', price: 29.99, color: '#f4f2ee', img: 'fotos/rare-form-longsleeve.webp', colors: { white: 'fotos/rare-form-longsleeve.webp', black: 'fotos/rare-form-longsleeve-black.webp' }, sizes: ['XS','S','M','XL','XXL'],
       desc: 'Langarmshirt in Weiß oder Schwarz aus Waffelstrick, locker und kurz geschnitten. Schriftzug entlang beider Ärmel und ein kleines Rare-Form-Logo auf der Brust.' },
@@ -467,8 +467,8 @@
       "desc": "Eau de parfum in a natural spray, 100 ml. Square glass bottle with a silver atomiser, a matte Rare Form logo on the front and “Rare·Form” lettering. Details on fragrance notes and ingredients to follow."
     },
     "rf10": {
-      "name": "Rare Form Sweatpants (Heather Grey)",
-      "desc": "Sweatpants in heather grey with a relaxed, straight-leg fit. Elastic waistband with drawstring, side pockets and a “Rare Form” lettering on the leg."
+      "name": "Rare Form Sweatpants",
+      "desc": "Sweatpants in heather grey, dark grey or black with a relaxed, straight-leg fit. Elastic waistband with drawstring, side pockets and a “Rare Form” lettering on the leg."
     },
     "rf5": {
       "name": "Urban Artifacts Belt (Black)",

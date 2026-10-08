@@ -1,11 +1,11 @@
 /* Service Worker für die Rare-Form-Web-App: Seite und Fotos werden gespeichert, damit der Shop auch offline startet.
    Bei einer neuen Version von Seite oder Fotos CACHE hochzählen. */
-const CACHE = 'rare-form-v27';
+const CACHE = 'rare-form-v28';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './logo/mark.png',  './logo/wordmark.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
   './fotos/rare-form-shirt.webp', './fotos/urban-artifacts-tee.webp', './fotos/urban-artifacts-baggy-denim.webp',
-  './fotos/urban-artifacts-black-baggy-denim.webp', './fotos/urban-artifacts-belt.webp', './fotos/kette.webp', './fotos/rare-form-glasses.webp', './fotos/rare-form-longsleeve.webp', './fotos/texture-powder.webp', './fotos/rare-form-slides.webp', './fotos/rare-form-hoodie.webp', './fotos/rare-form-hoodie-back.webp', './fotos/rare-form-slides-white.webp', './fotos/rare-form-slides-grey.webp', './fotos/rare-form-parfum.webp', './fotos/rare-form-sweatpants.webp', './fotos/rare-form-shirt-black.webp', './fotos/urban-artifacts-tee-black.webp', './fotos/rare-form-longsleeve-black.webp',
+  './fotos/urban-artifacts-black-baggy-denim.webp', './fotos/urban-artifacts-belt.webp', './fotos/kette.webp', './fotos/rare-form-glasses.webp', './fotos/rare-form-longsleeve.webp', './fotos/texture-powder.webp', './fotos/rare-form-slides.webp', './fotos/rare-form-hoodie.webp', './fotos/rare-form-hoodie-back.webp', './fotos/rare-form-slides-white.webp', './fotos/rare-form-slides-grey.webp', './fotos/rare-form-parfum.webp', './fotos/rare-form-sweatpants.webp', './fotos/rare-form-sweatpants-darkgrey.webp', './fotos/rare-form-sweatpants-black.webp', './fotos/rare-form-shirt-black.webp', './fotos/urban-artifacts-tee-black.webp', './fotos/rare-form-longsleeve-black.webp',
 ];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

@@ -121,7 +121,7 @@
   .colors button{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .colors button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(128,128,128,.6);display:inline-block}
-  .sw-white{background:#f4f2ee}.sw-black{background:#161616}.sw-grey{background:#8d8d8f}.sw-darkgrey{background:#48484a}
+  .sw-white{background:#f4f2ee}.sw-black{background:#161616}.sw-grey{background:#8d8d8f}.sw-clear{background:linear-gradient(135deg,#fff,#c9d1dc)}.sw-darkgrey{background:#48484a}
   .sizes{display:flex;gap:8px;flex-wrap:wrap}
   .sizes button{min-width:48px;padding:9px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .sizes button.on{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
@@ -320,7 +320,7 @@
       'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'search.ph': 'Suchen …', 'search.aria': 'Produkte suchen', 'search.none': 'Nichts gefunden für „{q}“. Versuch einen anderen Begriff oder lösch die Suche.', 'sale.bar': '🍂 Herbst-Sale −{pct} % · bis {date}', 'sale.tag': '−{pct} %', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
-      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.grey': 'Grau', 'col.darkgrey': 'Dunkelgrau', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
+      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.clear': 'Transparent', 'col.grey': 'Grau', 'col.darkgrey': 'Dunkelgrau', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
       'ship.over': 'Bei Bestellungen über {limit} kostet der Versand {ship}.', 'ship.free': 'Versand kostenlos bis {limit} Bestellwert.',
       'sum.sub': 'Zwischensumme', 'sum.ship': 'Versand', 'sum.free': 'gratis', 'sum.total': 'Gesamt', 'tocheckout': 'Zur Kasse',
       'co.title': 'Bestellung abschließen', 'co.sub': '{n} Artikel · Gesamt {total} (inkl. MwSt.)',
@@ -367,7 +367,7 @@
       'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'search.ph': 'Search …', 'search.aria': 'Search products', 'search.none': 'Nothing found for “{q}”. Try another term or clear the search.', 'sale.bar': '🍂 Autumn Sale −{pct}% · until {date}', 'sale.tag': '−{pct}%', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
-      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'col.grey': 'Grey', 'col.darkgrey': 'Dark grey', 'line.color': '{color} · ', 'colors.n': '{n} colours',
+      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'col.clear': 'Clear', 'col.grey': 'Grey', 'col.darkgrey': 'Dark grey', 'line.color': '{color} · ', 'colors.n': '{n} colours',
       'ship.over': 'Orders over {limit} cost {ship} to ship.', 'ship.free': 'Free shipping up to {limit} order value.',
       'sum.sub': 'Subtotal', 'sum.ship': 'Shipping', 'sum.free': 'free', 'sum.total': 'Total', 'tocheckout': 'Checkout',
       'co.title': 'Complete your order', 'co.sub': '{n} items · Total {total} (incl. VAT)',
@@ -426,8 +426,8 @@
     { id: 'rf8', type: 'tshirt', name: 'Rare Form Waffle Long Sleeve', price: 29.99, color: '#f4f2ee', img: 'fotos/rare-form-longsleeve.webp', colors: { white: 'fotos/rare-form-longsleeve.webp', black: 'fotos/rare-form-longsleeve-black.webp' }, sizes: ['XS','S','M','XL','XXL'],
       desc: 'Langarmshirt in Weiß oder Schwarz aus Waffelstrick, locker und kurz geschnitten. Schriftzug entlang beider Ärmel und ein kleines Rare-Form-Logo auf der Brust.' },
     // Brille: Preis 29,99 € laut Auftrag; Foto vom Nutzer geliefert (Material/Maße unbekannt)
-    { id: 'rf9', type: 'zubehoer', name: 'Rare Form Clear Glasses (ohne Sehstärke)', price: 29.99, color: '#d8dde2', img: 'fotos/rare-form-glasses.webp', allSizes: ['Einheitsgröße'], sizes: ['Einheitsgröße'],
-      desc: 'Ohne Sehstärke: Die Gläser sind reines Fensterglas ohne Korrektur und nicht zum Sehen mit Fehlsichtigkeit gedacht. Brille mit durchsichtigem Rahmen und klaren Gläsern. Auf dem Bügel ist „Rare Form Streetwear“ mit Logo graviert.' },
+    { id: 'rf9', type: 'zubehoer', name: 'Rare Form Brille (ohne Sehstärke)', price: 29.99, color: '#d8dde2', img: 'fotos/rare-form-glasses.webp', colors: { clear: 'fotos/rare-form-glasses.webp', black: 'fotos/rare-form-glasses-black.webp' }, allSizes: ['Einheitsgröße'], sizes: ['Einheitsgröße'],
+      desc: 'Ohne Sehstärke: Die Gläser sind reines Fensterglas ohne Korrektur und nicht zum Sehen mit Fehlsichtigkeit gedacht. Brille mit durchsichtigem oder schwarzem Rahmen und klaren Gläsern. Auf dem Bügel ist „Rare Form Streetwear“ mit Logo graviert.' },
     // PLATZHALTER: Preis und Größen des Gürtels sind noch nicht bestätigt
     { id: 'rf5', type: 'zubehoer', name: 'Urban Artifacts Belt (Black)', price: 19.99, color: '#232323', img: 'fotos/urban-artifacts-belt.webp', allSizes: ['S','M','L'], sizes: ['S','M','L'],
       desc: 'Schwarzer Gürtel mit zwei Reihen Ösen, grauen Ziernähten und gunmetal-farbener Schnalle. Dazu zwei D-Ringe, ein Karabiner und ein gesticktes „Urban Artifacts“-Label.' },
@@ -438,8 +438,8 @@
     { id: 'rf7', type: 'haarpflege', name: 'Rare Form Texture Powder', price: 14.99, color: '#232323', img: 'fotos/texture-powder.webp', allSizes: [], sizes: [],
       desc: 'Texture Powder in schwarzer Flasche mit „Rare Form“-Aufdruck.' },
     // Preis 39,99 € laut Auftrag; alle Größen wie bei den anderen Produkten; Foto ist ein bearbeitetes Fremdfoto (Logo, Rücken und Fellrand nachträglich eingefügt) – vor dem Verkauf durch eigenes ersetzen
-    { id: 'rf13', type: 'jacken', name: 'Rare Form Zip Hoodie mit Fellrand', price: 39.99, color: '#161616', img: 'fotos/rare-form-hoodie.webp', back: 'fotos/rare-form-hoodie-back.webp', sizes: ['XS','S','M','L','XL','XXL'],
-      desc: 'Schwarze Kapuzenjacke mit durchgehendem Reißverschluss, Kordeln und Kängurutasche. Der Fellrand an der Kapuze ist abnehmbar – ohne Rand trägst du sie als normalen Zip-Hoodie. Kleines Rare-Form-Logo auf der Brust, großes Logo auf dem Rücken und ein Label am Saum.' },
+    { id: 'rf13', type: 'jacken', name: 'Rare Form Zip Hoodie mit Fellrand', price: 39.99, color: '#161616', img: 'fotos/rare-form-hoodie.webp', back: 'fotos/rare-form-hoodie-back.webp', colors: { black: 'fotos/rare-form-hoodie.webp', white: 'fotos/rare-form-hoodie-white.webp' }, backs: { black: 'fotos/rare-form-hoodie-back.webp', white: 'fotos/rare-form-hoodie-white-back.webp' }, sizes: ['XS','S','M','L','XL','XXL'],
+      desc: 'Kapuzenjacke in Schwarz oder Weiß mit durchgehendem Reißverschluss, Kordeln und Kängurutasche. Der Fellrand an der Kapuze ist abnehmbar – ohne Rand trägst du sie als normalen Zip-Hoodie. Kleines Rare-Form-Logo auf der Brust, großes Logo auf dem Rücken und ein Label am Saum.' },
     // Preis 14,99 € laut Auftrag; Größen 38–39 und 42–43 = die häufigsten Damen-/Herrengrößen (Annahme, kein Kundenwunsch); Foto ist ein bearbeitetes Fremdfoto – vor dem Verkauf durch eigenes ersetzen
     { id: 'rf12', type: 'schuhe', name: 'Rare Form Fluffy Slides', price: 14.99, color: '#161616', img: 'fotos/rare-form-slides.webp', colors: { black: 'fotos/rare-form-slides.webp', white: 'fotos/rare-form-slides-white.webp', grey: 'fotos/rare-form-slides-grey.webp' }, allSizes: ['38–39','42–43'], sizes: ['38–39','42–43'],
       desc: 'Pantoffel (Slides) in Schwarz, Weiß oder Grau mit flauschigem Teddy-Fell-Look, offener Zehenpartie und breitem Riemen mit Rare-Form-Logo. Die Größen fallen in Doppelgrößen aus: 38–39 und 42–43.' },
@@ -467,7 +467,7 @@
     },
     "rf13": {
       "name": "Rare Form Zip Hoodie with Fur Trim",
-      "desc": "Black zip-up hoodie with a full-length zip, drawcords and a kangaroo pocket. The fur trim on the hood is detachable – without it you wear it as a regular zip hoodie. Small Rare Form logo on the chest, large logo on the back and a label at the hem."
+      "desc": "Zip-up hoodie in black or white with a full-length zip, drawcords and a kangaroo pocket. The fur trim on the hood is detachable – without it you wear it as a regular zip hoodie. Small Rare Form logo on the chest, large logo on the back and a label at the hem."
     },
     "rf12": {
       "name": "Rare Form Fluffy Slides",
@@ -494,8 +494,8 @@
     "desc": "Long-sleeve top in white or black waffle knit with a relaxed, cropped fit. Lettering down both sleeves and a small Rare Form logo on the chest."
   },
   "rf9": {
-    "name": "Rare Form Clear Glasses (non-prescription)",
-    "desc": "Non-prescription: the lenses are plain clear glass with no correction and are not meant to correct vision. Glasses with a transparent frame and clear lenses. “Rare Form Streetwear” and the logo are engraved on the temple."
+    "name": "Rare Form Glasses (non-prescription)",
+    "desc": "Non-prescription: the lenses are plain clear glass with no correction and are not meant to correct vision. Glasses with a transparent or black frame and clear lenses. “Rare Form Streetwear” and the logo are engraved on the temple."
   },
   "rf7": {
       "name": "Rare Form Texture Powder",
@@ -702,7 +702,7 @@
   // Vorder- und Rückseite: p.img = Vorderseite, p.back = Rückseite (optional, Pfad zum Foto)
   function setView(v) {
     const back = v === 'back' && cur.back;
-    $('mpic').innerHTML = (back ? picture({ ...cur, img: cur.back }) : picture(cur, pickColor)) +
+    $('mpic').innerHTML = (back ? picture({ ...cur, img: (cur.backs && cur.backs[pickColor]) || cur.back }) : picture(cur, pickColor)) +
       (cur.back ? `<div class="views" role="group" aria-label="${t('view.aria')}"><button data-view="front" class="${back ? '' : 'on'}">${t('view.front')}</button><button data-view="back" class="${back ? 'on' : ''}">${t('view.back')}</button></div>` : '');
   }
   $('mpic').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });

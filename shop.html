@@ -166,7 +166,7 @@
 <main class="wrap">
   <section class="hero">
     <h1>Rare Form</h1>
-    <p>Streetwear · Ab 60 € versandkostenfrei.</p>
+    <p>Streetwear · Ab <span class="fs">100 €</span> versandkostenfrei.</p>
   </section>
   <div class="tools">
     <span class="count" id="count"></span>
@@ -180,7 +180,7 @@
   <div class="grid" id="grid"></div>
 </main>
 
-<footer><div class="wrap">© Rare Form · Preise inkl. MwSt. · Versand 4,90 € (ab 60 € gratis) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
+<footer><div class="wrap">© Rare Form · Preise inkl. MwSt. · Versand 4,90 € (ab <span class="fs">100 €</span> gratis) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
 
 <div class="scrim" id="scrim"></div>
 
@@ -226,7 +226,7 @@
     { id: 'rf2', type: 'tshirt', name: 'Urban Artifacts Graphic Tee (White Edition)', price: 19.99, color: '#f4f2ee', img: 'fotos/urban-artifacts-tee.webp', sizes: ['XS','S','M','L','XL','XXL'],
       desc: 'Unisex-Streetwear-T-Shirt in Weiß mit markantem, modernem Grafikdesign auf der Vorderseite: Urban-Art-, Cyberpunk- und Graffiti-Elemente.' },
   ];
-  const FREE_SHIP = 60, SHIPPING = 4.90, MAX_QTY = 10;
+  const FREE_SHIP = 100, SHIPPING = 4.90, MAX_QTY = 10;
   const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
   const $ = id => document.getElementById(id);
   const byId = id => PRODUCTS.find(p => p.id === id);
@@ -540,6 +540,7 @@
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
 
   if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
+  document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_SHIP).replace(',00', ''); });   // Schwelle für kostenlosen Versand
   renderGrid(); renderCart();
   window.__shop = { PRODUCTS, get cart() { return cart; }, addToCart, subtotal, shipping, placeOrder };
 })();

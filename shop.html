@@ -33,6 +33,7 @@
   .logo img{display:block;width:auto;filter:var(--logo-filter)}
   .lg-mark{height:36px}
   .lg-word{height:15px}
+  @media (max-width:560px){.carttxt{display:none}.cartbtn{padding:8px 11px}.bar{gap:8px}}
   @media (max-width:380px){.lg-mark{height:30px}.lg-word{height:12px}.logo{gap:8px}.cartbtn{padding:7px 10px;font-size:13px}}
   nav{display:flex;gap:6px;margin-left:8px}
   nav button{background:none;border:0;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted)}
@@ -46,7 +47,8 @@
   }
   .spacer{flex:1}
   .themebtn{background:var(--card);border:1px solid var(--line);border-radius:12px;width:40px;height:38px;font-size:18px;line-height:1;display:grid;place-items:center;padding:0}
-  .themebtn:hover{border-color:var(--accent)}
+  .themebtn:hover,.langbtn:hover{border-color:var(--accent)}
+  .langbtn{background:var(--card);border:1px solid var(--line);border-radius:12px;height:38px;min-width:44px;padding:0 10px;font-size:13px;font-weight:800;letter-spacing:.04em}
   .cartbtn{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:700}
   .cartbtn b{position:absolute;top:-7px;right:-7px;background:var(--bad);color:#fff;border-radius:999px;min-width:20px;height:20px;font-size:12px;display:grid;place-items:center;padding:0 5px}
   .cartbtn b[hidden]{display:none}
@@ -158,6 +160,8 @@
   #chatform input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text)}
   #chatform .primary{padding:10px 14px}
   @media (max-width:520px){.chat{right:0;bottom:0;width:100vw;height:min(78vh,560px);border-radius:18px 18px 0 0}}
+  @media (max-width:640px){.spacer{display:none}.langbtn{margin-left:auto}}
+  @media (max-width:380px){.themebtn{width:36px}.langbtn{min-width:38px;padding:0 6px}.cartbtn{padding:8px 9px}}
   footer{border-top:1px solid var(--line);padding:22px 0 calc(22px + env(safe-area-inset-bottom));color:var(--muted);font-size:13px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-weight:600}
   .toast.show{opacity:1;transform:translateX(-50%)}
@@ -182,73 +186,175 @@
 </svg>
 <header>
   <div class="wrap bar">
-    <a class="logo" href="#" aria-label="Rare Form – Startseite"><img class="lg-mark" src="logo/mark.png" alt=""><img class="lg-word" src="logo/wordmark.png" alt="Rare Form"></a>
+    <a class="logo" href="#" data-i-aria="logo.aria" aria-label="Rare Form – Startseite"><img class="lg-mark" src="logo/mark.png" alt=""><img class="lg-word" src="logo/wordmark.png" alt="Rare Form"></a>
     <nav id="nav">
-      <button data-cat="alle" class="on">Alle</button>
-      <button data-cat="tshirt">T-Shirts</button>
-      <button data-cat="hose">Hosen</button>
-      <button data-cat="zubehoer">Accessoires</button>
-      <button data-cat="haarpflege">Haarpflege</button>
+      <button data-cat="alle" class="on" data-i="nav.all">Alle</button>
+      <button data-cat="tshirt" data-i="nav.tshirt">T-Shirts</button>
+      <button data-cat="hose" data-i="nav.hose">Hosen</button>
+      <button data-cat="zubehoer" data-i="nav.zub">Accessoires</button>
+      <button data-cat="haarpflege" data-i="nav.hair">Haarpflege</button>
     </nav>
     <div class="spacer"></div>
-    <button class="themebtn" id="themebtn" aria-label="Zwischen hellem und dunklem Modus wechseln" title="Hell / Dunkel"></button>
-    <button class="cartbtn" id="cartbtn" aria-label="Warenkorb öffnen">🛒 Warenkorb <b id="cartcount" hidden>0</b></button>
+    <button class="langbtn" id="langbtn" type="button"></button>
+    <button class="themebtn" id="themebtn" type="button"></button>
+    <button class="cartbtn" id="cartbtn" data-i-aria="cart.open" aria-label="Warenkorb öffnen">🛒 <span class="carttxt" data-i="cart">Warenkorb</span> <b id="cartcount" hidden>0</b></button>
   </div>
 </header>
 
 <main class="wrap">
   <section class="hero">
     <h1>Rare Form</h1>
-    <p>Streetwear · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert.</p>
+    <p data-ih="hero.sub">Streetwear · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert.</p>
   </section>
   <div class="tools">
     <span class="count" id="count"></span>
-    <select id="sort" aria-label="Sortierung">
-      <option value="neu">Empfohlen</option>
-      <option value="auf">Preis aufsteigend</option>
-      <option value="ab">Preis absteigend</option>
-      <option value="name">Name A–Z</option>
+    <select id="sort" data-i-aria="sort.aria" aria-label="Sortierung">
+      <option value="neu" data-i="sort.rec">Empfohlen</option>
+      <option value="auf" data-i="sort.asc">Preis aufsteigend</option>
+      <option value="ab" data-i="sort.desc">Preis absteigend</option>
+      <option value="name" data-i="sort.name">Name A–Z</option>
     </select>
   </div>
   <div id="grid"></div>
 </main>
 
-<footer><div class="wrap">© Rare Form · Preise inkl. MwSt. · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert (darüber 4,90 €) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
+<footer><div class="wrap" data-ih="footer">© Rare Form · Preise inkl. MwSt. · Versand kostenlos bis <span class="fs">100 €</span> Bestellwert (darüber 4,90 €) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.</div></footer>
 
 <div class="scrim" id="scrim"></div>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">
-  <button class="x" id="mclose" aria-label="Schließen">✕</button>
+  <button class="x" id="mclose" data-i-aria="close" aria-label="Schließen">✕</button>
   <div class="pic" id="mpic"></div>
   <div class="detail">
     <h2 id="mtitle"></h2>
     <div class="price" id="mprice"></div>
     <p id="mdesc"></p>
-    <div id="msizelabel"><b>Größe</b></div>
+    <div id="msizelabel"><b data-i="size">Größe</b></div>
     <div class="sizes" id="msizes"></div>
     <div class="err" id="merr"></div>
-    <button class="primary" id="madd">In den Warenkorb</button>
+    <button class="primary" id="madd" data-i="add">In den Warenkorb</button>
   </div>
 </div>
 
-<aside class="drawer" id="drawer" aria-label="Warenkorb">
-  <h2>Warenkorb <button class="ghost" id="dclose" style="padding:6px 12px">Schließen</button></h2>
+<aside class="drawer" id="drawer" data-i-aria="cart" aria-label="Warenkorb">
+  <h2><span data-i="cart">Warenkorb</span> <button class="ghost" id="dclose" style="padding:6px 12px" data-i="close">Schließen</button></h2>
   <div class="lines" id="lines"></div>
   <div class="sum" id="sum"></div>
 </aside>
 
 <div class="checkout" id="checkout" role="dialog" aria-modal="true" aria-labelledby="ctitle"></div>
-<button class="chatbtn" id="chatbtn" aria-label="Help – Hilfe-Chat öffnen">💬 <span>Help</span></button>
-<section class="chat" id="chat" hidden role="dialog" aria-label="Hilfe-Chat">
-  <header><div><b>Rare Form Assistent</b><small>Automatischer Assistent · keine echte Person</small></div><button id="chatx" aria-label="Chat schließen">✕</button></header>
+<button class="chatbtn" id="chatbtn" data-i-aria="chat.open" aria-label="Help – Hilfe-Chat öffnen">💬 <span>Help</span></button>
+<section class="chat" id="chat" hidden role="dialog" data-i-aria="chat.aria" aria-label="Hilfe-Chat">
+  <header><div><b data-i="chat.title">Rare Form Assistent</b><small data-i="chat.sub">Automatischer Assistent · keine echte Person</small></div><button id="chatx" data-i-aria="chat.close" aria-label="Chat schließen">✕</button></header>
   <div id="chatlog" aria-live="polite"></div>
   <div id="chips"></div>
-  <form id="chatform" autocomplete="off"><input id="chatin" placeholder="Schreib deine Frage …" maxlength="300" aria-label="Deine Nachricht"><button class="primary" type="submit">Senden</button></form>
+  <form id="chatform" autocomplete="off"><input id="chatin" data-i-ph="chat.ph" data-i-aria="chat.msg" placeholder="Schreib deine Frage …" maxlength="300" aria-label="Deine Nachricht"><button class="primary" type="submit" data-i="send">Senden</button></form>
 </section>
 <div class="toast" id="toast"></div>
 
 <script>
 (() => {
+  /* ---------- Sprache (Deutsch / Englisch) ---------- */
+  // Texte stehen hier an einer Stelle. Werte mit {…} werden über t('key', { … }) gefüllt, Funktionen bekommen die Werte direkt.
+  const I18N = {
+    de: {
+      'nav.all': 'Alle', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Hosen', 'nav.zub': 'Accessoires', 'nav.hair': 'Haarpflege',
+      'logo.aria': 'Rare Form – Startseite', 'cart': 'Warenkorb', 'cart.open': 'Warenkorb öffnen',
+      'hero.sub': 'Streetwear · Versand kostenlos bis <span class="fs">{fs}</span> Bestellwert.',
+      'footer': '© Rare Form · Preise inkl. MwSt. · Versand kostenlos bis <span class="fs">{fs}</span> Bestellwert (darüber {ship}) · 14 Tage Rückgabe · Demo-Shop: es wird nichts wirklich bestellt oder bezahlt.',
+      'sort.aria': 'Sortierung', 'sort.rec': 'Empfohlen', 'sort.asc': 'Preis aufsteigend', 'sort.desc': 'Preis absteigend', 'sort.name': 'Name A–Z',
+      'count.one': '{n} Artikel', 'count.many': '{n} Artikel',
+      'type.tshirt': 'T-Shirt', 'type.hose': 'Hose', 'type.zubehoer': 'Accessoire', 'type.haarpflege': 'Haarpflege',
+      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Hosen', 'sec.zubehoer': 'Accessoires', 'sec.haarpflege': 'Haarpflege',
+      'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
+      'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
+      'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
+      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ',
+      'ship.over': 'Bei Bestellungen über {limit} kostet der Versand {ship}.', 'ship.free': 'Versand kostenlos bis {limit} Bestellwert.',
+      'sum.sub': 'Zwischensumme', 'sum.ship': 'Versand', 'sum.free': 'gratis', 'sum.total': 'Gesamt', 'tocheckout': 'Zur Kasse',
+      'co.title': 'Bestellung abschließen', 'co.sub': '{n} Artikel · Gesamt {total} (inkl. MwSt.)',
+      'f.first': 'Vorname', 'f.last': 'Nachname', 'f.mail': 'E-Mail', 'f.street': 'Straße und Hausnummer', 'f.zip': 'PLZ', 'f.city': 'Ort',
+      'pays': 'Zahlungsart', 'co.note': 'Das ist ein Demo-Shop: Es wird nichts bezahlt, versendet oder an einen Server geschickt. Die Bestellung bleibt nur in deinem Browser gespeichert.',
+      'co.back': 'Zurück', 'co.buy': 'Jetzt kaufen · {total}', 'co.check': 'Bitte prüfe deine Angaben: {field}.',
+      'pay.fail': 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.',
+      'pay.paypal.name': 'PayPal', 'pay.paypal.note': 'Bezahle mit deinem PayPal-Konto', 'pay.paypal.tag': 'PayPal', 'pay.paypal.step': 'Du wirst zu PayPal weitergeleitet, meldest dich dort an und bestätigst die Zahlung.',
+      'pay.card.name': 'Kredit- oder Debitkarte', 'pay.card.note': 'Visa, Mastercard, American Express, Maestro u. a.', 'pay.card.tag': 'Karte', 'pay.card.step': 'Hier würde der Zahlungsanbieter deine Kartendaten sicher abfragen. Deine Kartennummer wird nie auf dieser Seite eingegeben.',
+      'pay.klarna.name': 'Klarna', 'pay.klarna.note': 'Später bezahlen oder in Raten', 'pay.klarna.tag': 'Klarna', 'pay.klarna.step': 'Du wirst zu Klarna weitergeleitet, wählst dort die Zahlungsart und bestätigst.',
+      'pay.invoice.name': 'Rechnung', 'pay.invoice.note': 'Erst die Ware erhalten, dann bezahlen', 'pay.invoice.tag': 'Rechnung',
+      'ps.badge': 'DEMO – keine echte Zahlung', 'ps.title': 'Zahlung mit {name}', 'ps.would': '{total} würden jetzt bezahlt.', 'ps.ok': 'Zahlung bestätigen (Demo)',
+      'done.title': 'Danke, {name}!', 'done.text': 'Deine Bestellung <b>{no}</b> über <b>{total}</b> ist eingegangen (Demo).<br>Zahlungsart: {pay}{inv}.<br>Eine Bestätigung ginge an {mail}.', 'done.inv': ' – die Rechnung käme per E-Mail', 'done.more': 'Weiter einkaufen',
+      'theme.toLight': 'Heller Modus', 'theme.toDark': 'Dunkler Modus', 'lang.btn': 'EN', 'lang.aria': 'Sprache wechseln: Englisch',
+      'chat.open': 'Help – Hilfe-Chat öffnen', 'chat.aria': 'Hilfe-Chat', 'chat.title': 'Rare Form Assistent', 'chat.sub': 'Automatischer Assistent · keine echte Person', 'chat.close': 'Chat schließen',
+      'chat.ph': 'Schreib deine Frage …', 'chat.msg': 'Deine Nachricht', 'send': 'Senden',
+      'chat.hello': 'Hallo! Ich bin der automatische Assistent von Rare Form. Hast du ein Problem oder eine Frage zu Bestellung, Größen oder Versand? Tipp einfach unten auf ein Thema oder schreib mir.',
+      'chips': ['Versandkosten', 'Welche Größen?', 'Rückgabe', 'Zahlung', 'Mein Warenkorb', 'Mit einem Menschen sprechen'],
+      'a.contact.mail': 'Schreib uns an {mail}.', 'a.contact.none': 'Die Kontaktdaten des Shops sind noch nicht eingetragen – bitte melde dich über den Shop-Betreiber.',
+      'a.hello': 'Hallo! Ich bin der automatische Assistent von Rare Form. Wobei kann ich dir helfen?', 'a.thanks': 'Sehr gern! Sag Bescheid, wenn du noch etwas wissen möchtest.',
+      'a.ship': 'Der Versand ist bis {limit} Bestellwert kostenlos. Bei Bestellungen darüber kostet er {ship}.',
+      'a.time': 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ',
+      'a.return': 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ',
+      'a.sizes.h': 'Verfügbare Größen:', 'a.sizes.t': 'Das Rare Form Shirt hat einen lockeren, oversized Schnitt und die Baggy-Jeans sind locker geschnitten – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.',
+      'a.pay': 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.',
+      'a.price.h': 'Preise (inkl. MwSt.):', 'a.price.t': 'Rabattcodes gibt es aktuell nicht.', 'a.prod.t': 'Angaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.',
+      'a.order': 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ',
+      'a.cart.empty': 'Dein Warenkorb ist leer. Klick beim Shirt auf „Kaufen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.',
+      'a.cart.full': 'In deinem Warenkorb: {items}.\nZwischensumme {sub}, Versand {ship}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.', 'a.cart.free': 'kostenlos',
+      'a.stock.h': 'Verfügbar sind aktuell:', 'a.stock.t': 'Eine Lagerzahl kann ich nicht sehen.',
+      'a.bug': 'Das tut mir leid! Versuch bitte, die Seite neu zu laden (dein Warenkorb bleibt erhalten). Wenn es dann immer noch nicht klappt: ',
+      'a.human': 'Ich bin ein automatischer Assistent. Für alles Weitere: ',
+      'a.unknown': 'Dazu habe ich leider keine sichere Antwort. Ich kann dir bei Versand, Größen, Rückgabe, Zahlung und dem Warenkorb helfen. ',
+    },
+    en: {
+      'nav.all': 'All', 'nav.tshirt': 'T-Shirts', 'nav.hose': 'Trousers', 'nav.zub': 'Accessories', 'nav.hair': 'Hair care',
+      'logo.aria': 'Rare Form – Home', 'cart': 'Cart', 'cart.open': 'Open cart',
+      'hero.sub': 'Streetwear · Free shipping up to <span class="fs">{fs}</span> order value.',
+      'footer': '© Rare Form · Prices incl. VAT · Free shipping up to <span class="fs">{fs}</span> order value ({ship} above) · 14-day returns · Demo shop: nothing is actually ordered or paid.',
+      'sort.aria': 'Sort', 'sort.rec': 'Featured', 'sort.asc': 'Price: low to high', 'sort.desc': 'Price: high to low', 'sort.name': 'Name A–Z',
+      'count.one': '{n} item', 'count.many': '{n} items',
+      'type.tshirt': 'T-shirt', 'type.hose': 'Trousers', 'type.zubehoer': 'Accessory', 'type.haarpflege': 'Hair care',
+      'sec.tshirt': 'T-Shirts', 'sec.hose': 'Trousers', 'sec.zubehoer': 'Accessories', 'sec.haarpflege': 'Hair care',
+      'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
+      'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
+      'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
+      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ',
+      'ship.over': 'Orders over {limit} cost {ship} to ship.', 'ship.free': 'Free shipping up to {limit} order value.',
+      'sum.sub': 'Subtotal', 'sum.ship': 'Shipping', 'sum.free': 'free', 'sum.total': 'Total', 'tocheckout': 'Checkout',
+      'co.title': 'Complete your order', 'co.sub': '{n} items · Total {total} (incl. VAT)',
+      'f.first': 'First name', 'f.last': 'Last name', 'f.mail': 'Email', 'f.street': 'Street and house number', 'f.zip': 'Postcode', 'f.city': 'City',
+      'pays': 'Payment method', 'co.note': 'This is a demo shop: nothing is paid, shipped or sent to a server. Your order stays in your browser only.',
+      'co.back': 'Back', 'co.buy': 'Buy now · {total}', 'co.check': 'Please check your details: {field}.',
+      'pay.fail': 'The payment could not be started. Please try again.',
+      'pay.paypal.name': 'PayPal', 'pay.paypal.note': 'Pay with your PayPal account', 'pay.paypal.tag': 'PayPal', 'pay.paypal.step': 'You will be redirected to PayPal, log in there and confirm the payment.',
+      'pay.card.name': 'Credit or debit card', 'pay.card.note': 'Visa, Mastercard, American Express, Maestro and more', 'pay.card.tag': 'Card', 'pay.card.step': 'This is where the payment provider would securely ask for your card details. Your card number is never entered on this page.',
+      'pay.klarna.name': 'Klarna', 'pay.klarna.note': 'Pay later or in instalments', 'pay.klarna.tag': 'Klarna', 'pay.klarna.step': 'You will be redirected to Klarna, choose your payment option there and confirm.',
+      'pay.invoice.name': 'Invoice', 'pay.invoice.note': 'Receive your goods first, then pay', 'pay.invoice.tag': 'Invoice',
+      'ps.badge': 'DEMO – no real payment', 'ps.title': 'Pay with {name}', 'ps.would': '{total} would be paid now.', 'ps.ok': 'Confirm payment (demo)',
+      'done.title': 'Thank you, {name}!', 'done.text': 'Your order <b>{no}</b> for <b>{total}</b> has been received (demo).<br>Payment method: {pay}{inv}.<br>A confirmation would be sent to {mail}.', 'done.inv': ' – the invoice would arrive by email', 'done.more': 'Continue shopping',
+      'theme.toLight': 'Light mode', 'theme.toDark': 'Dark mode', 'lang.btn': 'DE', 'lang.aria': 'Switch language: German',
+      'chat.open': 'Help – open help chat', 'chat.aria': 'Help chat', 'chat.title': 'Rare Form Assistant', 'chat.sub': 'Automated assistant · not a real person', 'chat.close': 'Close chat',
+      'chat.ph': 'Type your question …', 'chat.msg': 'Your message', 'send': 'Send',
+      'chat.hello': 'Hi! I am the automated assistant of Rare Form. Do you have a problem or a question about orders, sizes or shipping? Tap a topic below or write to me.',
+      'chips': ['Shipping costs', 'Which sizes?', 'Returns', 'Payment', 'My cart', 'Talk to a human'],
+      'a.contact.mail': 'Write to us at {mail}.', 'a.contact.none': 'The shop’s contact details have not been added yet – please get in touch via the shop owner.',
+      'a.hello': 'Hi! I am the automated assistant of Rare Form. How can I help you?', 'a.thanks': 'You are welcome! Let me know if you would like to know anything else.',
+      'a.ship': 'Shipping is free up to {limit} order value. Orders above that cost {ship} to ship.',
+      'a.time': 'No fixed delivery time has been set up in the shop yet, so I cannot give you a reliable answer. ',
+      'a.return': 'You have a 14-day right of return. Details of the return process have not been added yet. ',
+      'a.sizes.h': 'Available sizes:', 'a.sizes.t': 'The Rare Form Shirt has a relaxed, oversized fit and the baggy jeans are cut loose – if you do not like it that wide, go one size down. I do not have an exact size chart yet.',
+      'a.pay': 'At checkout you can pay with PayPal, credit or debit card (Visa, Mastercard, American Express, Maestro and more), Klarna or on invoice. The shop is currently a demo: nothing is actually paid or charged.',
+      'a.price.h': 'Prices (incl. VAT):', 'a.price.t': 'There are no discount codes at the moment.', 'a.prod.t': 'I do not have details on material and care yet – they will be added.',
+      'a.order': 'This is a demo shop: orders are only saved in the browser and not actually shipped. Once the shop is live you will receive a confirmation by email. ',
+      'a.cart.empty': 'Your cart is empty. Tap “Buy” on a product, choose your size and add it to the cart. Use “Cart” at the top right to check out.',
+      'a.cart.full': 'In your cart: {items}.\nSubtotal {sub}, shipping {ship}. Use “Cart” at the top right to check out.', 'a.cart.free': 'free',
+      'a.stock.h': 'Currently available:', 'a.stock.t': 'I cannot see stock numbers.',
+      'a.bug': 'I am sorry! Please try reloading the page (your cart is kept). If it still does not work: ',
+      'a.human': 'I am an automated assistant. For anything else: ',
+      'a.unknown': 'I am afraid I do not have a reliable answer for that. I can help with shipping, sizes, returns, payment and your cart. ',
+    },
+  };
+  let LANG = 'de';
+  const t = (k, v) => { let s = (I18N[LANG] && I18N[LANG][k]); if (s === undefined) s = I18N.de[k]; if (s === undefined) return k; return Array.isArray(s) || !v ? s : s.replace(/\{(\w+)\}/g, (m, n) => (v[n] !== undefined ? v[n] : m)); };
+
   /* ---------- Produkte (hier einfach bearbeiten) ---------- */
   // type: tshirt | hose · color: Stofffarbe · sizes: verfügbare Größen · old: alter Preis (optional)
   // img: Pfad zu einem echten Produktfoto (z. B. 'fotos/basic-tee-weiss.jpg') – ersetzt dann die gezeichnete Ansicht
@@ -272,8 +378,48 @@
     { id: 'rf7', type: 'haarpflege', name: 'Rare Form Texture Powder', price: 14.99, color: '#232323', img: 'fotos/texture-powder.webp', allSizes: [], sizes: [],
       desc: 'Texture Powder in schwarzer Flasche mit „Rare Form“-Aufdruck.' },
   ];
+
+  const EN = {
+    "rf1": {
+      "name": "Rare Form Shirt",
+      "desc": "Streetwear T-shirt in white with a relaxed, oversized fit. Angel graphic and “Chaotic” lettering on the front, prints on both sleeves and a black label at the hem."
+    },
+    "rf2": {
+      "name": "Urban Artifacts Graphic Tee (White Edition)",
+      "desc": "Unisex streetwear T-shirt in white with a bold, modern graphic on the front: urban art, cyberpunk and graffiti elements."
+    },
+    "rf3": {
+      "name": "Urban Artifacts Baggy Denim (Vintage Wash)",
+      "desc": "Unisex baggy jeans in a classic vintage wash, relaxed fit. With a subtle streetwear accent: fine embroidery on the pocket and a brown label at the waistband."
+    },
+    "rf4": {
+      "name": "Urban Artifacts Black Baggy Denim (Washed Black)",
+      "desc": "Unisex baggy jeans in washed black, relaxed fit. With subtle streetwear details: embroidery on the thigh and a “Street Culture” label on the leg."
+    },
+    "rf5": {
+      "name": "Urban Artifacts Belt (Black)",
+      "desc": "Black belt with two rows of eyelets, grey contrast stitching and a gunmetal buckle. Plus two D-rings, a snap hook and an embroidered “Urban Artifacts” label."
+    },
+    "rf6": {
+      "name": "Curb Chain (Silver-tone)",
+      "desc": "Curb-style chain in silver tone with a spring-ring clasp."
+    },
+    "rf7": {
+      "name": "Rare Form Texture Powder",
+      "desc": "Texture powder in a black bottle with “Rare Form” print."
+    }
+  };
+  // Name und Beschreibung folgen der gewählten Sprache (Deutsch = Angaben oben, Englisch = EN)
+  PRODUCTS.forEach(p => {
+    const de = { name: p.name, desc: p.desc }, e = EN[p.id];
+    Object.defineProperty(p, 'name', { get: () => (LANG === 'en' && e ? e.name : de.name), enumerable: true });
+    Object.defineProperty(p, 'desc', { get: () => (LANG === 'en' && e ? e.desc : de.desc), enumerable: true });
+  });
   const FREE_UP_TO = 100, SHIPPING = 4.90, MAX_QTY = 10;
-  const eur = n => n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+  const loc = () => (LANG === 'en' ? 'en-IE' : 'de-DE');
+  const eur = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR' });
+  const eur0 = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const sizeLabel = s => (s === 'Einheitsgröße' ? t('onesize') : s);
   const $ = id => document.getElementById(id);
   const byId = id => PRODUCTS.find(p => p.id === id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -388,17 +534,17 @@
     const n = itemCount(); $('cartcount').textContent = n; $('cartcount').hidden = n === 0;
     $('lines').innerHTML = cart.length ? cart.map((l, i) => {
       const p = byId(l.id);
-      return `<div class="line"><div class="pic">${picture(p)}</div><div><h4>${esc(p.name)}</h4><div class="meta">${l.size ? `Größe ${l.size} · ` : ''}${eur(p.price)}</div>
-        <div class="qty"><button data-q="${i}" data-d="-1" aria-label="weniger">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="mehr">+</button></div>
-        <button class="rm" data-rm="${i}">Entfernen</button></div><b>${eur(p.price * l.qty)}</b></div>`;
-    }).join('') : '<div class="empty">Dein Warenkorb ist leer.</div>';
+      return `<div class="line"><div class="pic">${picture(p)}</div><div><h4>${esc(p.name)}</h4><div class="meta">${l.size ? t('line.size', { size: sizeLabel(l.size) }) : ''}${eur(p.price)}</div>
+        <div class="qty"><button data-q="${i}" data-d="-1" aria-label="${t('cart.less')}">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="${t('cart.more')}">+</button></div>
+        <button class="rm" data-rm="${i}">${t('cart.remove')}</button></div><b>${eur(p.price * l.qty)}</b></div>`;
+    }).join('') : `<div class="empty">${t('cart.empty')}</div>`;
     const sub = subtotal(), sh = shipping();
     $('sum').innerHTML = cart.length ? `
-      <div class="ship">${sh ? `Bei Bestellungen über ${eur(FREE_UP_TO)} kostet der Versand ${eur(SHIPPING)}.` : `Versand kostenlos bis ${eur(FREE_UP_TO)} Bestellwert.`}</div>
-      <div class="row"><span>Zwischensumme</span><span>${eur(sub)}</span></div>
-      <div class="row"><span>Versand</span><span>${sh ? eur(sh) : 'gratis'}</span></div>
-      <div class="row total"><span>Gesamt</span><span>${eur(sub + sh)}</span></div>
-      <button class="primary" id="tocheckout">Zur Kasse</button>` : '';
+      <div class="ship">${sh ? t('ship.over', { limit: eur(FREE_UP_TO), ship: eur(SHIPPING) }) : t('ship.free', { limit: eur(FREE_UP_TO) })}</div>
+      <div class="row"><span>${t('sum.sub')}</span><span>${eur(sub)}</span></div>
+      <div class="row"><span>${t('sum.ship')}</span><span>${sh ? eur(sh) : t('sum.free')}</span></div>
+      <div class="row total"><span>${t('sum.total')}</span><span>${eur(sub + sh)}</span></div>
+      <button class="primary" id="tocheckout">${t('tocheckout')}</button>` : '';
   }
   $('lines').addEventListener('click', e => {
     const q = e.target.closest('[data-q]'), rm = e.target.closest('[data-rm]');
@@ -414,14 +560,14 @@
     let list = PRODUCTS.filter(p => cat === 'alle' || p.type === cat);
     if (sortBy === 'auf') list = [...list].sort((a, b) => a.price - b.price);
     if (sortBy === 'ab') list = [...list].sort((a, b) => b.price - a.price);
-    if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'de'));
-    $('count').textContent = list.length + (list.length === 1 ? ' Artikel' : ' Artikel');
-    const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(p.name)} ansehen">${picture(p)}${p.old ? '<span class="tag">Angebot</span>' : ''}</div>
-      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${{ tshirt: 'T-Shirt', hose: 'Hose', zubehoer: 'Accessoire', haarpflege: 'Haarpflege' }[p.type]}${p.sizes.length ? ' · ' + p.sizes.join(' ') : ''}</div>
-      <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">Kaufen</button></div></article>`;
+    if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, LANG));
+    $('count').textContent = t(list.length === 1 ? 'count.one' : 'count.many', { n: list.length });
+    const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(t('view', { name: p.name }))}">${picture(p)}${p.old ? `<span class="tag">${t('sale')}</span>` : ''}</div>
+      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${t('type.' + p.type)}${p.sizes.length ? ' · ' + p.sizes.map(sizeLabel).join(' ') : ''}</div>
+      <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">${t('buy')}</button></div></article>`;
     // T-Shirts oben, Hosen darunter
-    const SECTIONS = [['tshirt', 'T-Shirts'], ['hose', 'Hosen'], ['zubehoer', 'Accessoires'], ['haarpflege', 'Haarpflege']];
-    $('grid').innerHTML = SECTIONS.map(([t, title]) => { const items = list.filter(p => p.type === t); return items.length ? `<section class="sec"><h2>${title}</h2><div class="grid">${items.map(card).join('')}</div></section>` : ''; }).join('');
+    const SECTIONS = ['tshirt', 'hose', 'zubehoer', 'haarpflege'];
+    $('grid').innerHTML = SECTIONS.map(ty => { const items = list.filter(p => p.type === ty); return items.length ? `<section class="sec"><h2>${t('sec.' + ty)}</h2><div class="grid">${items.map(card).join('')}</div></section>` : ''; }).join('');
   }
   $('nav').addEventListener('click', e => {
     const b = e.target.closest('[data-cat]'); if (!b) return;
@@ -443,7 +589,7 @@
   function setView(v) {
     const back = v === 'back' && cur.back;
     $('mpic').innerHTML = (back ? picture({ ...cur, img: cur.back }) : picture(cur)) +
-      (cur.back ? `<div class="views" role="group" aria-label="Ansicht"><button data-view="front" class="${back ? '' : 'on'}">Vorderseite</button><button data-view="back" class="${back ? 'on' : ''}">Rückseite</button></div>` : '');
+      (cur.back ? `<div class="views" role="group" aria-label="${t('view.aria')}"><button data-view="front" class="${back ? '' : 'on'}">${t('view.front')}</button><button data-view="back" class="${back ? 'on' : ''}">${t('view.back')}</button></div>` : '');
   }
   $('mpic').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
   function openProduct(id) {
@@ -452,7 +598,7 @@
     $('mprice').innerHTML = eur(cur.price) + (cur.old ? `<s>${eur(cur.old)}</s>` : '');
     $('mdesc').textContent = cur.desc; $('merr').textContent = '';
     const hasSizes = cur.sizes.length > 0; $('msizelabel').hidden = !hasSizes; $('msizes').hidden = !hasSizes;
-    $('msizes').innerHTML = (cur.allSizes || ALL_SIZES).map(s => `<button data-size="${s}" ${cur.sizes.includes(s) ? '' : 'disabled title="ausverkauft"'}>${s}</button>`).join('');
+    $('msizes').innerHTML = (cur.allSizes || ALL_SIZES).map(s => `<button data-size="${s}" ${cur.sizes.includes(s) ? '' : `disabled title="${t('soldout')}"`}>${sizeLabel(s)}</button>`).join('');
     show($('modal'));
   }
   $('msizes').addEventListener('click', e => {
@@ -461,8 +607,8 @@
     document.querySelectorAll('#msizes button').forEach(x => x.classList.toggle('on', x === b));
   });
   $('madd').addEventListener('click', () => {
-    if (cur.sizes.length && !pick) { $('merr').textContent = 'Bitte wähle eine Größe.'; return; }
-    addToCart(cur.id, pick || ''); closeAll(); toast(`${cur.name}${pick ? ` (${pick})` : ''} im Warenkorb`);
+    if (cur.sizes.length && !pick) { $('merr').textContent = t('pick'); return; }
+    addToCart(cur.id, pick || ''); closeAll(); toast(t('added', { name: cur.name, size: pick ? ` (${sizeLabel(pick)})` : '' }));
   });
 
   /* ---------- Kasse (Demo: keine echte Zahlung) ---------- */
@@ -471,50 +617,51 @@
   // {url:"…"} zurückgibt (Weiterleitung zur Bezahlseite). Geheime Schlüssel gehören nur auf den Server, nie in diese Seite.
   const CHECKOUT_ENDPOINT = '';
   const PAYMENTS = {
-    paypal:  { name: 'PayPal', note: 'Bezahle mit deinem PayPal-Konto', tag: 'PayPal', step: 'Du wirst zu PayPal weitergeleitet, meldest dich dort an und bestätigst die Zahlung.' },
-    card:    { name: 'Kredit- oder Debitkarte', note: 'Visa, Mastercard, American Express, Maestro u. a.', tag: 'Karte', step: 'Hier würde der Zahlungsanbieter deine Kartendaten sicher abfragen. Deine Kartennummer wird nie auf dieser Seite eingegeben.' },
-    klarna:  { name: 'Klarna', note: 'Später bezahlen oder in Raten', tag: 'Klarna', step: 'Du wirst zu Klarna weitergeleitet, wählst dort die Zahlungsart und bestätigst.' },
-    invoice: { name: 'Rechnung', note: 'Erst die Ware erhalten, dann bezahlen', tag: 'Rechnung', step: null },
+    paypal:  { step: true },
+    card:    { step: true },
+    klarna:  { step: true },
+    invoice: { step: false },
   };
+  const pay = (k, f) => t('pay.' + k + '.' + f);
   function openCheckout() {
     if (!cart.length) return;
     const sub = subtotal(), sh = shipping();
-    $('checkout').innerHTML = `<h2 id="ctitle">Bestellung abschließen</h2><div class="meta" style="color:var(--muted)">${itemCount()} Artikel · Gesamt ${eur(sub + sh)} (inkl. MwSt.)</div>
+    $('checkout').innerHTML = `<h2 id="ctitle">${t('co.title')}</h2><div class="meta" style="color:var(--muted)">${t('co.sub', { n: itemCount(), total: eur(sub + sh) })}</div>
       <form id="cform" novalidate>
-        <label>Vorname<input name="first" required autocomplete="given-name" placeholder=" "></label>
-        <label>Nachname<input name="last" required autocomplete="family-name" placeholder=" "></label>
-        <label class="full">E-Mail<input name="mail" type="email" required autocomplete="email" placeholder=" "></label>
-        <label class="full">Straße und Hausnummer<input name="street" required autocomplete="street-address" placeholder=" "></label>
-        <label>PLZ<input name="zip" required pattern="[0-9]{5}" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder=" "></label>
-        <label>Ort<input name="city" required autocomplete="address-level2" placeholder=" "></label>
-        <div class="pays" role="radiogroup" aria-label="Zahlungsart"><b>Zahlungsart</b>${Object.entries(PAYMENTS).map(([k, m], i) => `<label class="pay"><input type="radio" name="pay" value="${k}" ${i === 0 ? 'checked' : ''}><span><b>${m.name}</b><small>${m.note}</small></span><em>${m.tag}</em></label>`).join('')}</div>
-        <div class="note">Das ist ein Demo-Shop: Es wird nichts bezahlt, versendet oder an einen Server geschickt. Die Bestellung bleibt nur in deinem Browser gespeichert.</div>
+        <label>${t('f.first')}<input name="first" required autocomplete="given-name" placeholder=" "></label>
+        <label>${t('f.last')}<input name="last" required autocomplete="family-name" placeholder=" "></label>
+        <label class="full">${t('f.mail')}<input name="mail" type="email" required autocomplete="email" placeholder=" "></label>
+        <label class="full">${t('f.street')}<input name="street" required autocomplete="street-address" placeholder=" "></label>
+        <label>${t('f.zip')}<input name="zip" required pattern="[0-9]{5}" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder=" "></label>
+        <label>${t('f.city')}<input name="city" required autocomplete="address-level2" placeholder=" "></label>
+        <div class="pays" role="radiogroup" aria-label="${t('pays')}"><b>${t('pays')}</b>${Object.keys(PAYMENTS).map((k, i) => `<label class="pay"><input type="radio" name="pay" value="${k}" ${i === 0 ? 'checked' : ''}><span><b>${pay(k, 'name')}</b><small>${pay(k, 'note')}</small></span><em>${pay(k, 'tag')}</em></label>`).join('')}</div>
+        <div class="note">${t('co.note')}</div>
         <div class="err full" id="cerr" style="grid-column:1/-1"></div>
-        <button type="button" class="ghost" id="cback">Zurück</button><button class="primary" type="submit">Jetzt kaufen · ${eur(sub + sh)}</button>
+        <button type="button" class="ghost" id="cback">${t('co.back')}</button><button class="primary" type="submit">${t('co.buy', { total: eur(sub + sh) })}</button>
       </form>`;
     show($('checkout'));
     $('cback').addEventListener('click', () => { renderCart(); show($('drawer')); });
     $('cform').addEventListener('submit', e => {
       e.preventDefault();
       const f = e.target; const bad = [...f.elements].find(x => x.name && x.willValidate && !x.checkValidity());
-      if (bad) { $('cerr').textContent = 'Bitte prüfe deine Angaben: ' + (bad.parentElement.firstChild.textContent || bad.name) + '.'; bad.focus(); return; }
+      if (bad) { $('cerr').textContent = t('co.check', { field: bad.parentElement.firstChild.textContent || bad.name }); bad.focus(); return; }
       startPayment(Object.fromEntries(new FormData(f)));
     });
   }
   // Zahlung starten: mit Server → Weiterleitung zum Anbieter; ohne Server → simulierter Zahlungsschritt (Demo)
   async function startPayment(data) {
-    const m = PAYMENTS[data.pay] || PAYMENTS.invoice;
+    const m = PAYMENTS[data.pay] || (data.pay = 'invoice', PAYMENTS.invoice);
     if (CHECKOUT_ENDPOINT) {
       try {
         const r = await fetch(CHECKOUT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ customer: data, items: cart, method: data.pay }) });
         const j = await r.json(); if (j && j.url) { location.href = j.url; return; }
-        $('cerr').textContent = 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.'; return;
-      } catch (e) { $('cerr').textContent = 'Die Zahlung konnte nicht gestartet werden. Bitte versuche es erneut.'; return; }
+        $('cerr').textContent = t('pay.fail'); return;
+      } catch (e) { $('cerr').textContent = t('pay.fail'); return; }
     }
     if (!m.step) return placeOrder(data);
     const total = subtotal() + shipping();
-    $('checkout').innerHTML = `<div class="paystep"><span class="badge">DEMO – keine echte Zahlung</span><h2 id="ctitle">Zahlung mit ${m.name}</h2><p style="color:var(--muted);margin:0">${m.step}</p><p style="margin:0"><b>${eur(total)}</b> würden jetzt bezahlt.</p>
-      <button class="primary" id="payok">Zahlung bestätigen (Demo)</button><button class="ghost" id="payback">Zurück</button></div>`;
+    $('checkout').innerHTML = `<div class="paystep"><span class="badge">${t('ps.badge')}</span><h2 id="ctitle">${t('ps.title', { name: pay(data.pay, 'name') })}</h2><p style="color:var(--muted);margin:0">${pay(data.pay, 'step')}</p><p style="margin:0">${t('ps.would', { total: `<b>${eur(total)}</b>` })}</p>
+      <button class="primary" id="payok">${t('ps.ok')}</button><button class="ghost" id="payback">${t('co.back')}</button></div>`;
     $('payok').addEventListener('click', () => placeOrder(data));
     $('payback').addEventListener('click', openCheckout);
   }
@@ -523,7 +670,7 @@
     const order = { no, date: new Date().toISOString(), customer: data, payment: data.pay, items: cart.map(l => ({ ...l, name: byId(l.id).name, price: byId(l.id).price })), subtotal: sub, shipping: sh, total: sub + sh };
     try { const o = JSON.parse(localStorage.getItem(ORDERS_KEY)) || []; o.push(order); localStorage.setItem(ORDERS_KEY, JSON.stringify(o)); } catch (e) { /* ignorieren */ }
     cart = []; saveCart(); renderCart();
-    $('checkout').innerHTML = `<div class="done"><div class="ok">✅</div><h2>Danke, ${esc(data.first)}!</h2><p>Deine Bestellung <b>${no}</b> über <b>${eur(order.total)}</b> ist eingegangen (Demo).<br>Zahlungsart: ${(PAYMENTS[data.pay] || PAYMENTS.invoice).name}${data.pay === 'invoice' ? ' – die Rechnung käme per E-Mail' : ''}.<br>Eine Bestätigung ginge an ${esc(data.mail)}.</p><button class="primary" id="cdone">Weiter einkaufen</button></div>`;
+    $('checkout').innerHTML = `<div class="done"><div class="ok">✅</div><h2>${t('done.title', { name: esc(data.first) })}</h2><p>${t('done.text', { no, total: eur(order.total), pay: pay(PAYMENTS[data.pay] ? data.pay : 'invoice', 'name'), inv: data.pay === 'invoice' ? t('done.inv') : '', mail: esc(data.mail) })}</p><button class="primary" id="cdone">${t('done.more')}</button></div>`;
     $('cdone').addEventListener('click', closeAll);
   }
 
@@ -535,32 +682,33 @@
   const CHAT_ENDPOINT = '';
   const SUPPORT_MAIL = '';   // hier die Kontakt-E-Mail des Shops eintragen
   const norm = t => t.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '');
-  const contact = () => SUPPORT_MAIL ? `Schreib uns an ${SUPPORT_MAIL}.` : 'Die Kontaktdaten des Shops sind noch nicht eingetragen – bitte melde dich über den Shop-Betreiber.';
+  const contact = () => (SUPPORT_MAIL ? t('a.contact.mail', { mail: SUPPORT_MAIL }) : t('a.contact.none'));
+  const list = (items, f) => items.map(f).join('\n');
+  // Stichwörter gelten für Deutsch und Englisch; geantwortet wird in der gewählten Sprache
   const FAQ = [
-    { k: ['hallo', 'hi ', 'hey', 'moin', 'servus', 'guten tag', 'guten morgen', 'guten abend'], a: () => 'Hallo! Ich bin der automatische Assistent von Rare Form. Wobei kann ich dir helfen?' },
-    { k: ['danke', 'dankeschon', 'super', 'perfekt', 'top '], a: () => 'Sehr gern! Sag Bescheid, wenn du noch etwas wissen möchtest.' },
-    { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Der Versand ist bis ${eur(FREE_UP_TO)} Bestellwert kostenlos. Bei Bestellungen darüber kostet er ${eur(SHIPPING)}.` },
-    { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
-    { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
-    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Verfügbare Größen:\n${PRODUCTS.filter(p => p.sizes.length).map(p => `• ${p.name}: ${p.sizes.join(', ')}`).join('\n')}\nDas Rare Form Shirt hat einen lockeren, oversized Schnitt und die Baggy-Jeans sind locker geschnitten – wenn du es nicht so weit magst, nimm eher eine Größe kleiner. Eine genaue Maßtabelle habe ich noch nicht.` },
-    { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'In der Kasse kannst du mit PayPal, Kredit- oder Debitkarte (Visa, Mastercard, American Express, Maestro u. a.), Klarna oder auf Rechnung bezahlen. Aktuell ist der Shop eine Demo: Es wird nichts wirklich bezahlt oder abgebucht.' },
-    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Preise (inkl. MwSt.):\n${PRODUCTS.map(p => `• ${p.name}: ${eur(p.price)}`).join('\n')}\nRabattcodes gibt es aktuell nicht.` },
-    { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => PRODUCTS.map(p => `• ${p.name}: ${p.desc}`).join('\n') + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
-    { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung'], a: () => 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ' + contact() },
-    { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen'], a: () => {
-      if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Kaufen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
-      return `In deinem Warenkorb: ${cart.map(l => `${l.qty}× ${byId(l.id).name} (${l.size})`).join(', ')}.\nZwischensumme ${eur(subtotal())}, Versand ${shipping() ? eur(shipping()) : 'kostenlos'}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.`;
+    { k: ['hallo', 'hi ', 'hey', 'moin', 'servus', 'guten tag', 'guten morgen', 'guten abend', 'hello', 'good morning', 'good evening'], a: () => t('a.hello') },
+    { k: ['danke', 'dankeschon', 'super', 'perfekt', 'top ', 'thanks', 'thank you', 'great', 'perfect'], a: () => t('a.thanks') },
+    { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick', 'shipping', 'postage', 'free delivery', 'delivery cost', 'free'], a: () => t('a.ship', { limit: eur(FREE_UP_TO), ship: eur(SHIPPING) }) },
+    { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer', 'how long', 'delivery time', 'when will', 'arrive'], a: () => t('a.time') + contact() },
+    { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben', 'return', 'refund', 'exchange', 'send back', 'withdraw'], a: () => t('a.return') + contact() },
+    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt', 'size', 'sizes', 'fit', 'measure', 'small', 'large'], a: () => `${t('a.sizes.h')}\n${list(PRODUCTS.filter(p => p.sizes.length), p => `• ${p.name}: ${p.sizes.map(sizeLabel).join(', ')}`)}\n${t('a.sizes.t')}` },
+    { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung', 'pay', 'payment', 'card', 'invoice', 'credit'], a: () => t('a.pay') },
+    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale', 'price', 'cost', 'expensive', 'discount', 'coupon', 'voucher'], a: () => `${t('a.price.h')}\n${list(PRODUCTS, p => `• ${p.name}: ${eur(p.price)}`)}\n${t('a.price.t')}` },
+    { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib', 'fabric', 'cotton', 'wash', 'care', 'quality', 'product', 'colour', 'color', 'white', 'describe'], a: () => list(PRODUCTS, p => `• ${p.name}: ${p.desc}`) + '\n' + t('a.prod.t') },
+    { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung', 'parcel', 'package', 'confirmation', 'not arrived'], a: () => t('a.order') + contact() },
+    { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen', 'cart', 'basket', 'buy', 'add to', 'how do i order'], a: () => {
+      if (!cart.length) return t('a.cart.empty');
+      return t('a.cart.full', { items: cart.map(l => `${l.qty}× ${byId(l.id).name}${l.size ? ` (${sizeLabel(l.size)})` : ''}`).join(', '), sub: eur(subtotal()), ship: shipping() ? eur(shipping()) : t('a.cart.free') });
     } },
-    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell:\n${PRODUCTS.map(p => `• ${p.name}${p.sizes.length ? ': ' + p.sizes.join(', ') : ''}`).join('\n')}\nEine Lagerzahl kann ich nicht sehen.` },
-    { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem'], a: () => 'Das tut mir leid! Versuch bitte, die Seite neu zu laden (dein Warenkorb bleibt erhalten). Wenn es dann immer noch nicht klappt: ' + contact() },
-    { k: ['mensch', 'mitarbeiter', 'support', 'kontakt', 'telefon', 'mail', 'beschwerde', 'impressum', 'echte person', 'jemand'], a: () => 'Ich bin ein automatischer Assistent. Für alles Weitere: ' + contact() },
+    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat', 'available', 'in stock', 'sold out', 'stock'], a: () => `${t('a.stock.h')}\n${list(PRODUCTS, p => `• ${p.name}${p.sizes.length ? ': ' + p.sizes.map(sizeLabel).join(', ') : ''}`)}\n${t('a.stock.t')}` },
+    { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem', 'not working', 'error', 'broken', 'does not work', 'doesnt work', 'page', 'issue'], a: () => t('a.bug') + contact() },
+    { k: ['mensch', 'mitarbeiter', 'support', 'kontakt', 'telefon', 'mail', 'beschwerde', 'impressum', 'echte person', 'jemand', 'human', 'agent', 'contact', 'phone', 'complaint', 'real person', 'someone', 'staff'], a: () => t('a.human') + contact() },
   ];
-  const CHIPS = ['Versandkosten', 'Welche Größen?', 'Rückgabe', 'Zahlung', 'Mein Warenkorb', 'Mit einem Menschen sprechen'];
   function localAnswer(text) {
-    const t = ' ' + norm(text) + ' ';
+    const q = ' ' + norm(text) + ' ';
     let best = null, bs = 0;
-    FAQ.forEach(f => { const sc = f.k.reduce((n, w) => n + (t.includes(w) ? (w.length > 4 ? 2 : 1) : 0), 0); if (sc > bs) { bs = sc; best = f; } });
-    return best ? best.a() : 'Dazu habe ich leider keine sichere Antwort. Ich kann dir bei Versand, Größen, Rückgabe, Zahlung und dem Warenkorb helfen. ' + contact();
+    FAQ.forEach(f => { const sc = f.k.reduce((n, w) => n + (q.includes(w) ? (w.length > 4 ? 2 : 1) : 0), 0); if (sc > bs) { bs = sc; best = f; } });
+    return best ? best.a() : t('a.unknown') + contact();
   }
   const history = [];
   async function answer(text) {
@@ -584,33 +732,51 @@
   }
   function toggleChat(open) {
     $('chat').hidden = !open; $('chatbtn').hidden = open;
-    if (open) { if (!$('chatlog').children.length) say('bot', 'Hallo! Ich bin der automatische Assistent von Rare Form. Hast du ein Problem oder eine Frage zu Bestellung, Größen oder Versand? Tipp einfach unten auf ein Thema oder schreib mir.'); $('chatin').focus(); }
+    if (open) { if (!$('chatlog').children.length) say('bot', t('chat.hello')); $('chatin').focus(); }
   }
-  $('chips').innerHTML = CHIPS.map(c => `<button type="button">${esc(c)}</button>`).join('');
   $('chips').addEventListener('click', e => { if (e.target.tagName === 'BUTTON') ask(e.target.textContent); });
   $('chatform').addEventListener('submit', e => { e.preventDefault(); const v = $('chatin').value; $('chatin').value = ''; ask(v); });
   $('chatbtn').addEventListener('click', () => toggleChat(true)); $('chatx').addEventListener('click', () => toggleChat(false));
   addEventListener('keydown', e => { if (e.key === 'Escape' && !$('chat').hidden && !openEl) toggleChat(false); });
 
+  /* ---------- Sprache anwenden ---------- */
+  function applyLang(l, rerender) {
+    LANG = l === 'en' ? 'en' : 'de';
+    document.documentElement.lang = LANG;
+    document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
+    document.querySelectorAll('[data-ih]').forEach(e => { e.innerHTML = t(e.dataset.ih, { fs: eur0(FREE_UP_TO), ship: eur(SHIPPING) }); });
+    document.querySelectorAll('[data-i-aria]').forEach(e => { e.setAttribute('aria-label', t(e.dataset.iAria)); });
+    document.querySelectorAll('[data-i-ph]').forEach(e => { e.setAttribute('placeholder', t(e.dataset.iPh)); });
+    $('langbtn').textContent = t('lang.btn'); $('langbtn').setAttribute('aria-label', t('lang.aria')); $('langbtn').title = t('lang.aria');
+    $('chips').innerHTML = t('chips').map(c => `<button type="button">${esc(c)}</button>`).join('');
+    if (typeof applyTheme === 'function') applyTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
+    if (rerender) { renderGrid(); renderCart(); $('chatlog').innerHTML = ''; history.length = 0; if (!$('chat').hidden) say('bot', t('chat.hello')); if (openEl === $('modal') && cur) openProduct(cur.id); }
+  }
+
   let tt;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }
 
   if (PRODUCTS.length < 4) { $('nav').hidden = true; document.querySelector('.tools').hidden = true; }   // Filter erst bei größerem Sortiment
-  document.querySelectorAll('.fs').forEach(e => { e.textContent = eur(FREE_UP_TO).replace(',00', ''); });   // Schwelle für kostenlosen Versand
   // Hell/Dunkel: Auswahl wird im Browser gespeichert; Standard ist dunkel
-  function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    $('themebtn').textContent = t === 'light' ? '🌙' : '☀️';
-    $('themebtn').title = t === 'light' ? 'Dunkler Modus' : 'Heller Modus';
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', t === 'light' ? '#f5f3ef' : '#0d0d0f');
-    document.querySelector('meta[name="color-scheme"]').setAttribute('content', t);
+  function applyTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
+    $('themebtn').textContent = mode === 'light' ? '🌙' : '☀️';
+    const tl = mode === 'light' ? t('theme.toDark') : t('theme.toLight'); $('themebtn').title = tl; $('themebtn').setAttribute('aria-label', tl);
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', mode === 'light' ? '#f5f3ef' : '#0d0d0f');
+    document.querySelector('meta[name="color-scheme"]').setAttribute('content', mode);
   }
   let saved = null; try { saved = localStorage.getItem('rare-form-theme'); } catch (e) { /* ignorieren */ }
   applyTheme(saved === 'light' || saved === 'dark' ? saved : (document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'));
   $('themebtn').addEventListener('click', () => {
-    const t = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    applyTheme(t); try { localStorage.setItem('rare-form-theme', t); } catch (e) { /* ignorieren */ }
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    applyTheme(next); try { localStorage.setItem('rare-form-theme', next); } catch (e) { /* ignorieren */ }
   });
+  let savedLang = null; try { savedLang = localStorage.getItem('rare-form-lang'); } catch (e) { /* ignorieren */ }
+  $('langbtn').addEventListener('click', () => {
+    const l = LANG === 'de' ? 'en' : 'de'; applyLang(l, true);
+    try { localStorage.setItem('rare-form-lang', l); } catch (e) { /* ignorieren */ }
+  });
+  applyLang(savedLang === 'en' ? 'en' : 'de', false);
   renderGrid(); renderCart();
   // Web-App: Offline-Speicher (Service Worker) nur über http(s), nie aus einer lokalen Datei
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* ignorieren */ } }

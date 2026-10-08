@@ -94,6 +94,11 @@
   .detail{padding:22px;display:flex;flex-direction:column;gap:10px}
   .detail h2{margin:0;padding-right:44px}
   .detail p{margin:0;color:var(--muted)}
+  .colors{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+  .colors button{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
+  .colors button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(128,128,128,.6);display:inline-block}
+  .sw-white{background:#f4f2ee}.sw-black{background:#161616}
   .sizes{display:flex;gap:8px;flex-wrap:wrap}
   .sizes button{min-width:48px;padding:9px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .sizes button.on{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
@@ -243,6 +248,8 @@
     <h2 id="mtitle"></h2>
     <div class="price" id="mprice"></div>
     <p id="mdesc"></p>
+    <div id="mcolorlabel"><b data-i="color">Farbe</b></div>
+    <div class="colors" id="mcolors"></div>
     <div id="msizelabel"><b data-i="size">Größe</b></div>
     <div class="sizes" id="msizes"></div>
     <div class="err" id="merr"></div>
@@ -283,7 +290,7 @@
       'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
-      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ',
+      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
       'ship.over': 'Bei Bestellungen über {limit} kostet der Versand {ship}.', 'ship.free': 'Versand kostenlos bis {limit} Bestellwert.',
       'sum.sub': 'Zwischensumme', 'sum.ship': 'Versand', 'sum.free': 'gratis', 'sum.total': 'Gesamt', 'tocheckout': 'Zur Kasse',
       'co.title': 'Bestellung abschließen', 'co.sub': '{n} Artikel · Gesamt {total} (inkl. MwSt.)',
@@ -330,7 +337,7 @@
       'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
-      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ',
+      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'line.color': '{color} · ', 'colors.n': '{n} colours',
       'ship.over': 'Orders over {limit} cost {ship} to ship.', 'ship.free': 'Free shipping up to {limit} order value.',
       'sum.sub': 'Subtotal', 'sum.ship': 'Shipping', 'sum.free': 'free', 'sum.total': 'Total', 'tocheckout': 'Checkout',
       'co.title': 'Complete your order', 'co.sub': '{n} items · Total {total} (incl. VAT)',
@@ -374,17 +381,17 @@
   // img: Pfad zu einem echten Produktfoto (z. B. 'fotos/basic-tee-weiss.jpg') – ersetzt dann die gezeichnete Ansicht
   const ALL_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const PRODUCTS = [
-    { id: 'rf1', type: 'tshirt', name: 'Rare Form Shirt', price: 19.99, color: '#f4f2ee', img: 'fotos/rare-form-shirt.webp', sizes: ['XS','S','M','L','XXL'],
-      desc: 'Streetwear-T-Shirt in Weiß mit lockerem, oversized Schnitt. Frontprint mit Engel-Motiv und „Chaotic“-Schriftzug, Prints an beiden Ärmeln und ein schwarzes Label am Saum.' },
-    { id: 'rf2', type: 'tshirt', name: 'Urban Artifacts Graphic Tee (White Edition)', price: 19.99, color: '#f4f2ee', img: 'fotos/urban-artifacts-tee.webp', sizes: ['XS','S','M','L','XL','XXL'],
-      desc: 'Unisex-Streetwear-T-Shirt in Weiß mit markantem, modernem Grafikdesign auf der Vorderseite: Urban-Art-, Cyberpunk- und Graffiti-Elemente.' },
+    { id: 'rf1', type: 'tshirt', name: 'Rare Form Shirt', price: 19.99, color: '#f4f2ee', img: 'fotos/rare-form-shirt.webp', colors: { white: 'fotos/rare-form-shirt.webp', black: 'fotos/rare-form-shirt-black.webp' }, sizes: ['XS','S','M','L','XXL'],
+      desc: 'Streetwear-T-Shirt in Weiß oder Schwarz mit lockerem, oversized Schnitt. Frontprint mit Engel-Motiv und „Chaotic“-Schriftzug, Prints an beiden Ärmeln und ein Label am Saum.' },
+    { id: 'rf2', type: 'tshirt', name: 'Urban Artifacts Graphic Tee', price: 19.99, color: '#f4f2ee', img: 'fotos/urban-artifacts-tee.webp', colors: { white: 'fotos/urban-artifacts-tee.webp', black: 'fotos/urban-artifacts-tee-black.webp' }, sizes: ['XS','S','M','L','XL','XXL'],
+      desc: 'Unisex-Streetwear-T-Shirt in Weiß oder Schwarz mit markantem, modernem Grafikdesign auf der Vorderseite: Urban-Art-, Cyberpunk- und Graffiti-Elemente.' },
     { id: 'rf3', type: 'hose', name: 'Urban Artifacts Baggy Denim (Vintage Wash)', price: 39.99, color: '#34527a', img: 'fotos/urban-artifacts-baggy-denim.webp', sizes: ['XS','S','M','L','XL','XXL'],
       desc: 'Unisex-Baggy-Jeans in klassischer Vintage-Waschung, locker geschnitten. Mit dezentem Streetwear-Akzent: feine Stickerei auf der Tasche und ein braunes Label am Bund.' },
     { id: 'rf4', type: 'hose', name: 'Urban Artifacts Black Baggy Denim (Washed Black)', price: 39.99, color: '#232323', img: 'fotos/urban-artifacts-black-baggy-denim.webp', sizes: ['XS','S','M','L','XL','XXL'],
       desc: 'Unisex-Baggy-Jeans in verwaschenem Schwarz, locker geschnitten. Mit dezenten Streetwear-Details: Stickerei am Oberschenkel und ein „Street Culture“-Label am Bein.' },
     // Größen laut Auftrag: XS, S, M, XL, XXL (L nicht genannt; "x" in der Liste war unklar)
-    { id: 'rf8', type: 'tshirt', name: 'Rare Form Waffle Long Sleeve (Weiß)', price: 29.99, color: '#f4f2ee', img: 'fotos/rare-form-longsleeve.webp', sizes: ['XS','S','M','XL','XXL'],
-      desc: 'Langarmshirt in Weiß aus Waffelstrick, locker und kurz geschnitten. Schriftzug entlang beider Ärmel und ein kleines Rare-Form-Logo auf der Brust.' },
+    { id: 'rf8', type: 'tshirt', name: 'Rare Form Waffle Long Sleeve', price: 29.99, color: '#f4f2ee', img: 'fotos/rare-form-longsleeve.webp', colors: { white: 'fotos/rare-form-longsleeve.webp', black: 'fotos/rare-form-longsleeve-black.webp' }, sizes: ['XS','S','M','XL','XXL'],
+      desc: 'Langarmshirt in Weiß oder Schwarz aus Waffelstrick, locker und kurz geschnitten. Schriftzug entlang beider Ärmel und ein kleines Rare-Form-Logo auf der Brust.' },
     // Brille: Preis 29,99 € laut Auftrag; Foto vom Nutzer geliefert (Material/Maße unbekannt)
     { id: 'rf9', type: 'zubehoer', name: 'Rare Form Clear Glasses (ohne Sehstärke)', price: 29.99, color: '#d8dde2', img: 'fotos/rare-form-glasses.webp', allSizes: ['Einheitsgröße'], sizes: ['Einheitsgröße'],
       desc: 'Ohne Sehstärke: Die Gläser sind reines Fensterglas ohne Korrektur und nicht zum Sehen mit Fehlsichtigkeit gedacht. Brille mit durchsichtigem Rahmen und klaren Gläsern. Auf dem Bügel ist „Rare Form Streetwear“ mit Logo graviert.' },
@@ -402,11 +409,11 @@
   const EN = {
     "rf1": {
       "name": "Rare Form Shirt",
-      "desc": "Streetwear T-shirt in white with a relaxed, oversized fit. Angel graphic and “Chaotic” lettering on the front, prints on both sleeves and a black label at the hem."
+      "desc": "Streetwear T-shirt in white or black with a relaxed, oversized fit. Angel graphic and “Chaotic” lettering on the front, prints on both sleeves and a label at the hem."
     },
     "rf2": {
-      "name": "Urban Artifacts Graphic Tee (White Edition)",
-      "desc": "Unisex streetwear T-shirt in white with a bold, modern graphic on the front: urban art, cyberpunk and graffiti elements."
+      "name": "Urban Artifacts Graphic Tee",
+      "desc": "Unisex streetwear T-shirt in white or black with a bold, modern graphic on the front: urban art, cyberpunk and graffiti elements."
     },
     "rf3": {
       "name": "Urban Artifacts Baggy Denim (Vintage Wash)",
@@ -425,8 +432,8 @@
       "desc": "Curb-style chain in silver tone with a spring-ring clasp."
     },
     "rf8": {
-    "name": "Rare Form Waffle Long Sleeve (White)",
-    "desc": "Long-sleeve top in white waffle knit with a relaxed, cropped fit. Lettering down both sleeves and a small Rare Form logo on the chest."
+    "name": "Rare Form Waffle Long Sleeve",
+    "desc": "Long-sleeve top in white or black waffle knit with a relaxed, cropped fit. Lettering down both sleeves and a small Rare Form logo on the chest."
   },
   "rf9": {
     "name": "Rare Form Clear Glasses (non-prescription)",
@@ -447,6 +454,8 @@
   const loc = () => (LANG === 'en' ? 'en-IE' : 'de-DE');
   const eur = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR' });
   const eur0 = n => n.toLocaleString(loc(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const colorLabel = c => t('col.' + c);
+  const colorKeys = p => (p.colors ? Object.keys(p.colors) : []);
   const sizeLabel = s => (s === 'Einheitsgröße' ? t('onesize') : s);
   const $ = id => document.getElementById(id);
   const byId = id => PRODUCTS.find(p => p.id === id);
@@ -536,33 +545,35 @@
       ${stitch(`M${86 + t} 462 L${176 - t} 464`, sc, so, 1.3)}${stitch(`M${224 + t} 464 L${314 - t} 462`, sc, so, 1.3)}
     </svg>`;
   }
-  function picture(p) {
+  function picture(p, color) {
+    if (color && p.colors && p.colors[color]) p = { ...p, img: p.colors[color] };
     if (p.img) return `<img src="${esc(p.img)}" alt="${esc(p.name)}" loading="lazy">`;
     return p.type === 'tshirt' ? shirtSVG(p) : pantsSVG(p);
   }
 
   /* ---------- Warenkorb ---------- */
   const CART_KEY = 'rare-form-cart', ORDERS_KEY = 'rare-form-orders';
-  let cart = [];   // { id, size, qty }
+  let cart = [];   // { id, size, color, qty }
   try {
     const c = JSON.parse(localStorage.getItem(CART_KEY));
-    if (Array.isArray(c)) cart = c.filter(l => byId(l.id) && (!byId(l.id).sizes.length || byId(l.id).sizes.includes(l.size)) && l.qty > 0).map(l => ({ id: l.id, size: l.size, qty: Math.min(MAX_QTY, l.qty | 0) }));
+    if (Array.isArray(c)) cart = c.filter(l => byId(l.id) && (!byId(l.id).sizes.length || byId(l.id).sizes.includes(l.size)) && l.qty > 0).map(l => ({ id: l.id, size: l.size, color: byId(l.id).colors ? (byId(l.id).colors[l.color] ? l.color : colorKeys(byId(l.id))[0]) : '', qty: Math.min(MAX_QTY, l.qty | 0) }));
   } catch (e) { /* leerer Warenkorb */ }
   const saveCart = () => { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* ignorieren */ } };
   const subtotal = () => cart.reduce((s, l) => s + byId(l.id).price * l.qty, 0);
   const shipping = () => (cart.length === 0 || subtotal() <= FREE_UP_TO ? 0 : SHIPPING);
   const itemCount = () => cart.reduce((s, l) => s + l.qty, 0);
 
-  function addToCart(id, size) {
-    const l = cart.find(x => x.id === id && x.size === size);
-    if (l) l.qty = Math.min(MAX_QTY, l.qty + 1); else cart.push({ id, size, qty: 1 });
+  function addToCart(id, size, color) {
+    color = color || '';
+    const l = cart.find(x => x.id === id && x.size === size && (x.color || '') === color);
+    if (l) l.qty = Math.min(MAX_QTY, l.qty + 1); else cart.push({ id, size, color, qty: 1 });
     saveCart(); renderCart();
   }
   function renderCart() {
     const n = itemCount(); $('cartcount').textContent = n; $('cartcount').hidden = n === 0;
     $('lines').innerHTML = cart.length ? cart.map((l, i) => {
       const p = byId(l.id);
-      return `<div class="line"><div class="pic">${picture(p)}</div><div><h4>${esc(p.name)}</h4><div class="meta">${l.size ? t('line.size', { size: sizeLabel(l.size) }) : ''}${eur(p.price)}</div>
+      return `<div class="line"><div class="pic">${picture(p, l.color)}</div><div><h4>${esc(p.name)}</h4><div class="meta">${l.color ? t('line.color', { color: colorLabel(l.color) }) : ''}${l.size ? t('line.size', { size: sizeLabel(l.size) }) : ''}${eur(p.price)}</div>
         <div class="qty"><button data-q="${i}" data-d="-1" aria-label="${t('cart.less')}">−</button><span>${l.qty}</span><button data-q="${i}" data-d="1" aria-label="${t('cart.more')}">+</button></div>
         <button class="rm" data-rm="${i}">${t('cart.remove')}</button></div><b>${eur(p.price * l.qty)}</b></div>`;
     }).join('') : `<div class="empty">${t('cart.empty')}</div>`;
@@ -591,7 +602,7 @@
     if (sortBy === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name, LANG));
     $('count').textContent = t(list.length === 1 ? 'count.one' : 'count.many', { n: list.length });
     const card = p => `<article class="card"><div class="pic${p.img ? ' photo' : ''}" data-open="${p.id}" role="button" tabindex="0" aria-label="${esc(t('view', { name: p.name }))}">${picture(p)}${p.old ? `<span class="tag">${t('sale')}</span>` : ''}</div>
-      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${t('type.' + p.type)}${p.sizes.length ? ' · ' + p.sizes.map(sizeLabel).join(' ') : ''}</div>
+      <div class="info"><h3>${esc(p.name)}</h3><div class="meta">${t('type.' + p.type)}${p.colors ? ' · ' + t('colors.n', { n: colorKeys(p).length }) : ''}${p.sizes.length ? ' · ' + p.sizes.map(sizeLabel).join(' ') : ''}</div>
       <div class="price">${eur(p.price)}${p.old ? `<s>${eur(p.old)}</s>` : ''}</div><button class="primary" data-open="${p.id}">${t('buy')}</button></div></article>`;
     // T-Shirts oben, Hosen darunter
     const SECTIONS = ['tshirt', 'hose', 'zubehoer', 'haarpflege'];
@@ -606,7 +617,7 @@
   $('grid').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset.open) { e.preventDefault(); openProduct(e.target.dataset.open); } });
 
   /* ---------- Dialoge ---------- */
-  let openEl = null, pick = null, cur = null;
+  let openEl = null, pick = null, pickColor = '', cur = null;
   function show(el) { closeAll(); openEl = el; el.classList.add('open'); $('scrim').classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeAll() { ['modal', 'drawer', 'checkout'].forEach(id => $(id).classList.remove('open')); $('scrim').classList.remove('open'); document.body.style.overflow = ''; openEl = null; }
   $('scrim').addEventListener('click', closeAll); $('mclose').addEventListener('click', closeAll); $('dclose').addEventListener('click', closeAll);
@@ -616,19 +627,27 @@
   // Vorder- und Rückseite: p.img = Vorderseite, p.back = Rückseite (optional, Pfad zum Foto)
   function setView(v) {
     const back = v === 'back' && cur.back;
-    $('mpic').innerHTML = (back ? picture({ ...cur, img: cur.back }) : picture(cur)) +
+    $('mpic').innerHTML = (back ? picture({ ...cur, img: cur.back }) : picture(cur, pickColor)) +
       (cur.back ? `<div class="views" role="group" aria-label="${t('view.aria')}"><button data-view="front" class="${back ? '' : 'on'}">${t('view.front')}</button><button data-view="back" class="${back ? 'on' : ''}">${t('view.back')}</button></div>` : '');
   }
   $('mpic').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
   function openProduct(id) {
-    cur = byId(id); pick = null;
-    setView('front'); $('mtitle').textContent = cur.name;
+    cur = byId(id); pick = null; pickColor = colorKeys(cur)[0] || '';
+    setView('front'); renderColors(); $('mtitle').textContent = cur.name;
     $('mprice').innerHTML = eur(cur.price) + (cur.old ? `<s>${eur(cur.old)}</s>` : '');
     $('mdesc').textContent = cur.desc; $('merr').textContent = '';
     const hasSizes = cur.sizes.length > 0; $('msizelabel').hidden = !hasSizes; $('msizes').hidden = !hasSizes;
     $('msizes').innerHTML = (cur.allSizes || ALL_SIZES).map(s => `<button data-size="${s}" ${cur.sizes.includes(s) ? '' : `disabled title="${t('soldout')}"`}>${sizeLabel(s)}</button>`).join('');
     show($('modal'));
   }
+  function renderColors() {
+    const ks = colorKeys(cur); $('mcolorlabel').hidden = !ks.length; $('mcolors').hidden = !ks.length;
+    $('mcolors').innerHTML = ks.map(c => `<button data-color="${c}" class="${c === pickColor ? 'on' : ''}" aria-pressed="${c === pickColor}"><i class="sw sw-${c}"></i>${colorLabel(c)}</button>`).join('');
+  }
+  $('mcolors').addEventListener('click', e => {
+    const b = e.target.closest('[data-color]'); if (!b) return;
+    pickColor = b.dataset.color; renderColors(); setView('front');
+  });
   $('msizes').addEventListener('click', e => {
     const b = e.target.closest('[data-size]'); if (!b || b.disabled) return;
     pick = b.dataset.size; $('merr').textContent = '';
@@ -636,7 +655,7 @@
   });
   $('madd').addEventListener('click', () => {
     if (cur.sizes.length && !pick) { $('merr').textContent = t('pick'); return; }
-    addToCart(cur.id, pick || ''); closeAll(); toast(t('added', { name: cur.name, size: pick ? ` (${sizeLabel(pick)})` : '' }));
+    addToCart(cur.id, pick || '', pickColor); closeAll(); toast(t('added', { name: cur.name, size: (pickColor || pick) ? ` (${[pickColor && colorLabel(pickColor), pick && sizeLabel(pick)].filter(Boolean).join(', ')})` : '' }));
   });
 
   /* ---------- Kasse (Demo: keine echte Zahlung) ---------- */
@@ -726,7 +745,7 @@
     { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung', 'parcel', 'package', 'confirmation', 'not arrived'], a: () => t('a.order') + contact() },
     { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen', 'cart', 'basket', 'buy', 'add to', 'how do i order'], a: () => {
       if (!cart.length) return t('a.cart.empty');
-      return t('a.cart.full', { items: cart.map(l => `${l.qty}× ${byId(l.id).name}${l.size ? ` (${sizeLabel(l.size)})` : ''}`).join(', '), sub: eur(subtotal()), ship: shipping() ? eur(shipping()) : t('a.cart.free') });
+      return t('a.cart.full', { items: cart.map(l => `${l.qty}× ${byId(l.id).name}${l.size || l.color ? ` (${[l.color && colorLabel(l.color), l.size && sizeLabel(l.size)].filter(Boolean).join(', ')})` : ''}`).join(', '), sub: eur(subtotal()), ship: shipping() ? eur(shipping()) : t('a.cart.free') });
     } },
     { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat', 'available', 'in stock', 'sold out', 'stock'], a: () => `${t('a.stock.h')}\n${list(PRODUCTS, p => `• ${p.name}${p.sizes.length ? ': ' + p.sizes.map(sizeLabel).join(', ') : ''}`)}\n${t('a.stock.t')}` },
     { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem', 'not working', 'error', 'broken', 'does not work', 'doesnt work', 'page', 'issue'], a: () => t('a.bug') + contact() },

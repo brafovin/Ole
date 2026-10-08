@@ -111,7 +111,7 @@
   .colors button{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .colors button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
   .sw{width:16px;height:16px;border-radius:50%;border:1px solid rgba(128,128,128,.6);display:inline-block}
-  .sw-white{background:#f4f2ee}.sw-black{background:#161616}
+  .sw-white{background:#f4f2ee}.sw-black{background:#161616}.sw-grey{background:#8d8d8f}
   .sizes{display:flex;gap:8px;flex-wrap:wrap}
   .sizes button{min-width:48px;padding:9px 12px;border:1px solid var(--line);background:var(--card);border-radius:10px;font-weight:700}
   .sizes button.on{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
@@ -308,7 +308,7 @@
       'buy': 'Kaufen', 'view': '{name} ansehen', 'sale': 'Angebot', 'sale.bar': '🍂 Herbst-Sale: −{pct} % auf alles · nur bis {date}', 'sale.tag': '−{pct} %', 'close': 'Schließen', 'size': 'Größe', 'onesize': 'Einheitsgröße', 'soldout': 'ausverkauft',
       'add': 'In den Warenkorb', 'pick': 'Bitte wähle eine Größe.', 'added': '{name}{size} im Warenkorb',
       'view.aria': 'Ansicht', 'view.front': 'Vorderseite', 'view.back': 'Rückseite',
-      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
+      'cart.empty': 'Dein Warenkorb ist leer.', 'cart.less': 'weniger', 'cart.more': 'mehr', 'cart.remove': 'Entfernen', 'line.size': 'Größe {size} · ', 'color': 'Farbe', 'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.grey': 'Grau', 'line.color': '{color} · ', 'colors.n': '{n} Farben',
       'ship.over': 'Bei Bestellungen über {limit} kostet der Versand {ship}.', 'ship.free': 'Versand kostenlos bis {limit} Bestellwert.',
       'sum.sub': 'Zwischensumme', 'sum.ship': 'Versand', 'sum.free': 'gratis', 'sum.total': 'Gesamt', 'tocheckout': 'Zur Kasse',
       'co.title': 'Bestellung abschließen', 'co.sub': '{n} Artikel · Gesamt {total} (inkl. MwSt.)',
@@ -355,7 +355,7 @@
       'buy': 'Buy', 'view': 'View {name}', 'sale': 'Sale', 'sale.bar': '🍂 Autumn Sale: {pct}% off everything · until {date} only', 'sale.tag': '−{pct}%', 'close': 'Close', 'size': 'Size', 'onesize': 'One size', 'soldout': 'sold out',
       'add': 'Add to cart', 'pick': 'Please choose a size.', 'added': '{name}{size} added to cart',
       'view.aria': 'View', 'view.front': 'Front', 'view.back': 'Back',
-      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'line.color': '{color} · ', 'colors.n': '{n} colours',
+      'cart.empty': 'Your cart is empty.', 'cart.less': 'fewer', 'cart.more': 'more', 'cart.remove': 'Remove', 'line.size': 'Size {size} · ', 'color': 'Colour', 'col.white': 'White', 'col.black': 'Black', 'col.grey': 'Grey', 'line.color': '{color} · ', 'colors.n': '{n} colours',
       'ship.over': 'Orders over {limit} cost {ship} to ship.', 'ship.free': 'Free shipping up to {limit} order value.',
       'sum.sub': 'Subtotal', 'sum.ship': 'Shipping', 'sum.free': 'free', 'sum.total': 'Total', 'tocheckout': 'Checkout',
       'co.title': 'Complete your order', 'co.sub': '{n} items · Total {total} (incl. VAT)',
@@ -426,8 +426,8 @@
     { id: 'rf7', type: 'haarpflege', name: 'Rare Form Texture Powder', price: 14.99, color: '#232323', img: 'fotos/texture-powder.webp', allSizes: [], sizes: [],
       desc: 'Texture Powder in schwarzer Flasche mit „Rare Form“-Aufdruck.' },
     // Preis 14,99 € laut Auftrag; Größen 38–39 und 42–43 = die häufigsten Damen-/Herrengrößen (Annahme, kein Kundenwunsch); Foto ist ein bearbeitetes Fremdfoto – vor dem Verkauf durch eigenes ersetzen
-    { id: 'rf12', type: 'schuhe', name: 'Rare Form Fluffy Slides (Schwarz)', price: 14.99, color: '#161616', img: 'fotos/rare-form-slides.webp', allSizes: ['38–39','42–43'], sizes: ['38–39','42–43'],
-      desc: 'Pantoffel (Slides) in Schwarz mit flauschigem Teddy-Fell-Look, offener Zehenpartie und breitem Riemen mit Rare-Form-Logo. Die Größen fallen in Doppelgrößen aus: 38–39 und 42–43.' },
+    { id: 'rf12', type: 'schuhe', name: 'Rare Form Fluffy Slides', price: 14.99, color: '#161616', img: 'fotos/rare-form-slides.webp', colors: { black: 'fotos/rare-form-slides.webp', white: 'fotos/rare-form-slides-white.webp', grey: 'fotos/rare-form-slides-grey.webp' }, allSizes: ['38–39','42–43'], sizes: ['38–39','42–43'],
+      desc: 'Pantoffel (Slides) in Schwarz, Weiß oder Grau mit flauschigem Teddy-Fell-Look, offener Zehenpartie und breitem Riemen mit Rare-Form-Logo. Die Größen fallen in Doppelgrößen aus: 38–39 und 42–43.' },
     // Preis 79,99 € laut Auftrag; das Foto ist ein Mockup (kein echtes Produktfoto), Duftnoten sind nicht bekannt
     { id: 'rf11', type: 'parfum', name: 'Rare Form Eau de Parfum (100 ml)', price: 79.99, color: '#d8dde2', img: 'fotos/rare-form-parfum.webp', allSizes: [], sizes: [],
       desc: 'Eau de Parfum im Natural Spray, 100 ml. Eckiger Glasflakon mit Zerstäuber in Silber, mattem Rare-Form-Logo auf der Vorderseite und „Rare·Form“-Schriftzug. Angaben zu Duftnoten und Inhaltsstoffen folgen.' },
@@ -451,8 +451,8 @@
       "desc": "Unisex baggy jeans in washed black, relaxed fit. With subtle streetwear details: embroidery on the thigh and a “Street Culture” label on the leg."
     },
     "rf12": {
-      "name": "Rare Form Fluffy Slides (Black)",
-      "desc": "Slides in black with a fluffy teddy-fur look, open toe and a wide strap with the Rare Form logo. Sizes come in double sizes: 38–39 and 42–43 (EU)."
+      "name": "Rare Form Fluffy Slides",
+      "desc": "Slides in black, white or grey with a fluffy teddy-fur look, open toe and a wide strap with the Rare Form logo. Sizes come in double sizes: 38–39 and 42–43 (EU)."
     },
     "rf11": {
       "name": "Rare Form Eau de Parfum (100 ml)",

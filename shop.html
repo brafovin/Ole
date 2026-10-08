@@ -38,6 +38,9 @@
   .pic{aspect-ratio:1/1;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 36%,#4a4743 0%,#2e2c2a 58%,#1c1b1a 100%);cursor:pointer;position:relative;overflow:hidden}
   .pic svg{width:86%;height:86%}
   .pic img{width:100%;height:100%;object-fit:cover;display:block}
+  .views{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:4px;background:rgba(0,0,0,.6);padding:4px;border-radius:999px;backdrop-filter:blur(6px)}
+  .views button{background:none;border:0;color:#fff;padding:6px 14px;border-radius:999px;font-weight:700;font-size:14px}
+  .views button.on{background:#fff;color:#111}
   .card .pic.photo{aspect-ratio:1313/1198}
   .tag{position:absolute;top:10px;left:10px;background:var(--bad);color:#fff;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
   .info{padding:12px 14px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
@@ -399,9 +402,16 @@
   addEventListener('keydown', e => { if (e.key === 'Escape' && openEl) closeAll(); });
   $('cartbtn').addEventListener('click', () => { renderCart(); show($('drawer')); });
 
+  // Vorder- und Rückseite: p.img = Vorderseite, p.back = Rückseite (optional, Pfad zum Foto)
+  function setView(v) {
+    const back = v === 'back' && cur.back;
+    $('mpic').innerHTML = (back ? picture({ ...cur, img: cur.back }) : picture(cur)) +
+      (cur.back ? `<div class="views" role="group" aria-label="Ansicht"><button data-view="front" class="${back ? '' : 'on'}">Vorderseite</button><button data-view="back" class="${back ? 'on' : ''}">Rückseite</button></div>` : '');
+  }
+  $('mpic').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
   function openProduct(id) {
     cur = byId(id); pick = null;
-    $('mpic').innerHTML = picture(cur); $('mtitle').textContent = cur.name;
+    setView('front'); $('mtitle').textContent = cur.name;
     $('mprice').innerHTML = eur(cur.price) + (cur.old ? `<s>${eur(cur.old)}</s>` : '');
     $('mdesc').textContent = cur.desc; $('merr').textContent = '';
     $('msizes').innerHTML = ALL_SIZES.map(s => `<button data-size="${s}" ${cur.sizes.includes(s) ? '' : 'disabled title="ausverkauft"'}>${s}</button>`).join('');

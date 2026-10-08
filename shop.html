@@ -99,6 +99,25 @@
   .note{grid-column:1/-1;font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px}
   .done{text-align:center;padding:12px 0}
   .done .ok{font-size:48px}
+  /* Hilfe-Chat */
+  .chatbtn{position:fixed;right:18px;bottom:18px;z-index:15;background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.5);display:flex;gap:8px;align-items:center}
+  .chatbtn:hover{background:var(--accent-d)}
+  .chat{position:fixed;right:18px;bottom:18px;z-index:16;width:min(370px,calc(100vw - 24px));height:min(540px,calc(100vh - 36px));background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden}
+  .chat header{position:static;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+  .chat header small{display:block;color:var(--muted);font-size:12px}
+  .chat header button{background:none;border:1px solid var(--line);border-radius:50%;width:32px;height:32px}
+  #chatlog{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+  .msg{max-width:86%;padding:9px 12px;border-radius:14px;white-space:pre-wrap;font-size:14.5px;line-height:1.4;word-wrap:break-word}
+  .msg.bot{background:var(--bg);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.me{background:var(--accent);color:var(--on-accent);align-self:flex-end;border-bottom-right-radius:4px}
+  .msg.typing{color:var(--muted)}
+  #chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}
+  #chips button{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600}
+  #chips button:hover{border-color:var(--accent)}
+  #chatform{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+  #chatform input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--text)}
+  #chatform .primary{padding:10px 14px}
+  @media (max-width:520px){.chat{right:0;bottom:0;width:100vw;height:min(78vh,560px);border-radius:18px 18px 0 0}}
   footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:13px}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-weight:600}
   .toast.show{opacity:1;transform:translateX(-50%)}
@@ -176,6 +195,13 @@
 </aside>
 
 <div class="checkout" id="checkout" role="dialog" aria-modal="true" aria-labelledby="ctitle"></div>
+<button class="chatbtn" id="chatbtn" aria-label="Hilfe-Chat öffnen">💬 <span>Hilfe</span></button>
+<section class="chat" id="chat" hidden role="dialog" aria-label="Hilfe-Chat">
+  <header><div><b>Rare Form Assistent</b><small>Automatischer Assistent · keine echte Person</small></div><button id="chatx" aria-label="Chat schließen">✕</button></header>
+  <div id="chatlog" aria-live="polite"></div>
+  <div id="chips"></div>
+  <form id="chatform" autocomplete="off"><input id="chatin" placeholder="Schreib deine Frage …" maxlength="300" aria-label="Deine Nachricht"><button class="primary" type="submit">Senden</button></form>
+</section>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -405,6 +431,71 @@
     $('checkout').innerHTML = `<div class="done"><div class="ok">✅</div><h2>Danke, ${esc(data.first)}!</h2><p>Deine Bestellung <b>${no}</b> über <b>${eur(order.total)}</b> ist eingegangen (Demo).<br>Eine Bestätigung ginge an ${esc(data.mail)}.</p><button class="primary" id="cdone">Weiter einkaufen</button></div>`;
     $('cdone').addEventListener('click', closeAll);
   }
+
+
+  /* ---------- Hilfe-Chat ---------- */
+  // Eingebauter Assistent: beantwortet häufige Fragen anhand der Shop-Daten (läuft komplett im Browser).
+  // Für einen echten KI-Chat (Sprachmodell) CHAT_ENDPOINT auf einen eigenen Server setzen, der {messages:[{role,content}]}
+  // entgegennimmt und {reply:"…"} zurückgibt. Den API-Schlüssel nie in diese Seite schreiben – er gehört auf den Server.
+  const CHAT_ENDPOINT = '';
+  const SUPPORT_MAIL = '';   // hier die Kontakt-E-Mail des Shops eintragen
+  const norm = t => t.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const contact = () => SUPPORT_MAIL ? `Schreib uns an ${SUPPORT_MAIL}.` : 'Die Kontaktdaten des Shops sind noch nicht eingetragen – bitte melde dich über den Shop-Betreiber.';
+  const FAQ = [
+    { k: ['hallo', 'hi ', 'hey', 'moin', 'servus', 'guten tag', 'guten morgen', 'guten abend'], a: () => 'Hallo! Ich bin der automatische Assistent von Rare Form. Wobei kann ich dir helfen?' },
+    { k: ['danke', 'dankeschon', 'super', 'perfekt', 'top '], a: () => 'Sehr gern! Sag Bescheid, wenn du noch etwas wissen möchtest.' },
+    { k: ['versand', 'lieferkosten', 'porto', 'versandkosten', 'kostenlos', 'gratis', 'dhl', 'verschick'], a: () => `Versand kostet ${eur(SHIPPING)}. Ab ${eur(FREE_SHIP)} Warenwert ist der Versand kostenlos. Im Warenkorb siehst du live, wie viel dir noch bis dahin fehlt.` },
+    { k: ['wie lange', 'lieferzeit', 'lieferdauer', 'wann kommt', 'ankommen', 'dauer'], a: () => 'Eine feste Lieferzeit ist im Shop noch nicht hinterlegt, deshalb kann ich dir dazu keine verlässliche Angabe machen. ' + contact() },
+    { k: ['ruckgabe', 'zuruck', 'retour', 'umtausch', 'umtauschen', 'widerruf', 'tauschen', 'zuruckschicken', 'zuruckgeben'], a: () => 'Du hast 14 Tage Rückgaberecht. Details zum Rücksendeprozess sind noch nicht hinterlegt. ' + contact() },
+    { k: ['grosse', 'grossen', 'passt', 'passform', 'masse', 'tabelle', 'xxl', 'xs', 'klein', 'gross', 'oversized', 'schnitt', 'fallt'], a: () => `Das Rare Form Shirt gibt es in ${ALL_SIZES.join(', ')}. Es hat einen lockeren, oversized Schnitt. Eine genaue Maßtabelle habe ich noch nicht – wenn du es nicht so weit magst, nimm eher eine Größe kleiner.` },
+    { k: ['zahl', 'bezahl', 'paypal', 'karte', 'kreditkarte', 'rechnung', 'vorkasse', 'klarna', 'uberweisung'], a: () => 'Der Shop ist aktuell eine Demo: In der Kasse kannst du „Rechnung“ oder „Vorkasse“ wählen, es wird aber nichts wirklich bezahlt oder abgebucht. Echte Zahlungsarten kommen erst mit dem Start des Shops.' },
+    { k: ['preis', 'kostet', 'kosten', 'teuer', 'euro', 'rabatt', 'gutschein', 'code', 'angebot', 'sale'], a: () => `Das Rare Form Shirt kostet ${eur(byId('rf1').price)} (inkl. MwSt.). Rabattcodes gibt es aktuell nicht.` },
+    { k: ['material', 'stoff', 'baumwolle', 'waschen', 'pflege', 'qualitat', 'druck', 'motiv', 'print', 'shirt', 'produkt', 'farbe', 'weiss', 'beschreib'], a: () => byId('rf1').desc + '\nAngaben zu Material und Pflege habe ich noch nicht – die werden ergänzt.' },
+    { k: ['bestell', 'order', 'status', 'sendung', 'tracking', 'verfolg', 'paket', 'nicht angekommen', 'bestatigung'], a: () => 'Dies ist ein Demo-Shop: Bestellungen werden nur im Browser gespeichert und nicht wirklich versendet. Sobald der Shop live ist, bekommst du eine Bestätigung per E-Mail. ' + contact() },
+    { k: ['warenkorb', 'korb', 'kasse', 'checkout', 'kaufen', 'wie bestelle', 'hinzufugen'], a: () => {
+      if (!cart.length) return 'Dein Warenkorb ist leer. Klick beim Shirt auf „Größe wählen“, such deine Größe aus und leg es in den Warenkorb. Oben rechts auf „Warenkorb“ kommst du zur Kasse.';
+      return `In deinem Warenkorb: ${cart.map(l => `${l.qty}× ${byId(l.id).name} (${l.size})`).join(', ')}.\nZwischensumme ${eur(subtotal())}, Versand ${shipping() ? eur(shipping()) : 'kostenlos'}. Oben rechts auf „Warenkorb“ kommst du zur Kasse.`;
+    } },
+    { k: ['lager', 'verfugbar', 'ausverkauft', 'nachschub', 'restock', 'vorrat'], a: () => `Verfügbar sind aktuell die Größen ${byId('rf1').sizes.join(', ')}. Eine Lagerzahl kann ich nicht sehen.` },
+    { k: ['funktioniert nicht', 'fehler', 'bug', 'kaputt', 'geht nicht', 'hangt', 'ladt nicht', 'seite', 'problem'], a: () => 'Das tut mir leid! Versuch bitte, die Seite neu zu laden (dein Warenkorb bleibt erhalten). Wenn es dann immer noch nicht klappt: ' + contact() },
+    { k: ['mensch', 'mitarbeiter', 'support', 'kontakt', 'telefon', 'mail', 'beschwerde', 'impressum', 'echte person', 'jemand'], a: () => 'Ich bin ein automatischer Assistent. Für alles Weitere: ' + contact() },
+  ];
+  const CHIPS = ['Versandkosten', 'Welche Größen?', 'Rückgabe', 'Zahlung', 'Mein Warenkorb', 'Mit einem Menschen sprechen'];
+  function localAnswer(text) {
+    const t = ' ' + norm(text) + ' ';
+    let best = null, bs = 0;
+    FAQ.forEach(f => { const sc = f.k.reduce((n, w) => n + (t.includes(w) ? (w.length > 4 ? 2 : 1) : 0), 0); if (sc > bs) { bs = sc; best = f; } });
+    return best ? best.a() : 'Dazu habe ich leider keine sichere Antwort. Ich kann dir bei Versand, Größen, Rückgabe, Zahlung und dem Warenkorb helfen. ' + contact();
+  }
+  const history = [];
+  async function answer(text) {
+    if (CHAT_ENDPOINT) {
+      try {
+        const r = await fetch(CHAT_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history.slice(-12) }) });
+        const j = await r.json(); if (j && typeof j.reply === 'string' && j.reply) return j.reply;
+      } catch (e) { /* weiter mit dem eingebauten Assistenten */ }
+    }
+    return localAnswer(text);
+  }
+  function say(who, text) {
+    const d = document.createElement('div'); d.className = 'msg ' + who; d.textContent = text; $('chatlog').appendChild(d); $('chatlog').scrollTop = 1e9; return d;
+  }
+  async function ask(text) {
+    text = text.trim(); if (!text) return;
+    say('me', text); history.push({ role: 'user', content: text });
+    const typing = say('bot typing', '…');
+    const [reply] = await Promise.all([answer(text), new Promise(r => setTimeout(r, 450))]);
+    typing.remove(); say('bot', reply); history.push({ role: 'assistant', content: reply });
+  }
+  function toggleChat(open) {
+    $('chat').hidden = !open; $('chatbtn').hidden = open;
+    if (open) { if (!$('chatlog').children.length) say('bot', 'Hallo! Ich bin der automatische Assistent von Rare Form. Hast du ein Problem oder eine Frage zu Bestellung, Größen oder Versand? Tipp einfach unten auf ein Thema oder schreib mir.'); $('chatin').focus(); }
+  }
+  $('chips').innerHTML = CHIPS.map(c => `<button type="button">${esc(c)}</button>`).join('');
+  $('chips').addEventListener('click', e => { if (e.target.tagName === 'BUTTON') ask(e.target.textContent); });
+  $('chatform').addEventListener('submit', e => { e.preventDefault(); const v = $('chatin').value; $('chatin').value = ''; ask(v); });
+  $('chatbtn').addEventListener('click', () => toggleChat(true)); $('chatx').addEventListener('click', () => toggleChat(false));
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !$('chat').hidden && !openEl) toggleChat(false); });
 
   let tt;
   function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200); }

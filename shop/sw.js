@@ -1,6 +1,6 @@
 /* Service Worker für die Rare-Form-Web-App: Seite und Fotos werden gespeichert, damit der Shop auch offline startet.
    Bei einer neuen Version von Seite oder Fotos CACHE hochzählen. */
-const CACHE = 'rare-form-v16';
+const CACHE = 'rare-form-v17';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './logo/mark.png',  './logo/wordmark.png', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',

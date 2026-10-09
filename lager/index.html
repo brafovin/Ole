@@ -35,6 +35,7 @@
   .bar{max-width:1100px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-left));display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .brand{display:flex;align-items:center;gap:12px;min-width:0}
   .brand img{height:30px;width:auto;filter:var(--logo-filter);display:block}
+  .brand>div{min-width:0}
   .brand h1{margin:0;font-size:19px;font-weight:700;font-stretch:112%;letter-spacing:.01em;line-height:1.1}
   .brand small{display:block;color:var(--muted);font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
   .sp{flex:1}
@@ -64,7 +65,7 @@
   .list{display:grid;gap:10px}
   .prod{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0}
   .prod>.head{width:100%;display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:12px 14px;border:0;background:none;text-align:left;border-radius:12px}
-  .thumb{width:64px;aspect-ratio:1313/1198;border-radius:8px;object-fit:cover;background:var(--panel-2);display:block}
+  .thumb{align-self:start;width:64px;aspect-ratio:1313/1198;border-radius:8px;object-fit:cover;background:var(--panel-2);display:block}
   .pn{min-width:0}
   .pn h3{margin:0;font-size:16px;font-weight:650;line-height:1.25;overflow-wrap:anywhere}
   .pn .sub{display:flex;gap:6px 12px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-top:3px;align-items:center}
@@ -130,42 +131,54 @@
   .note{color:var(--muted);font-size:12.5px}
   footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;display:flex;gap:10px 20px;flex-wrap:wrap;align-items:center;justify-content:space-between}
   footer p{margin:0;max-width:64ch}
-  .themebtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);padding:0;display:grid;place-items:center}
+  .themebtn,.langbtn{height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);padding:0;display:grid;place-items:center}
+  .themebtn{width:40px;font-size:18px;line-height:1}
+  .langbtn{min-width:44px;padding:0 10px;font-size:13px;font-weight:800;letter-spacing:.04em}
+  .themebtn:hover,.langbtn:hover{border-color:var(--gold)}
+  .brk{display:none}
+  @media (max-width:700px){
+    .sp{display:none}.brand small{display:none}.brand{flex:1 1 0;order:0}.langbtn{order:1}.themebtn{order:2}
+    .brk{display:block;order:3;flex:0 0 100%;height:0;margin:-6px 0}
+    .tabs{order:4;flex:1 1 0;min-width:0}.tabs button{flex:1;justify-content:center;white-space:nowrap;padding-inline:8px}.shopbtn{order:5}
+    .search{flex-basis:100%}
+  }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head><body>
 
 <header><div class="bar">
-  <div class="brand"><img src="img/mark.png" alt=""><div><h1>Rare Form Lager</h1><small>Bestand &amp; Lieferzeiten · Beispieldaten</small></div></div>
+  <div class="brand"><img src="img/mark.png" alt=""><div><h1>Rare Form Lager</h1><small data-i="sub">Bestand &amp; Lieferzeiten · Beispieldaten</small></div></div>
   <div class="sp"></div>
-  <div class="tabs" role="tablist" aria-label="Bereich">
-    <button role="tab" id="tab-stock" aria-selected="true" data-tab="stock">Bestand</button>
-    <button role="tab" id="tab-orders" aria-selected="false" data-tab="orders">Unterwegs <span class="n" id="ordn">0</span></button>
+  <div class="tabs" role="tablist" data-i-aria="tabs.aria" aria-label="Bereich">
+    <button role="tab" id="tab-stock" aria-selected="true" data-tab="stock" data-i="tab.stock">Bestand</button>
+    <button role="tab" id="tab-orders" aria-selected="false" data-tab="orders"><span data-i="tab.orders">Unterwegs</span> <span class="n" id="ordn">0</span></button>
   </div>
-  <a class="shopbtn" id="shopbtn" href="../shop/index.html">Zum Shop <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h9v9M16 4L5 15"/></svg></a>
-  <button class="themebtn" id="themebtn" type="button" aria-label="Hell oder dunkel umschalten" title="Hell / dunkel"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 3a7 7 0 0 1 0 14z" fill="currentColor"/></svg></button>
+  <a class="shopbtn" id="shopbtn" href="../shop/index.html"><span data-i="shop">Zum Shop</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h9v9M16 4L5 15"/></svg></a>
+  <span class="brk"></span>
+  <button class="langbtn" id="langbtn" type="button"></button>
+  <button class="themebtn" id="themebtn" type="button"></button>
 </div></header>
 
 <main class="wrap">
-  <section class="stats" id="stats" aria-label="Kennzahlen"></section>
+  <section class="stats" id="stats" data-i-aria="stats.aria" aria-label="Kennzahlen"></section>
 
   <section id="view-stock">
     <div class="tools">
       <div class="search"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
-        <input id="q" type="search" placeholder="Produkt, Farbe oder Größe suchen" aria-label="Lager durchsuchen" autocomplete="off"></div>
-      <select id="cat" aria-label="Kategorie"></select>
-      <select id="sort" aria-label="Sortierung">
-        <option value="urg">Dringend zuerst</option><option value="name">Name A–Z</option><option value="low">Kleinster Bestand</option><option value="high">Größter Bestand</option>
+        <input id="q" type="search" data-i-ph="search.ph" data-i-aria="search.aria" placeholder="Produkt, Farbe oder Größe suchen" aria-label="Lager durchsuchen" autocomplete="off"></div>
+      <select id="cat" data-i-aria="cat.aria" aria-label="Kategorie"></select>
+      <select id="sort" data-i-aria="sort.aria" aria-label="Sortierung">
+        <option value="urg" data-i="sort.urg">Dringend zuerst</option><option value="name" data-i="sort.name">Name A–Z</option><option value="low" data-i="sort.low">Kleinster Bestand</option><option value="high" data-i="sort.high">Größter Bestand</option>
       </select>
     </div>
-    <div class="chips" id="chips" role="group" aria-label="Filter"></div>
+    <div class="chips" id="chips" role="group" data-i-aria="filter.aria" aria-label="Filter"></div>
     <div class="list" id="list" style="margin-top:12px"></div>
   </section>
 
   <section id="view-orders" hidden></section>
 
   <footer>
-    <p>Beispieldaten: Bestände, Mindestmengen, Lieferzeiten und die Lieferungen unterwegs sind erfundene Startwerte. Die App zeigt nur an, bestellt wird hier nichts.</p>
+    <p data-i="footer">Beispieldaten: Bestände, Mindestmengen, Lieferzeiten und die Lieferungen unterwegs sind erfundene Startwerte. Die App zeigt nur an, bestellt wird hier nichts.</p>
   </footer>
 </main>
 
@@ -173,25 +186,71 @@
 <script>
 (() => {
   const P = [{"id": "rf1", "type": "tshirt", "name": "Rare Form Shirt", "colors": ["white", "black"], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XXL"], "thumbs": {"white": "img/rf1-white.webp", "black": "img/rf1-black.webp"}}, {"id": "rf2", "type": "tshirt", "name": "Urban Artifacts Graphic Tee", "colors": ["white", "black"], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XL", "XXL"], "thumbs": {"white": "img/rf2-white.webp", "black": "img/rf2-black.webp"}}, {"id": "rf3", "type": "hose", "name": "Urban Artifacts Baggy Denim (Vintage Wash)", "colors": [""], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XL", "XXL"], "thumbs": {"": "img/rf3-x.webp"}}, {"id": "rf4", "type": "hose", "name": "Urban Artifacts Black Baggy Denim (Washed Black)", "colors": [""], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XL", "XXL"], "thumbs": {"": "img/rf4-x.webp"}}, {"id": "rf10", "type": "hose", "name": "Rare Form Sweatpants", "colors": ["grey", "darkgrey", "black"], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XL", "XXL"], "thumbs": {"grey": "img/rf10-grey.webp", "darkgrey": "img/rf10-darkgrey.webp", "black": "img/rf10-black.webp"}}, {"id": "rf8", "type": "tshirt", "name": "Rare Form Waffle Long Sleeve", "colors": ["white", "black"], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "XL", "XXL"], "thumbs": {"white": "img/rf8-white.webp", "black": "img/rf8-black.webp"}}, {"id": "rf9", "type": "zubehoer", "name": "Rare Form Clear Glasses (ohne Sehstärke)", "colors": [""], "sizes": ["Einheitsgröße"], "offered": ["Einheitsgröße"], "thumbs": {"": "img/rf9-x.webp"}}, {"id": "rf5", "type": "zubehoer", "name": "Urban Artifacts Belt (Black)", "colors": [""], "sizes": ["S", "M", "L"], "offered": ["S", "M", "L"], "thumbs": {"": "img/rf5-x.webp"}}, {"id": "rf6", "type": "zubehoer", "name": "Panzerkette", "colors": ["silver", "black"], "sizes": ["Einheitsgröße"], "offered": ["Einheitsgröße"], "thumbs": {"silver": "img/rf6-silver.webp", "black": "img/rf6-black.webp"}}, {"id": "rf7", "type": "haarpflege", "name": "Rare Form Texture Powder", "colors": [""], "sizes": [""], "offered": [""], "thumbs": {"": "img/rf7-x.webp"}}, {"id": "rf13", "type": "jacken", "name": "Rare Form Zip Hoodie mit Fellrand", "colors": ["black", "white"], "sizes": ["XS", "S", "M", "L", "XL", "XXL"], "offered": ["XS", "S", "M", "L", "XL", "XXL"], "thumbs": {"black": "img/rf13-black.webp", "white": "img/rf13-white.webp"}}, {"id": "rf12", "type": "schuhe", "name": "Rare Form Fluffy Slides", "colors": ["black", "white", "grey"], "sizes": ["38–39", "42–43"], "offered": ["38–39", "42–43"], "thumbs": {"black": "img/rf12-black.webp", "white": "img/rf12-white.webp", "grey": "img/rf12-grey.webp"}}, {"id": "rf11", "type": "parfum", "name": "Rare Form Eau de Parfum (100 ml)", "colors": [""], "sizes": [""], "offered": [""], "thumbs": {"": "img/rf11-x.webp"}}];
-  const TYPES = { tshirt: 'T-Shirts', jacken: 'Jacken', hose: 'Hosen', zubehoer: 'Accessoires', haarpflege: 'Haarpflege', schuhe: 'Schuhe', parfum: 'Parfüm' };
-  const COLORS = { '': '', white: 'Weiß', black: 'Schwarz', grey: 'Grau', darkgrey: 'Dunkelgrau', silver: 'Silber' };
+  const PN_EN = { rf6: 'Curb Chain', rf9: 'Rare Form Clear Glasses (non-prescription)', rf13: 'Rare Form Zip Hoodie with Fur Trim' };
+  const I18N = {
+    de: {
+      'sub': 'Bestand & Lieferzeiten · Beispieldaten', 'tabs.aria': 'Bereich', 'tab.stock': 'Bestand', 'tab.orders': 'Unterwegs', 'shop': 'Zum Shop',
+      'theme.toLight': 'Heller Modus', 'theme.toDark': 'Dunkler Modus', 'lang.btn': 'DE', 'lang.aria': 'Sprache wechseln: Englisch',
+      'stats.aria': 'Kennzahlen', 'search.ph': 'Suchen …', 'search.aria': 'Lager durchsuchen', 'cat.aria': 'Kategorie', 'cat.all': 'Alle Kategorien',
+      'sort.aria': 'Sortierung', 'sort.urg': 'Dringend zuerst', 'sort.name': 'Name A–Z', 'sort.low': 'Kleinster Bestand', 'sort.high': 'Größter Bestand',
+      'filter.aria': 'Filter', 'f.alle': 'Alle', 'f.leer': 'Mit leeren Varianten', 'f.knapp': 'Knapp oder leer', 'f.unterwegs': 'Mit Lieferung unterwegs',
+      'footer': 'Beispieldaten: Bestände, Mindestmengen, Lieferzeiten und die Lieferungen unterwegs sind erfundene Startwerte. Die App zeigt nur an, bestellt wird hier nichts.',
+      'type.tshirt': 'T-Shirts', 'type.jacken': 'Jacken', 'type.hose': 'Hosen', 'type.zubehoer': 'Accessoires', 'type.haarpflege': 'Haarpflege', 'type.schuhe': 'Schuhe', 'type.parfum': 'Parfüm',
+      'col.white': 'Weiß', 'col.black': 'Schwarz', 'col.grey': 'Grau', 'col.darkgrey': 'Dunkelgrau', 'col.silver': 'Silber',
+      'onesize': 'Einheitsgr.', 'unit': 'Stück', 'standard': 'Standard', 'stock.row': 'Bestand',
+      's.pcs': 'Stück im Lager', 's.pcs.sub': '{v} Varianten, {p} Produkte', 's.out': 'Leer', 's.out.sub': 'Varianten ohne Bestand', 's.out.none': 'nichts leer',
+      's.low': 'Knapp', 's.low.sub': 'unter dem Mindestbestand', 's.inc': 'Unterwegs', 's.inc.sub': n => `${n} offene Lieferung${n === 1 ? '' : 'en'}`, 's.next': 'Nächste Lieferung', 's.next.none': 'keine offen',
+      'eta.back': 'Wieder da ab <b>{d}</b> ({r})', 'eta.restock': 'Nachschub <b>{d}</b> ({r})', 'eta.need': (n, l) => `${n} Variante${n === 1 ? '' : 'n'} ohne Lieferung · normale Lieferzeit <b>${days(l)}</b>`, 'eta.normal': 'Normale Lieferzeit <b>{l}</b>',
+      'p.out': '{n} leer', 'p.low': '{n} knapp', 'p.inc': '{n} unterwegs', 'p.ok': 'Bestand ok',
+      'f.min': 'Mindestbestand', 'f.lead': 'Normale Lieferzeit', 'f.next': 'Nächste Lieferung',
+      'l.ok': 'ok', 'l.low': 'knapp (bis {m})', 'l.out': 'leer', 'l.inc': '+Zahl = unterwegs mit Ankunftsdatum', 'l.off': 'durchgestrichen = im Shop ausverkauft', 'cell.off': 'Im Shop als ausverkauft markiert',
+      'list.empty': 'Dazu gibt es nichts im Lager. Such mit einem anderen Begriff oder nimm einen Filter heraus.',
+      'o.title': 'Unterwegs ({n})', 'o.empty': 'Zurzeit ist nichts unterwegs.', 'o.ordered': 'bestellt {d}', 'o.total': 'Lieferzeit gesamt <b>{d}</b>', 'o.left': 'noch <b>{d}</b>', 'o.today': '<b>kommt heute</b>', 'o.late': '<b>{d} überfällig</b>', 'o.prog': '{p} Prozent der Lieferzeit vorbei',
+      'rel.today': 'heute', 'rel.tomorrow': 'morgen', 'rel.in': n => `in ${n} Tagen`, 'rel.late1': 'seit gestern überfällig', 'rel.late': n => `seit ${n} Tagen überfällig`,
+    },
+    en: {
+      'sub': 'Stock & delivery times · sample data', 'tabs.aria': 'Section', 'tab.stock': 'Stock', 'tab.orders': 'On the way', 'shop': 'To the shop',
+      'theme.toLight': 'Light mode', 'theme.toDark': 'Dark mode', 'lang.btn': 'EN', 'lang.aria': 'Switch language: German',
+      'stats.aria': 'Key figures', 'search.ph': 'Search …', 'search.aria': 'Search stock', 'cat.aria': 'Category', 'cat.all': 'All categories',
+      'sort.aria': 'Sort', 'sort.urg': 'Most urgent first', 'sort.name': 'Name A–Z', 'sort.low': 'Lowest stock', 'sort.high': 'Highest stock',
+      'filter.aria': 'Filter', 'f.alle': 'All', 'f.leer': 'With empty variants', 'f.knapp': 'Low or empty', 'f.unterwegs': 'With delivery on the way',
+      'footer': 'Sample data: stock levels, minimum quantities, delivery times and the deliveries on the way are made-up starting values. This app only displays; nothing is ordered here.',
+      'type.tshirt': 'T-shirts', 'type.jacken': 'Jackets', 'type.hose': 'Trousers', 'type.zubehoer': 'Accessories', 'type.haarpflege': 'Hair care', 'type.schuhe': 'Shoes', 'type.parfum': 'Fragrance',
+      'col.white': 'White', 'col.black': 'Black', 'col.grey': 'Grey', 'col.darkgrey': 'Dark grey', 'col.silver': 'Silver',
+      'onesize': 'One size', 'unit': 'pcs', 'standard': 'Standard', 'stock.row': 'Stock',
+      's.pcs': 'Pieces in stock', 's.pcs.sub': '{v} variants, {p} products', 's.out': 'Empty', 's.out.sub': 'variants out of stock', 's.out.none': 'nothing empty',
+      's.low': 'Low', 's.low.sub': 'below minimum stock', 's.inc': 'On the way', 's.inc.sub': n => `${n} open deliver${n === 1 ? 'y' : 'ies'}`, 's.next': 'Next delivery', 's.next.none': 'none open',
+      'eta.back': 'Back in stock from <b>{d}</b> ({r})', 'eta.restock': 'Restock <b>{d}</b> ({r})', 'eta.need': (n, l) => `${n} variant${n === 1 ? '' : 's'} without a delivery · usual delivery time <b>${days(l)}</b>`, 'eta.normal': 'Usual delivery time <b>{l}</b>',
+      'p.out': '{n} empty', 'p.low': '{n} low', 'p.inc': '{n} on the way', 'p.ok': 'Stock OK',
+      'f.min': 'Minimum stock', 'f.lead': 'Usual delivery time', 'f.next': 'Next delivery',
+      'l.ok': 'OK', 'l.low': 'low (up to {m})', 'l.out': 'empty', 'l.inc': '+number = on the way, with arrival date', 'l.off': 'struck through = sold out in the shop', 'cell.off': 'Marked as sold out in the shop',
+      'list.empty': 'Nothing in stock matches. Try another term or remove a filter.',
+      'o.title': 'On the way ({n})', 'o.empty': 'Nothing is on the way right now.', 'o.ordered': 'ordered {d}', 'o.total': 'Total delivery time <b>{d}</b>', 'o.left': '<b>{d}</b> left', 'o.today': '<b>arrives today</b>', 'o.late': '<b>{d} overdue</b>', 'o.prog': '{p} percent of the delivery time has passed',
+      'rel.today': 'today', 'rel.tomorrow': 'tomorrow', 'rel.in': n => `in ${n} days`, 'rel.late1': 'overdue since yesterday', 'rel.late': n => `overdue for ${n} days`,
+    },
+  };
+  let LANG = 'de';
+  function days(n) { return LANG === 'en' ? `${n} day${n === 1 ? '' : 's'}` : `${n} Tag${n === 1 ? '' : 'e'}`; }
+  const t = (k, v, w) => { let x = I18N[LANG][k]; if (x === undefined) x = I18N.de[k]; if (x === undefined) return k; if (typeof x === 'function') return x(v, w); return v ? x.replace(/\{(\w+)\}/g, (m, n) => (v[n] !== undefined ? v[n] : m)) : x; };
+  const pname = p => (LANG === 'en' && PN_EN[p.id]) || p.name;
+  const colorName = c => (c ? t('col.' + c) : '');
   const SW = { white: '#f4f2ee', black: '#161616', grey: '#8d8d8f', darkgrey: '#48484a', silver: '#c4c7cc' };
   const LEAD0 = { tshirt: 14, jacken: 21, hose: 18, zubehoer: 10, haarpflege: 7, schuhe: 25, parfum: 12 };
   const KEY = 'rare-form-lager-theme';
   const $ = id => document.getElementById(id);
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const sizeLabel = s => (s === 'Einheitsgröße' ? 'Einheitsgr.' : s === '' ? 'Stück' : s);
+  const sizeLabel = s => (s === 'Einheitsgröße' ? t('onesize') : s === '' ? t('unit') : s);
   const vkey = (p, c, s) => `${p.id}|${c}|${s}`;
   const variants = p => p.colors.flatMap(c => p.sizes.map(s => ({ key: vkey(p, c, s), c, s, offered: p.offered.includes(s) })));
   const byId = id => P.find(p => p.id === id);
-  const vname = (p, v) => [COLORS[v.c], v.s && sizeLabel(v.s)].filter(Boolean).join(' · ') || 'Standard';
+  const vname = (p, v) => [colorName(v.c), v.s && sizeLabel(v.s)].filter(Boolean).join(' · ') || t('standard');
 
   /* ---------- Datum ---------- */
   const day0 = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
   const addDays = (d, n) => { const x = day0(d); x.setDate(x.getDate() + n); return x; };
   const diffDays = d => Math.round((day0(d) - day0(new Date())) / 864e5);
-  const fmt = d => new Date(d).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
-  const rel = d => { const n = diffDays(d); return n === 0 ? 'heute' : n === 1 ? 'morgen' : n > 1 ? `in ${n} Tagen` : n === -1 ? 'seit gestern überfällig' : `seit ${-n} Tagen überfällig`; };
+  const fmt = d => new Date(d).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE', { weekday: 'short', day: 'numeric', month: 'short' });
+  const rel = d => { const n = diffDays(d); return n === 0 ? t('rel.today') : n === 1 ? t('rel.tomorrow') : n > 1 ? t('rel.in', n) : n === -1 ? t('rel.late1') : t('rel.late', -n); };
 
   /* ---------- Beispieldaten ---------- */
   function rng(str) { let h = 1779033703 ^ str.length; for (let i = 0; i < str.length; i++) { h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); } return () => { h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967296; }; }
@@ -236,36 +295,36 @@
   const openSet = new Set();
   const fold = x => String(x).toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[̀-ͯ]/g, '');
 
+  const pcs = n => `${n} ${t('unit')}`;
   function renderStats() {
     const all = P.map(prodInfo); const vs = all.flatMap(a => a.info);
-    const pcs = vs.reduce((n, v) => n + v.q, 0), out = vs.filter(v => v.st === 'out').length, low = vs.filter(v => v.st === 'low').length;
+    const tot = vs.reduce((n, v) => n + v.q, 0), out = vs.filter(v => v.st === 'out').length, low = vs.filter(v => v.st === 'low').length;
     const onway = S.orders.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0);
     const nx = S.orders.map(o => new Date(o.eta)).sort((a, b) => a - b)[0];
     $('stats').innerHTML = `
-      <div class="stat"><b>${pcs}</b><span>Stück im Lager</span><small>${vs.length} Varianten, ${P.length} Produkte</small></div>
-      <div class="stat out"><b>${out}</b><span>Leer</span><small>${out ? 'Varianten ohne Bestand' : 'nichts leer'}</small></div>
-      <div class="stat low"><b>${low}</b><span>Knapp</span><small>unter dem Mindestbestand</small></div>
-      <div class="stat inc"><b>${onway}</b><span>Unterwegs</span><small>${S.orders.length} offene Lieferung${S.orders.length === 1 ? '' : 'en'}</small></div>
-      <div class="stat"><b style="font-size:20px;padding-top:5px">${nx ? fmt(nx) : '–'}</b><span>Nächste Lieferung</span><small>${nx ? rel(nx) : 'keine offen'}</small></div>`;
+      <div class="stat"><b>${tot}</b><span>${t('s.pcs')}</span><small>${t('s.pcs.sub', { v: vs.length, p: P.length })}</small></div>
+      <div class="stat out"><b>${out}</b><span>${t('s.out')}</span><small>${out ? t('s.out.sub') : t('s.out.none')}</small></div>
+      <div class="stat low"><b>${low}</b><span>${t('s.low')}</span><small>${t('s.low.sub')}</small></div>
+      <div class="stat inc"><b>${onway}</b><span>${t('s.inc')}</span><small>${t('s.inc.sub', S.orders.length)}</small></div>
+      <div class="stat"><b style="font-size:20px;padding-top:5px">${nx ? fmt(nx) : '–'}</b><span>${t('s.next')}</span><small>${nx ? rel(nx) : t('s.next.none')}</small></div>`;
     $('ordn').textContent = S.orders.length;
   }
 
   function etaLine(a) {
     if (a.out.length || a.low.length) {
       const parts = [];
-      if (a.back) parts.push(`${a.out.length ? 'Wieder da ab' : 'Nachschub'} <b>${fmt(a.back)}</b> (${rel(a.back)})`);
-      if (a.need.length) parts.push(`${a.need.length} Variante${a.need.length === 1 ? '' : 'n'} ohne Lieferung · normale Lieferzeit <b>${a.lead} Tage</b>`);
+      if (a.back) parts.push(t(a.out.length ? 'eta.back' : 'eta.restock', { d: fmt(a.back), r: rel(a.back) }));
+      if (a.need.length) parts.push(t('eta.need', a.need.length, a.lead));
       return parts.length ? `<span class="eta">${parts.join(' · ')}</span>` : '';
     }
-    return `<span class="eta">Normale Lieferzeit <b>${a.lead} Tage</b></span>`;
+    return `<span class="eta">${t('eta.normal', { l: days(a.lead) })}</span>`;
   }
 
   function matrix(p, a) {
-    const cols = p.sizes;
-    const head = `<tr><th class="rowh"></th>${cols.map(s => `<th>${esc(sizeLabel(s))}</th>`).join('')}</tr>`;
-    const rows = p.colors.map(c => `<tr><th class="rowh" scope="row">${c ? `<i class="sw" style="background:${SW[c]}"></i>${COLORS[c]}` : 'Bestand'}</th>${p.sizes.map(s => {
+    const head = `<tr><th class="rowh"></th>${p.sizes.map(s => `<th>${esc(sizeLabel(s))}</th>`).join('')}</tr>`;
+    const rows = p.colors.map(c => `<tr><th class="rowh" scope="row">${c ? `<i class="sw" style="background:${SW[c]}"></i>${colorName(c)}` : t('stock.row')}</th>${p.sizes.map(s => {
       const v = a.info.find(x => x.c === c && x.s === s);
-      return `<td><div class="cell ${v.st}${v.offered ? '' : ' off'}" ${v.offered ? '' : 'title="Im Shop als ausverkauft markiert"'} aria-label="${esc(p.name)} ${esc(vname(p, v))}: ${v.q} Stück">${v.q}</div>
+      return `<td><div class="cell ${v.st}${v.offered ? '' : ' off'}" ${v.offered ? '' : `title="${esc(t('cell.off'))}"`} aria-label="${esc(pname(p))} ${esc(vname(p, v))}: ${pcs(v.q)}">${v.q}</div>
         <span class="more">${v.inc ? `+${v.inc} · ${fmt(v.eta).replace(/^\S+\s/, '')}` : ''}</span></td>`;
     }).join('')}</tr>`).join('');
     return `<div class="matrix-wrap"><table><thead>${head}</thead><tbody>${rows}</tbody></table></div>`;
@@ -273,24 +332,25 @@
 
   function prodCard(p) {
     const a = prodInfo(p), open = openSet.has(p.id);
-    const pill = a.out.length ? `<span class="pill out">${a.out.length} leer</span>` : '';
-    const pill2 = a.low.length ? `<span class="pill low">${a.low.length} knapp</span>` : '';
-    const pill3 = a.open.length ? `<span class="pill inc">${a.open.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0)} unterwegs</span>` : '';
-    const pillOk = !a.out.length && !a.low.length ? '<span class="pill ok">Bestand ok</span>' : '';
+    const pill = a.out.length ? `<span class="pill out">${t('p.out', { n: a.out.length })}</span>` : '';
+    const pill2 = a.low.length ? `<span class="pill low">${t('p.low', { n: a.low.length })}</span>` : '';
+    const pill3 = a.open.length ? `<span class="pill inc">${t('p.inc', { n: a.open.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0) })}</span>` : '';
+    const pillOk = !a.out.length && !a.low.length ? `<span class="pill ok">${t('p.ok')}</span>` : '';
     const thumb = p.thumbs[p.colors[0]] || Object.values(p.thumbs)[0];
+    const nextD = a.open.length ? fmt(a.open.map(o => new Date(o.eta)).sort((x, y) => x - y)[0]) : '';
     return `<article class="prod" data-p="${p.id}">
       <button class="head" type="button" data-toggle="${p.id}" aria-expanded="${open}">
         <img class="thumb" src="${thumb}" alt="" loading="lazy">
-        <div class="pn"><h3>${esc(p.name)}</h3>
-          <div class="sub"><span>${TYPES[p.type]}</span>${pill}${pill2}${pill3}${pillOk}</div>
+        <div class="pn"><h3>${esc(pname(p))}</h3>
+          <div class="sub"><span>${t('type.' + p.type)}</span>${pill}${pill2}${pill3}${pillOk}</div>
           <div class="strip" aria-hidden="true">${a.info.map(v => `<i class="${v.st}${v.inc ? ' inc' : ''}"></i>`).join('')}</div>
           ${etaLine(a)}</div>
-        <div class="tot"><b>${a.total}</b><span>Stück</span><svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></div>
+        <div class="tot"><b>${a.total}</b><span>${t('unit')}</span><svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 8l5 5 5-5"/></svg></div>
       </button>
       ${open ? `<div class="body">
-        <dl class="facts"><div><dt>Mindestbestand</dt><dd>${a.min} Stück</dd></div><div><dt>Normale Lieferzeit</dt><dd>${a.lead} Tage</dd></div>${a.open.length ? `<div><dt>Nächste Lieferung</dt><dd>${fmt(a.open.map(o => new Date(o.eta)).sort((x, y) => x - y)[0])}</dd></div>` : ''}</dl>
+        <dl class="facts"><div><dt>${t('f.min')}</dt><dd>${pcs(a.min)}</dd></div><div><dt>${t('f.lead')}</dt><dd>${days(a.lead)}</dd></div>${nextD ? `<div><dt>${t('f.next')}</dt><dd>${nextD}</dd></div>` : ''}</dl>
         ${matrix(p, a)}
-        <div class="legend"><span><i style="background:var(--ok)"></i>ok</span><span><i style="background:var(--low)"></i>knapp (bis ${a.min})</span><span><i style="background:var(--out)"></i>leer</span><span style="color:var(--inc)">+Zahl = unterwegs mit Ankunftsdatum</span>${p.sizes.some(s => !p.offered.includes(s)) ? '<span>durchgestrichen = im Shop ausverkauft</span>' : ''}</div>
+        <div class="legend"><span><i style="background:var(--ok)"></i>${t('l.ok')}</span><span><i style="background:var(--low)"></i>${t('l.low', { m: a.min })}</span><span><i style="background:var(--out)"></i>${t('l.out')}</span><span style="color:var(--inc)">${t('l.inc')}</span>${p.sizes.some(s => !p.offered.includes(s)) ? `<span>${t('l.off')}</span>` : ''}</div>
       </div>` : ''}
     </article>`;
   }
@@ -302,19 +362,18 @@
       if (filter === 'leer' && !a.out.length) return false;
       if (filter === 'knapp' && !a.low.length && !a.out.length) return false;
       if (filter === 'unterwegs' && !a.open.length) return false;
-      const hay = fold([p.name, TYPES[p.type], ...p.colors.map(c => COLORS[c]), ...p.sizes].join(' '));
-      return toks.every(t => hay.includes(t));
+      const hay = fold([p.name, PN_EN[p.id] || '', t('type.' + p.type), I18N.de['type.' + p.type], ...p.colors.map(c => colorName(c) + ' ' + (c ? I18N.de['col.' + c] + ' ' + I18N.en['col.' + c] : '')), ...p.sizes].join(' '));
+      return toks.every(w => hay.includes(w));
     });
     const urg = x => x.a.out.length * 100 + x.a.low.length;
-    items.sort(sortBy === 'name' ? (x, y) => x.p.name.localeCompare(y.p.name, 'de') : sortBy === 'low' ? (x, y) => x.a.total - y.a.total : sortBy === 'high' ? (x, y) => y.a.total - x.a.total : (x, y) => urg(y) - urg(x) || x.a.total - y.a.total);
-    $('list').innerHTML = items.length ? items.map(({ p }) => prodCard(p)).join('') : '<div class="empty">Dazu gibt es nichts im Lager. Such mit einem anderen Begriff oder nimm einen Filter heraus.</div>';
+    items.sort(sortBy === 'name' ? (x, y) => pname(x.p).localeCompare(pname(y.p), LANG) : sortBy === 'low' ? (x, y) => x.a.total - y.a.total : sortBy === 'high' ? (x, y) => y.a.total - x.a.total : (x, y) => urg(y) - urg(x) || x.a.total - y.a.total);
+    $('list').innerHTML = items.length ? items.map(({ p }) => prodCard(p)).join('') : `<div class="empty">${t('list.empty')}</div>`;
   }
 
   function renderChips() {
     const cnt = { alle: P.length, leer: 0, knapp: 0, unterwegs: 0 };
     P.forEach(p => { const a = prodInfo(p); if (a.out.length) cnt.leer++; if (a.low.length || a.out.length) cnt.knapp++; if (a.open.length) cnt.unterwegs++; });
-    const lab = { alle: 'Alle', leer: 'Mit leeren Varianten', knapp: 'Knapp oder leer', unterwegs: 'Mit Lieferung unterwegs' };
-    $('chips').innerHTML = Object.keys(lab).map(k => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter === k}">${lab[k]} · ${cnt[k]}</button>`).join('');
+    $('chips').innerHTML = Object.keys(cnt).map(k => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter === k}">${t('f.' + k)} · ${cnt[k]}</button>`).join('');
   }
 
   function renderOrders() {
@@ -322,17 +381,17 @@
     const card = o => {
       const p = byId(o.pid), n = o.lines.reduce((m, l) => m + l.qty, 0), late = diffDays(o.eta) < 0;
       const span = Math.max(1, diffDays(o.eta) - diffDays(o.created)), done = Math.max(0, Math.min(1, (0 - diffDays(o.created)) / span));
-      const left = diffDays(o.eta);
+      const left = diffDays(o.eta), pct = Math.round(done * 100);
       return `<article class="ord${late ? ' late' : ''}" data-o="${o.id}">
-        <div><div class="no">${o.id} · bestellt ${fmt(o.created)}</div><h3>${esc(p.name)}</h3>
+        <div><div class="no">${o.id} · ${t('o.ordered', { d: fmt(o.created) })}</div><h3>${esc(pname(p))}</h3>
           <ul>${o.lines.map(l => { const v = variants(p).find(x => x.key === l.key); return `<li>${esc(vname(p, v))} <b>×${l.qty}</b></li>`; }).join('')}</ul></div>
-        <div class="when"><b>${fmt(o.eta)}</b><span>${rel(o.eta)}</span><span class="num">${n} Stück</span></div>
-        <div class="prog"><div class="track" role="img" aria-label="${Math.round(done * 100)} Prozent der Lieferzeit vorbei"><i style="width:${Math.round(done * 100)}%"></i></div>
-          <div class="lab"><span>Lieferzeit gesamt <b>${span} Tage</b></span><span>${left > 0 ? `noch <b>${left} Tag${left === 1 ? '' : 'e'}</b>` : left === 0 ? '<b>kommt heute</b>' : `<b>${-left} Tag${left === -1 ? '' : 'e'} überfällig</b>`}</span></div></div>
+        <div class="when"><b>${fmt(o.eta)}</b><span>${rel(o.eta)}</span><span class="num">${pcs(n)}</span></div>
+        <div class="prog"><div class="track" role="img" aria-label="${esc(t('o.prog', { p: pct }))}"><i style="width:${pct}%"></i></div>
+          <div class="lab"><span>${t('o.total', { d: days(span) })}</span><span>${left > 0 ? t('o.left', { d: days(left) }) : left === 0 ? t('o.today') : t('o.late', { d: days(-left) })}</span></div></div>
       </article>`;
     };
-    $('view-orders').innerHTML = `<h2 class="sec" style="margin-top:18px">Unterwegs (${open.length})</h2>
-      <div class="orders">${open.length ? open.map(card).join('') : '<div class="empty">Zurzeit ist nichts unterwegs.</div>'}</div>`;
+    $('view-orders').innerHTML = `<h2 class="sec" style="margin-top:18px">${t('o.title', { n: open.length })}</h2>
+      <div class="orders">${open.length ? open.map(card).join('') : `<div class="empty">${t('o.empty')}</div>`}</div>`;
   }
 
   function render() {
@@ -341,22 +400,39 @@
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
   }
 
+  /* ---------- Sprache und Helligkeit ---------- */
+  const themeNow = () => { const a = document.documentElement.getAttribute('data-theme'); return a || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); };
+  function applyTheme() {
+    const dark = themeNow() === 'dark', b = $('themebtn'), tl = dark ? t('theme.toLight') : t('theme.toDark');
+    b.textContent = dark ? '☀️' : '🌙'; b.title = tl; b.setAttribute('aria-label', tl);
+  }
+  function applyLang(l) {
+    LANG = l === 'en' ? 'en' : 'de'; document.documentElement.lang = LANG;
+    document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
+    document.querySelectorAll('[data-i-aria]').forEach(e => e.setAttribute('aria-label', t(e.dataset.iAria)));
+    document.querySelectorAll('[data-i-ph]').forEach(e => e.setAttribute('placeholder', t(e.dataset.iPh)));
+    $('langbtn').textContent = t('lang.btn'); $('langbtn').title = t('lang.aria'); $('langbtn').setAttribute('aria-label', t('lang.aria'));
+    const keep = cat; $('cat').innerHTML = `<option value="alle">${t('cat.all')}</option>` + Object.keys(I18N.de).filter(k => k.startsWith('type.') && P.some(p => 'type.' + p.type === k)).map(k => `<option value="${k.slice(5)}">${t(k)}</option>`).join(''); $('cat').value = keep;
+    applyTheme(); render();
+  }
+
   /* ---------- Bedienung (nur ansehen) ---------- */
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-tab],[data-toggle],[data-f],#themebtn'); if (!t) return;
-    if (t.dataset.tab) { tab = t.dataset.tab; render(); }
-    else if (t.dataset.toggle) { const id = t.dataset.toggle; openSet.has(id) ? openSet.delete(id) : openSet.add(id); render(); const b = document.querySelector(`[data-toggle="${id}"]`); if (b) b.focus({ preventScroll: true }); }
-    else if (t.dataset.f) { filter = t.dataset.f; render(); }
-    else if (t.id === 'themebtn') { const r = document.documentElement, dark = r.getAttribute('data-theme') ? r.getAttribute('data-theme') === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches; r.setAttribute('data-theme', dark ? 'light' : 'dark'); try { localStorage.setItem(KEY, dark ? 'light' : 'dark'); } catch (er) { /* ignorieren */ } }
+    const tg = e.target.closest('[data-tab],[data-toggle],[data-f],#themebtn,#langbtn'); if (!tg) return;
+    if (tg.dataset.tab) { tab = tg.dataset.tab; render(); }
+    else if (tg.dataset.toggle) { const id = tg.dataset.toggle; openSet.has(id) ? openSet.delete(id) : openSet.add(id); render(); const b = document.querySelector(`[data-toggle="${id}"]`); if (b) b.focus({ preventScroll: true }); }
+    else if (tg.dataset.f) { filter = tg.dataset.f; render(); }
+    else if (tg.id === 'themebtn') { const next = themeNow() === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', next); try { localStorage.setItem(KEY, next); } catch (er) { /* ignorieren */ } applyTheme(); }
+    else if (tg.id === 'langbtn') { const l = LANG === 'de' ? 'en' : 'de'; applyLang(l); try { localStorage.setItem(KEY + '-lang', l); } catch (er) { /* ignorieren */ } }
   });
   $('q').addEventListener('input', e => { term = e.target.value; renderList(); });
   $('sort').addEventListener('change', e => { sortBy = e.target.value; renderList(); });
-  $('cat').innerHTML = '<option value="alle">Alle Kategorien</option>' + Object.keys(TYPES).filter(k => P.some(p => p.type === k)).map(k => `<option value="${k}">${TYPES[k]}</option>`).join('');
   $('cat').addEventListener('change', e => { cat = e.target.value; renderList(); });
 
   try { const th = localStorage.getItem(KEY); if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th); } catch (e) { /* ignorieren */ }
   if (P.length) openSet.add([...P].sort((a, b) => { const f = x => { const i = prodInfo(x); return i.out.length * 100 + i.low.length; }; return f(b) - f(a); })[0].id);
-  render();
+  let l0 = null; try { l0 = localStorage.getItem(KEY + '-lang'); } catch (e) { /* ignorieren */ }
+  applyLang(l0 === 'en' ? 'en' : 'de');
 })();
 </script>
 

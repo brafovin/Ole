@@ -1,6 +1,6 @@
 /* Service Worker der Rare-Form-Lager-App: Seite und Bilder werden gespeichert, damit die App auch offline startet.
    Bei einer neuen Version CACHE hochzählen. Schriften von Google werden nicht gespeichert (offline gilt dann die Systemschrift). */
-const CACHE = 'rare-form-lager-v4';
+const CACHE = 'rare-form-lager-v5';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',

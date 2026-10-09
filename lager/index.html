@@ -1,5 +1,8 @@
 <!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light dark">
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#0d0d0f">
+<script>try{var t=localStorage.getItem("rare-form-lager-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/png" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Lager"><meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Rare Form Lager</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -431,6 +434,7 @@
 
   try { const th = localStorage.getItem(KEY); if (th === 'light' || th === 'dark') document.documentElement.setAttribute('data-theme', th); } catch (e) { /* ignorieren */ }
   if (P.length) openSet.add([...P].sort((a, b) => { const f = x => { const i = prodInfo(x); return i.out.length * 100 + i.low.length; }; return f(b) - f(a); })[0].id);
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && document.querySelector('link[rel="manifest"]')) { try { navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) { /* ignorieren */ } }
   let l0 = null; try { l0 = localStorage.getItem(KEY + '-lang'); } catch (e) { /* ignorieren */ }
   applyLang(l0 === 'en' ? 'en' : 'de');
 })();

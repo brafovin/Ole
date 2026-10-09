@@ -192,7 +192,7 @@
   .wkey i{width:14px;height:8px;border-radius:2px;display:inline-block}
   /* Hilfe-Chat */
   .chatbtn{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--accent);color:var(--on-accent);border:0;border-radius:999px;padding:12px 18px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.4);display:flex;gap:8px;align-items:center}
-  .chat{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:16;width:min(380px,calc(100vw - 24px));height:min(560px,calc(100% - 36px));background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+  .chat{position:fixed;right:max(18px,env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:16;width:min(460px,calc(100vw - 24px));height:min(600px,calc(100% - 36px));background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
   .chat[hidden]{display:none}
   .chat .chead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
   .chat .chead small{display:block;color:var(--muted);font-size:12px}
@@ -202,6 +202,19 @@
   .msg.bot{background:var(--bg);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:4px}
   .msg.me{background:var(--accent);color:var(--on-accent);align-self:flex-end;border-bottom-right-radius:4px}
   .msg.typing{color:var(--muted)}
+  .msg.bot.rich{white-space:normal;max-width:100%;width:100%}
+  .msg .ln{margin:0 0 5px;white-space:pre-wrap}.msg .ln:last-child{margin-bottom:0}
+  .msg .ln b{font-weight:700}
+  .msg .tw{overflow-x:auto;margin:6px 0;border:1px solid var(--line);border-radius:8px}
+  .msg table{border-collapse:collapse;width:100%;font-size:13px}
+  .msg th,.msg td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .msg th:first-child,.msg td:first-child{text-align:left;position:sticky;left:0;background:var(--panel-2)}
+  .msg th{background:var(--panel-2);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .msg tr:last-child td{border-bottom:0}
+  .msg td{font-family:var(--mono)} .msg td:first-child{font-family:var(--display);font-weight:600}
+  .msg td.out{background:var(--out-bg);color:var(--out);font-weight:600}.msg td.low{background:var(--low-bg);color:var(--low);font-weight:600}.msg td.inc{color:var(--inc)}
+  .msg td.tx{font-family:var(--display);text-align:left;white-space:normal;min-width:90px}
+  .msg td:first-child{white-space:normal;min-width:110px;max-width:190px}
   #cchips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}
   #cchips button{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600}
   #cchips button:hover{border-color:var(--gold)}
@@ -307,21 +320,23 @@
   const PN_EN = { rf6: 'Curb Chain', rf9: 'Rare Form Clear Glasses (non-prescription)', rf13: 'Rare Form Zip Hoodie with Fur Trim' };
   const I18N = {
     de: {
-      'sub': 'Bestand & Lieferzeiten · Beispieldaten', 'v.stock': 'Lagerwert', 'v.stock.sub': 'zu aktuellen Shop-Preisen', 'v.each': 'Preis', 'v.inc': '{v} Warenwert', 'f.value': 'Wert im Lager', 'o.value': 'Warenwert', 'tr.value': 'Warenwert {v}', 'wh.value': 'Lagerwert', 'price.note': 'Preise: aktuelle Shop-Preise inkl. MwSt. Werte sind Stück mal Preis.', 'price.sale': 'Herbst-Sale −{p} % gilt bis {d}', 'sale.on': 'inkl. Herbst-Sale −{p} %', 'tabs.aria': 'Bereich', 'tab.stock': 'Bestand', 'b.open': 'Hilfe-Chat öffnen', 'b.aria': 'Hilfe-Chat', 'b.title': 'Lager-Assistent', 'b.sub': 'Automatischer Assistent · keine echte Person', 'b.close': 'Chat schließen', 'b.ph': 'Frag zu Bestand oder Lieferung …', 'b.msg': 'Deine Nachricht', 'b.send': 'Senden',
+      'sub': 'Bestand & Lieferzeiten · Beispieldaten', 'v.stock': 'Lagerwert', 'v.stock.sub': 'zu aktuellen Shop-Preisen', 'v.each': 'Preis', 'v.inc': '{v} Warenwert', 'f.value': 'Wert im Lager', 'o.value': 'Warenwert', 'tr.value': 'Warenwert {v}', 'wh.value': 'Lagerwert', 'price.note': 'Preise: aktuelle Shop-Preise inkl. MwSt. Werte sind Stück mal Preis.', 'price.sale': 'Herbst-Sale −{p} % gilt bis {d}', 'sale.on': 'inkl. Herbst-Sale −{p} %', 'tabs.aria': 'Bereich', 'tab.stock': 'Bestand', 'tb.color': 'Farbe', 'tb.stock': 'Bestand', 'tb.product': 'Produkt', 'tb.variant': 'Variante', 'tb.here': 'Da', 'tb.inc': 'Unterwegs', 'tb.arr': 'Ankunft', 'tb.left': 'Noch', 'tb.id': 'Nr.', 'tb.qty': 'Stück', 'tb.value': 'Wert', 'tb.price': 'Preis', 'tb.empty': 'Leer', 'tb.low': 'Knapp', 'tb.wh': 'Lager', 'tb.eg': 'Leer / knapp', 'tb.none': 'ok',
+      'b.open': 'Hilfe-Chat öffnen', 'b.aria': 'Hilfe-Chat', 'b.title': 'Lager-Assistent', 'b.sub': 'Automatischer Assistent · keine echte Person', 'b.close': 'Chat schließen', 'b.ph': 'Frag zu Bestand oder Lieferung …', 'b.msg': 'Deine Nachricht', 'b.send': 'Senden',
       'b.hello': 'Hallo! Ich bin der Lager-Assistent. Ich kann dir sagen, wie viel von etwas noch da ist, was unterwegs ist und wann es ankommt, und wie es mit dem Versand aussieht. Frag zum Beispiel: „Wie viel Hoodie in L?“',
       'b.chips': ['Wie viel ist noch da?', 'Was ist leer oder knapp?', 'Was ist unterwegs?', 'Versand', 'Lagerwert', 'Was kann ich fragen?'],
-      'b.stock.all': 'Aktuell sind {n} Stück im Lager ({v} Varianten, Wert {w}). Leer: {o} Varianten, knapp: {l}. Unterwegs: {i} Stück. Für ein Produkt frag zum Beispiel „Wie viel Sweatpants in M?“',
+      'b.stock.all': '**Lager aktuell** ({v} Varianten in {p} Produkten)',
+      'b.stock.hint': 'Für ein Produkt frag zum Beispiel „Wie viel Sweatpants in M?“',
       'b.var': '{name} ({vn}): {q} Stück da{st}.{inc}', 'b.st.out': ' (leer)', 'b.st.low': ' (knapp, Mindestbestand {m})', 'b.inc': ' {n} Stück unterwegs, Ankunft {d} ({r}).',
-      'b.prod': '{name}: {q} Stück da, Wert {w}, Preis {p}.', 'b.prod.gaps': 'Davon leer: {o}, knapp: {l} Varianten.', 'b.prod.inc': 'Unterwegs: {n} Stück, Ankunft {d} ({r}).',
+      'b.prod': '**{name}** · {q} Stück da · Wert {w} · Preis {p}', 'b.prod.gaps': 'Davon leer: {o}, knapp: {l} Varianten.', 'b.prod.inc': 'Unterwegs: {n} Stück, Ankunft {d} ({r}).',
       'b.novar': '{name} gibt es nicht in „{vn}“. Es gibt: {have}.', 'b.nosize': 'Die Größe {s} gibt es bei {name} nicht. Es gibt: {have}.',
-      'b.low.h': 'Leer ({n} Varianten):', 'b.low.k': 'Knapp ({n} Varianten):', 'b.low.none': 'Zurzeit ist nichts leer oder knapp.', 'b.low.more': '… und weitere. Frag nach einem Produkt für Details.',
+      'b.low.h': '**{e} Varianten leer, {k} knapp** (Mindestbestand je Produkt)', 'b.low.none': 'Zurzeit ist nichts leer oder knapp.', 'b.low.more': 'Frag nach einem Produkt (z. B. „Hoodie“), dann siehst du die einzelnen Größen und Farben.',
       'b.deliv.none': '{name}: Aktuell ist nichts unterwegs. Eine Bestellung würde normalerweise {l} dauern, also etwa bis {d}',
       'b.deliv.one': '{id} · {name}: {q} Stück ({vars}). Bestellt {c}, Ankunft {d} ({r}). Lieferzeit gesamt {span}, {left}.',
       'b.left': 'noch {d}', 'b.left.today': 'kommt heute', 'b.left.late': '{d} überfällig',
-      'b.deliv.h': 'Unterwegs: {n} Lieferungen, zusammen {q} Stück, Warenwert {w}.', 'b.deliv.line': '• {id} {name}: {q} Stück, Ankunft {d} ({r})', 'b.deliv.none.all': 'Zurzeit ist nichts unterwegs. Normale Lieferzeiten: {x}.',
+      'b.deliv.h': '**Unterwegs: {n} Lieferungen** · zusammen {q} Stück · Warenwert {w}', 'b.deliv.line': '• {id} {name}: {q} Stück, Ankunft {d} ({r})', 'b.deliv.none.all': 'Zurzeit ist nichts unterwegs. Normale Lieferzeiten: {x}.',
       'b.ship': 'Zum Lager: {n} Lieferungen unterwegs ({q} Stück), die nächste kommt {d} ({r}). An Kunden: Der Shop versendet die Bestellungen, bis {fs} Bestellwert kostenlos, darüber {sh}. Eine feste Lieferzeit an Kunden ist im Shop noch nicht hinterlegt. Die goldenen Transporter in der Karte sind nur Beispiele.',
-      'b.price.prod': '{name}: {p}{sale}.', 'b.price.sale': ' (Sale, statt {o})', 'b.price.all': 'Der Lagerwert beträgt {w} zu aktuellen Shop-Preisen{sale}. Unterwegs sind Waren im Wert von {i}.',
-      'b.wh.h': 'Die drei Lager:', 'b.wh.line': '• {wh}: {q} Stück, Wert {w}, {i} unterwegs, {o} leer / {l} knapp', 'b.wh.t': 'Tippe in der Karte auf ein Lagerhaus für die Produkte.',
+      'b.price.prod': '{name}: {p}{sale}.', 'b.price.sale': ' (Sale, statt {o})', 'b.price.all': '**Lagerwert {w}** zu aktuellen Shop-Preisen{sale}. Unterwegs: Waren im Wert von {i}.',
+      'b.wh.h': '**Die drei Lager**', 'b.wh.line': '• {wh}: {q} Stück, Wert {w}, {i} unterwegs, {o} leer / {l} knapp', 'b.wh.t': 'Tippe in der Karte auf ein Lagerhaus für die Produkte.',
       'b.date': 'Heute ist {d}, es ist {t} Uhr.', 'b.thanks': 'Gern! Frag einfach weiter.', 'b.human': 'Ich bin ein automatischer Assistent und kenne nur die Zahlen in dieser App. Das sind Beispieldaten. Für alles Weitere melde dich beim Shop-Betreiber.',
       'b.help': 'Du kannst mich zum Beispiel fragen:\n• Wie viel Hoodie in L ist noch da?\n• Was ist leer oder knapp?\n• Wann kommt die nächste Lieferung?\n• Wie lange dauert die Lieferung für Sweatpants?\n• Was kostet die Kette?\n• Wie sieht es mit dem Versand aus?\n• Wie hoch ist der Lagerwert?',
       'b.unknown': 'Das habe ich nicht verstanden. Ich kann zu Bestand, Lieferungen, Versand, Preisen und den Lagern antworten. Versuch zum Beispiel: „Wie viel Sweatpants in M?“ Mehr Beispiele: „Was kann ich fragen?“',
@@ -350,21 +365,23 @@
       'rel.today': 'heute', 'rel.tomorrow': 'morgen', 'rel.in': n => `in ${n} Tagen`, 'rel.late1': 'seit gestern überfällig', 'rel.late': n => `seit ${n} Tagen überfällig`,
     },
     en: {
-      'sub': 'Stock & delivery times · sample data', 'v.stock': 'Stock value', 'v.stock.sub': 'at current shop prices', 'v.each': 'Price', 'v.inc': '{v} goods value', 'f.value': 'Value in stock', 'o.value': 'Goods value', 'tr.value': 'Goods value {v}', 'wh.value': 'Stock value', 'price.note': 'Prices: current shop prices incl. VAT. Values are pieces times price.', 'price.sale': 'The autumn sale of {p}% runs until {d}', 'sale.on': 'incl. autumn sale −{p}%', 'tabs.aria': 'Section', 'tab.stock': 'Stock', 'b.open': 'Open help chat', 'b.aria': 'Help chat', 'b.title': 'Stock assistant', 'b.sub': 'Automated assistant · not a real person', 'b.close': 'Close chat', 'b.ph': 'Ask about stock or delivery …', 'b.msg': 'Your message', 'b.send': 'Send',
+      'sub': 'Stock & delivery times · sample data', 'v.stock': 'Stock value', 'v.stock.sub': 'at current shop prices', 'v.each': 'Price', 'v.inc': '{v} goods value', 'f.value': 'Value in stock', 'o.value': 'Goods value', 'tr.value': 'Goods value {v}', 'wh.value': 'Stock value', 'price.note': 'Prices: current shop prices incl. VAT. Values are pieces times price.', 'price.sale': 'The autumn sale of {p}% runs until {d}', 'sale.on': 'incl. autumn sale −{p}%', 'tabs.aria': 'Section', 'tab.stock': 'Stock', 'tb.color': 'Colour', 'tb.stock': 'Stock', 'tb.product': 'Product', 'tb.variant': 'Variant', 'tb.here': 'In stock', 'tb.inc': 'On the way', 'tb.arr': 'Arrival', 'tb.left': 'Left', 'tb.id': 'No.', 'tb.qty': 'Pcs', 'tb.value': 'Value', 'tb.price': 'Price', 'tb.empty': 'Empty', 'tb.low': 'Low', 'tb.wh': 'Warehouse', 'tb.eg': 'Empty / low', 'tb.none': 'OK',
+      'b.open': 'Open help chat', 'b.aria': 'Help chat', 'b.title': 'Stock assistant', 'b.sub': 'Automated assistant · not a real person', 'b.close': 'Close chat', 'b.ph': 'Ask about stock or delivery …', 'b.msg': 'Your message', 'b.send': 'Send',
       'b.hello': 'Hi! I am the stock assistant. I can tell you how much of something is left, what is on the way and when it arrives, and how shipping works. Try: “How many hoodies in L?”',
       'b.chips': ['How much is left?', 'What is empty or low?', 'What is on the way?', 'Shipping', 'Stock value', 'What can I ask?'],
-      'b.stock.all': 'There are currently {n} pieces in stock ({v} variants, value {w}). Empty: {o} variants, low: {l}. On the way: {i} pieces. For one product, try “How many sweatpants in M?”',
+      'b.stock.all': '**Stock right now** ({v} variants in {p} products)',
+      'b.stock.hint': 'For one product, try “How many sweatpants in M?”',
       'b.var': '{name} ({vn}): {q} in stock{st}.{inc}', 'b.st.out': ' (empty)', 'b.st.low': ' (low, minimum {m})', 'b.inc': ' {n} on the way, arriving {d} ({r}).',
-      'b.prod': '{name}: {q} in stock, value {w}, price {p}.', 'b.prod.gaps': 'Of these empty: {o}, low: {l} variants.', 'b.prod.inc': 'On the way: {n} pieces, arriving {d} ({r}).',
+      'b.prod': '**{name}** · {q} in stock · value {w} · price {p}', 'b.prod.gaps': 'Of these empty: {o}, low: {l} variants.', 'b.prod.inc': 'On the way: {n} pieces, arriving {d} ({r}).',
       'b.novar': '{name} does not come in “{vn}”. Available: {have}.', 'b.nosize': 'Size {s} does not exist for {name}. Available: {have}.',
-      'b.low.h': 'Empty ({n} variants):', 'b.low.k': 'Low ({n} variants):', 'b.low.none': 'Nothing is empty or low right now.', 'b.low.more': '… and more. Ask about a product for details.',
+      'b.low.h': '**{e} variants empty, {k} low** (minimum per product)', 'b.low.none': 'Nothing is empty or low right now.', 'b.low.more': 'Ask about a product (e.g. “hoodie”) to see the individual sizes and colours.',
       'b.deliv.none': '{name}: nothing is on the way right now. A new order would usually take {l}, so around {d}',
       'b.deliv.one': '{id} · {name}: {q} pieces ({vars}). Ordered {c}, arriving {d} ({r}). Total delivery time {span}, {left}.',
       'b.left': '{d} left', 'b.left.today': 'arrives today', 'b.left.late': '{d} overdue',
-      'b.deliv.h': 'On the way: {n} deliveries, {q} pieces in total, goods value {w}.', 'b.deliv.line': '• {id} {name}: {q} pieces, arriving {d} ({r})', 'b.deliv.none.all': 'Nothing is on the way right now. Usual delivery times: {x}.',
+      'b.deliv.h': '**On the way: {n} deliveries** · {q} pieces in total · goods value {w}', 'b.deliv.line': '• {id} {name}: {q} pieces, arriving {d} ({r})', 'b.deliv.none.all': 'Nothing is on the way right now. Usual delivery times: {x}.',
       'b.ship': 'To the warehouse: {n} deliveries on the way ({q} pieces), the next one arrives {d} ({r}). To customers: the shop ships the orders, free up to {fs} order value, {sh} above that. No fixed delivery time to customers has been set in the shop yet. The gold trucks on the map are only examples.',
-      'b.price.prod': '{name}: {p}{sale}.', 'b.price.sale': ' (sale, instead of {o})', 'b.price.all': 'The stock value is {w} at current shop prices{sale}. Goods worth {i} are on the way.',
-      'b.wh.h': 'The three warehouses:', 'b.wh.line': '• {wh}: {q} pieces, value {w}, {i} on the way, {o} empty / {l} low', 'b.wh.t': 'Tap a warehouse on the map to see its products.',
+      'b.price.prod': '{name}: {p}{sale}.', 'b.price.sale': ' (sale, instead of {o})', 'b.price.all': '**Stock value {w}** at current shop prices{sale}. On the way: goods worth {i}.',
+      'b.wh.h': '**The three warehouses**', 'b.wh.line': '• {wh}: {q} pieces, value {w}, {i} on the way, {o} empty / {l} low', 'b.wh.t': 'Tap a warehouse on the map to see its products.',
       'b.date': 'Today is {d}, it is {t}.', 'b.thanks': 'You are welcome! Just keep asking.', 'b.human': 'I am an automated assistant and only know the numbers in this app. They are sample data. For anything else, contact the shop owner.',
       'b.help': 'You can ask me, for example:\n• How many hoodies in L are left?\n• What is empty or low?\n• When does the next delivery arrive?\n• How long does delivery take for sweatpants?\n• How much is the chain?\n• What about shipping?\n• What is the stock value?',
       'b.unknown': 'I did not understand that. I can answer questions about stock, deliveries, shipping, prices and the warehouses. Try: “How many sweatpants in M?” More examples: “What can I ask?”',
@@ -774,50 +791,64 @@
     if (!size && big && !/^(xl|xxl)$/i.test(big.replace(/\s/g, ''))) size = big.replace(/\s/g, '').toUpperCase();
     return { products: best.slice(0, 4), color, size, bad };
   }
-  const list3 = a => a.join('\n');
+  const fmtS = d => new Date(d).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE', { day: 'numeric', month: 'short' });
+  const leftS = o => { const l = diffDays(o.eta); return l > 0 ? days(l) : l === 0 ? t('rel.today') : '−' + days(-l); };
+  const tbl = rows => rows.map(r => '| ' + r.join(' | ')).join('\n');
+  const flag = (q, min) => (q === 0 ? q + '!' : q <= min ? q + '~' : String(q));
   const incLine = v => (v.inc ? t('b.inc', { n: v.inc, d: fmt(v.eta), r: rel(v.eta) }) : '');
+  const sumQ = os => os.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0);
   function prodAnswer(p, color, size, bad) {
     const a = prodInfo(p);
-    if (size && !p.sizes.includes(size)) return t('b.nosize', { s: sizeLabel(size), name: pname(p), have: p.sizes.map(sizeLabel).join(', ') || '–' });
     if (bad) return t('b.novar', { name: pname(p), vn: bad, have: p.colors.map(c => colorName(c) || t('standard')).join(', ') });
+    if (size && !p.sizes.includes(size)) return t('b.nosize', { s: sizeLabel(size), name: pname(p), have: p.sizes.map(sizeLabel).join(', ') || '–' });
     if (color && !p.colors.includes(color)) return t('b.novar', { name: pname(p), vn: colorName(color), have: p.colors.map(c => colorName(c) || t('standard')).join(', ') });
     const vs = a.info.filter(v => (!color || v.c === color) && (!size || v.s === size));
     if (color || size) {
       if (vs.length === 1) { const v = vs[0]; return t('b.var', { name: pname(p), vn: vname(p, v), q: v.q, st: v.st === 'out' ? t('b.st.out') : v.st === 'low' ? t('b.st.low', { m: a.min }) : '', inc: incLine(v) }); }
-      return vs.map(v => t('b.var', { name: pname(p), vn: vname(p, v), q: v.q, st: v.st === 'out' ? t('b.st.out') : v.st === 'low' ? t('b.st.low', { m: a.min }) : '', inc: incLine(v) })).join('\n');
+      return `**${pname(p)}**\n` + tbl([[t('tb.variant'), t('tb.here'), t('tb.inc'), t('tb.arr')], ...vs.map(v => [vname(p, v), flag(v.q, a.min), v.inc ? '+' + v.inc : '–', v.inc ? fmtS(v.eta) : '–'])]);
     }
-    const lines = [t('b.prod', { name: pname(p), q: a.total, w: eur0(valueOf(p, a.total)), p: eur(priceOf(p)) })];
-    p.colors.forEach(c => lines.push('• ' + (c ? colorName(c) + ': ' : '') + a.info.filter(v => v.c === c).map(v => `${p.sizes.length > 1 || p.sizes[0] !== '' ? sizeLabel(v.s) + ' ' : ''}${v.q}`).join(' · ')));
+    const one = p.sizes.length === 1 && p.sizes[0] === '';
+    const head = [p.colors.length === 1 && !p.colors[0] ? t('tb.stock') : t('tb.color'), ...p.sizes.map(x => (x === '' ? t('tb.qty') : sizeLabel(x)))];
+    const rows = p.colors.map(c => [colorName(c) || t('tb.qty'), ...p.sizes.map(x => { const v = a.info.find(y => y.c === c && y.s === x); return flag(v.q, a.min); })]);
+    const lines = [t('b.prod', { name: pname(p), q: a.total, w: eur0(valueOf(p, a.total)), p: eur(priceOf(p)) }), tbl([head, ...rows])];
     if (a.out.length || a.low.length) lines.push(t('b.prod.gaps', { o: a.out.length, l: a.low.length }));
-    if (a.open.length) { const o = a.open.slice().sort((x, y) => new Date(x.eta) - new Date(y.eta))[0]; lines.push(t('b.prod.inc', { n: a.open.reduce((n, od) => n + od.lines.reduce((m, ln) => m + ln.qty, 0), 0), d: fmt(o.eta), r: rel(o.eta) })); }
+    if (a.open.length) { const o = a.open.slice().sort((x, y) => new Date(x.eta) - new Date(y.eta))[0]; lines.push(t('b.prod.inc', { n: sumQ(a.open), d: fmt(o.eta), r: rel(o.eta) })); }
     return lines.join('\n');
   }
   function lowAnswer() {
-    const outs = [], lows = [];
-    P.forEach(p => { const a = prodInfo(p); if (a.out.length) outs.push([p, a.out]); if (a.low.length) lows.push([p, a.low]); });
-    if (!outs.length && !lows.length) return t('b.low.none');
-    const fmtL = (arr, k) => { const n = arr.reduce((m, [, v]) => m + v.length, 0); const L = arr.slice(0, 6).map(([p, v]) => `• ${pname(p)}: ${v.slice(0, 6).map(x => vname(p, x)).join(', ')}${v.length > 6 ? ' …' : ''}`); return [t(k, { n }), ...L, arr.length > 6 ? t('b.low.more') : ''].filter(Boolean).join('\n'); };
-    return [outs.length ? fmtL(outs, 'b.low.h') : '', lows.length ? fmtL(lows, 'b.low.k') : ''].filter(Boolean).join('\n\n');
+    const rows = []; let e = 0, k = 0;
+    P.forEach(p => { const a = prodInfo(p); if (!a.out.length && !a.low.length) return; e += a.out.length; k += a.low.length; rows.push([pname(p), a.out.length + 'x!', a.low.length + 'x~']); });
+    if (!rows.length) return t('b.low.none');
+    rows.sort((x, y) => parseInt(y[1]) - parseInt(x[1]));
+    return t('b.low.h', { e, k }) + '\n' + tbl([[t('tb.product'), t('tb.empty'), t('tb.low')], ...rows.slice(0, 10).map(r => [r[0], r[1].replace('x', ''), r[2].replace('x', '')])]) + '\n' + t('b.low.more');
   }
   function leftTxt(o) { const l = diffDays(o.eta); return l > 0 ? t('b.left', { d: days(l) }) : l === 0 ? t('b.left.today') : t('b.left.late', { d: days(-l) }); }
   function delivAnswer(prods) {
     if (prods.length) return prods.map(p => {
       const a = prodInfo(p);
       if (!a.open.length) return t('b.deliv.none', { name: pname(p), l: days(a.lead), d: fmt(addDays(new Date(), a.lead)) });
-      return a.open.map(o => t('b.deliv.one', { id: o.id, name: pname(p), q: o.lines.reduce((m, ln) => m + ln.qty, 0), vars: o.lines.map(ln => vname(p, variants(p).find(x => x.key === ln.key))).join(', '), c: fmt(o.created), d: fmt(o.eta), r: rel(o.eta), span: days(Math.max(1, diffDays(o.eta) - diffDays(o.created))), left: leftTxt(o) })).join('\n');
-    }).join('\n');
+      const os = a.open.slice().sort((x, y) => new Date(x.eta) - new Date(y.eta));
+      return `**${pname(p)}**\n` + tbl([[t('tb.id'), t('tb.qty'), t('tb.arr'), t('tb.left')], ...os.map(o => [o.id, '+' + sumQ([o]), fmtS(o.eta), leftS(o)])]) + '\n' + os.map(o => `${o.id}: ` + o.lines.map(ln => `${vname(p, variants(p).find(x => x.key === ln.key))} ×${ln.qty}`).join(', ')).join('\n');
+    }).join('\n\n');
     const os = S.orders.slice().sort((a, b) => new Date(a.eta) - new Date(b.eta));
     if (!os.length) return t('b.deliv.none.all', { x: [...new Set(P.map(p => LEAD0[p.type]))].sort((a, b) => a - b).join('–') + ' ' + (LANG === 'en' ? 'days' : 'Tage') });
-    const q = os.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0), w = os.reduce((n, o) => n + valueOf(byId(o.pid), o.lines.reduce((m, l) => m + l.qty, 0)), 0);
-    return [t('b.deliv.h', { n: os.length, q, w: eur0(w) }), ...os.map(o => t('b.deliv.line', { id: o.id, name: pname(byId(o.pid)), q: o.lines.reduce((m, l) => m + l.qty, 0), d: fmt(o.eta), r: rel(o.eta) }))].join('\n');
+    const w = os.reduce((n, o) => n + valueOf(byId(o.pid), sumQ([o])), 0);
+    return t('b.deliv.h', { n: os.length, q: sumQ(os), w: eur0(w) }) + '\n' + tbl([[t('tb.id'), t('tb.product'), t('tb.qty'), t('tb.arr'), t('tb.left')], ...os.map(o => [o.id, '§' + pname(byId(o.pid)), '+' + sumQ([o]), fmtS(o.eta), leftS(o)])]);
   }
   function shipAnswer() {
-    const os = S.orders.slice().sort((a, b) => new Date(a.eta) - new Date(b.eta)), q = os.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0);
-    return t('b.ship', { n: os.length, q, d: os[0] ? fmt(os[0].eta) : '–', r: os[0] ? rel(os[0].eta) : '', fs: eur(100), sh: eur(4.9) });
+    const os = S.orders.slice().sort((a, b) => new Date(a.eta) - new Date(b.eta));
+    return t('b.ship', { n: os.length, q: sumQ(os), d: os[0] ? fmt(os[0].eta) : '–', r: os[0] ? rel(os[0].eta) : '', fs: eur(100), sh: eur(4.9) });
   }
   function whAnswer() {
-    return [t('b.wh.h'), ...GROUPS.map(g => { const items = P.filter(p => g.types.includes(p.type)).map(p => ({ p, a: prodInfo(p) })); return t('b.wh.line', { wh: t('wh.' + g.id), q: items.reduce((n, x) => n + x.a.total, 0), w: eur0(items.reduce((n, x) => n + valueOf(x.p, x.a.total), 0)), i: items.reduce((n, x) => n + x.a.open.reduce((m, od) => m + od.lines.reduce((k, ln) => k + ln.qty, 0), 0), 0), o: items.reduce((n, x) => n + x.a.out.length, 0), l: items.reduce((n, x) => n + x.a.low.length, 0) }); }), t('b.wh.t')].join('\n');
+    const rows = GROUPS.map(g => { const items = P.filter(p => g.types.includes(p.type)).map(p => ({ p, a: prodInfo(p) })); return [t('wh.' + g.id), items.reduce((n, x) => n + x.a.total, 0), eur0(items.reduce((n, x) => n + valueOf(x.p, x.a.total), 0)), '+' + items.reduce((n, x) => n + sumQ(x.a.open), 0), items.reduce((n, x) => n + x.a.out.length, 0) + ' / ' + items.reduce((n, x) => n + x.a.low.length, 0)]; });
+    return t('b.wh.h') + '\n' + tbl([[t('tb.wh'), t('tb.qty'), t('tb.value'), t('tb.inc'), t('tb.eg')], ...rows.map(r => ['§' + r[0], ...r.slice(1)])]) + '\n' + t('b.wh.t');
   }
+  function stockAll() {
+    const vs = P.map(prodInfo).flatMap(a => a.info), val = P.reduce((n, p) => n + valueOf(p, prodInfo(p).total), 0);
+    const rows = P.map(p => { const a = prodInfo(p); return ['§' + pname(p), a.total, eur0(valueOf(p, a.total)), a.out.length + a.low.length ? a.out.length + ' / ' + a.low.length : t('tb.none')]; });
+    return t('b.stock.all', { v: vs.length, p: P.length }) + '\n' + tbl([[t('tb.product'), t('tb.qty'), t('tb.value'), t('tb.eg')], ...rows, ['§Σ', vs.reduce((n, v) => n + v.q, 0), eur0(val), vs.filter(v => v.st === 'out').length + ' / ' + vs.filter(v => v.st === 'low').length]]) + '\n' + t('b.stock.hint');
+  }
+  function priceAll() { return tbl([[t('tb.product'), t('tb.price'), t('tb.qty'), t('tb.value')], ...P.map(p => ['§' + pname(p), eur(priceOf(p)), prodInfo(p).total, eur0(valueOf(p, prodInfo(p).total))])]); }
   const hasAny = (q, ws) => ws.some(w => q.includes(w));
   function botAnswer(text) {
     const q = ' ' + nrm(text) + ' ', ent = entities(text), has = ent.products.length > 0;
@@ -830,26 +861,39 @@
     if (hasAny(q, ['lagerwert', 'stock value', 'warenwert', 'wie viel wert', 'how much is the stock worth', 'total value'])) return t('b.price.all', { w: eur0(P.reduce((n, p) => n + valueOf(p, prodInfo(p).total), 0)), sale: saleOn() ? ` (${t('sale.on', { p: SALE.PERCENT })})` : '', i: eur0(S.orders.reduce((n, o) => n + valueOf(byId(o.pid), o.lines.reduce((m, l) => m + l.qty, 0)), 0)) });
     if (hasAny(q, ['preis', 'kostet', 'kosten', 'euro', 'price', 'cost', 'how much is', 'much does', 'sale', 'rabatt', 'discount'])) {
       if (has) return ent.products.map(p => t('b.price.prod', { name: pname(p), p: eur(priceOf(p)), sale: saleOn() ? t('b.price.sale', { o: eur(p.price) }) : '' })).join('\n');
-      return P.map(p => `• ${pname(p)}: ${eur(priceOf(p))}`).join('\n');
+      return priceAll();
     }
     if (hasAny(q, ['unterwegs', 'on the way', 'lieferung', 'delivery', 'ankunft', 'ankommen', 'arriv', 'lieferzeit', 'wie lange', 'how long', 'wann kommt', 'wann ist', 'when ', 'wann ', 'eta', 'dauer', 'transit', 'bestellt', 'ordered', 'nachbestell', 'reorder'])) return delivAnswer(ent.products);
     if (hasAny(q, ['lagerhaus', 'lagerhalle', 'welches lager', 'welche lager', 'warehouse', 'wo liegt', 'where is', 'lager '])) return has ? ent.products.map(p => `${pname(p)}: ${t('wh.' + gOf(p).id)}`).join('\n') + '\n' + ent.products.map(p => prodAnswer(p, ent.color, ent.size, ent.bad)).join('\n') : whAnswer();
     if (hasAny(q, ['leer', 'knapp', 'ausverkauft', 'fehlt', 'fehlen', 'nachschub', 'low', 'empty', 'sold out', 'running out', 'missing', 'out of stock']) && !has) return lowAnswer();
     if (has) return ent.products.map(p => prodAnswer(p, ent.color, ent.size, ent.bad)).join('\n\n');
     if (hasAny(q, ['wie viel', 'wieviel', 'wie viele', 'noch da', 'bestand', 'vorrat', 'auf lager', 'lagernd', 'stuck', 'menge', 'anzahl', 'how many', 'how much', 'in stock', 'left', 'stock', 'available', 'verfugbar', 'zur zeit', 'zurzeit', 'aktuell', 'right now'])) {
-      const all = P.map(prodInfo), vs = all.flatMap(a => a.info);
-      return t('b.stock.all', { n: vs.reduce((n, v) => n + v.q, 0), v: vs.length, w: eur0(P.reduce((n, p) => n + valueOf(p, prodInfo(p).total), 0)), o: vs.filter(v => v.st === 'out').length, l: vs.filter(v => v.st === 'low').length, i: S.orders.reduce((n, o) => n + o.lines.reduce((m, l) => m + l.qty, 0), 0) });
+      return stockAll();
     }
     return t('b.unknown');
   }
   const chatHistory = [];
-  function say(who, text) { const d = document.createElement('div'); d.className = 'msg ' + who; d.textContent = text; $('chatlog').appendChild(d); $('chatlog').scrollTop = 1e9; return d; }
+  function renderRich(text) {
+    const bold = x => x.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    const out = []; let rows = [];
+    const flush = () => {
+      if (!rows.length) return;
+      const cells = r => r.slice(2).split(' | ');
+      const head = cells(rows[0]), body = rows.slice(1).map(cells);
+      out.push('<div class="tw"><table><thead><tr>' + head.map(h => `<th>${esc(h)}</th>`).join('') + '</tr></thead><tbody>' + body.map(r => '<tr>' + r.map((c, i) => {
+        let cls = '', v = c; if (/^§/.test(v)) { v = v.slice(1); cls = 'tx'; } else if (/[!~]$/.test(v) && i) { cls = v.endsWith('!') ? 'out' : 'low'; v = v.slice(0, -1); } else if (/^\+/.test(v)) cls = 'inc';
+        return `<td${cls ? ` class="${cls}"` : ''}>${esc(v)}</td>`;
+      }).join('') + '</tr>').join('') + '</tbody></table></div>');
+      rows = [];
+    };
+    text.split('\n').forEach(l => { if (l.startsWith('| ')) rows.push(l); else { flush(); if (l.trim()) out.push(`<div class="ln">${bold(esc(l))}</div>`); } });
+    flush(); return out.join('');
+  }
+  function say(who, text) { const d = document.createElement('div'); d.className = 'msg ' + who; if (who === 'bot') { d.classList.add('rich'); d.innerHTML = renderRich(text); } else d.textContent = text; $('chatlog').appendChild(d); $('chatlog').scrollTop = 1e9; return d; }
   async function ask(text) {
     text = text.trim(); if (!text) return;
     say('me', text); chatHistory.push({ role: 'user', content: text });
-    const typing = say('bot typing', '…');
-    await new Promise(r => setTimeout(r, 380));
-    typing.remove(); const reply = botAnswer(text); say('bot', reply); chatHistory.push({ role: 'assistant', content: reply });
+    const reply = botAnswer(text); say('bot', reply); chatHistory.push({ role: 'assistant', content: reply });
   }
   const mobileChat = () => matchMedia('(max-width:600px),(max-height:520px)').matches;
   function fitChat() {

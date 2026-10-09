@@ -151,11 +151,35 @@
   .themebtn{width:40px;font-size:18px;line-height:1}
   .langbtn{min-width:44px;padding:0 10px;font-size:13px;font-weight:800;letter-spacing:.04em}
   .themebtn:hover,.langbtn:hover{border-color:var(--gold)}
+  .world{background:color-mix(in srgb,var(--panel) 65%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:10px;margin-top:18px;display:grid;gap:10px}
+  .wtools{display:flex;gap:8px 14px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+  .wtools .grp{display:flex;gap:4px;background:var(--panel-2);padding:3px;border-radius:10px}
+  .wtools .grp button{border:0;background:none;padding:6px 12px;border-radius:8px;font-weight:600;color:var(--muted)}
+  .wtools .grp button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+  .wdate{font-family:var(--mono);font-size:14px}
+  .wdate small{color:var(--muted);font-family:var(--display);margin-right:6px;text-transform:uppercase;letter-spacing:.05em;font-size:12px}
+  .cv{position:relative;width:100%;aspect-ratio:720/640;border-radius:10px;overflow:hidden;background:var(--panel-2)}
+  .cv canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+  .winfo{min-height:74px;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel)}
+  .winfo h3{margin:0 0 4px;font-size:16px}
+  .winfo p{margin:0;color:var(--muted);font-size:14px}
+  .winfo ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+  .winfo li{display:flex;gap:8px;justify-content:space-between;font-size:13.5px;border-top:1px solid var(--line);padding-top:4px}
+  .winfo li b{font-family:var(--mono);font-weight:500}
+  .trucks{display:flex;gap:6px;flex-wrap:wrap}
+  .trucks button{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 11px;font-size:13px;font-weight:600;color:var(--ink)}
+  .trucks button[aria-pressed="true"]{background:var(--inc);border-color:var(--inc);color:#fff}
+  .wkey{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .wkey span{display:inline-flex;gap:6px;align-items:center}
+  .wkey i{width:14px;height:8px;border-radius:2px;display:inline-block}
   .brk{display:none}
+  .sh{display:none}
   @media (max-width:700px){
-    .sp{display:none}.brand small{display:none}.brand{flex:1 1 0;order:0}.langbtn{order:1}.themebtn{order:2}
-    .brk{display:block;order:3;flex:0 0 100%;height:0;margin:-6px 0}
-    .tabs{order:4;flex:1 1 0;min-width:0}.tabs button{flex:1;justify-content:center;white-space:nowrap;padding-inline:8px}.shopbtn{order:5}
+    header{position:static}
+    .sp{display:none}.brand small{display:none}.brand{flex:1 1 0;order:0}.brand h1{font-size:17px}.shopbtn{order:1;padding:8px 11px;font-size:14px}.langbtn{order:2}.themebtn{order:3}
+    .lg{display:none}.sh{display:inline}
+    .brk{display:block;order:4;flex:0 0 100%;height:0;margin:-6px 0}
+    .tabs{order:5;flex:1 1 100%;min-width:0}.tabs button{flex:1;justify-content:center;white-space:nowrap;padding:7px 9px;font-size:14px;gap:6px}
     .search{flex-basis:100%}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -170,8 +194,9 @@
   <div class="tabs" role="tablist" data-i-aria="tabs.aria" aria-label="Bereich">
     <button role="tab" id="tab-stock" aria-selected="true" data-tab="stock" data-i="tab.stock">Bestand</button>
     <button role="tab" id="tab-orders" aria-selected="false" data-tab="orders"><span data-i="tab.orders">Unterwegs</span> <span class="n" id="ordn">0</span></button>
+    <button role="tab" id="tab-map" aria-selected="false" data-tab="map" data-i="tab.map">Karte</button>
   </div>
-  <a class="shopbtn" id="shopbtn" href="../shop/index.html"><span data-i="shop">Zum Shop</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h9v9M16 4L5 15"/></svg></a>
+  <a class="shopbtn" id="shopbtn" href="../shop/index.html"><span class="lg" data-i="shop">Zum Shop</span><span class="sh" data-i="shop.s">Shop</span> <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h9v9M16 4L5 15"/></svg></a>
   <span class="brk"></span>
   <button class="langbtn" id="langbtn" type="button"></button>
   <button class="themebtn" id="themebtn" type="button"></button>
@@ -195,6 +220,22 @@
 
   <section id="view-orders" hidden></section>
 
+  <section id="view-map" hidden>
+    <div class="world">
+      <div class="wtools">
+        <div class="grp" role="group" data-i-aria="map.speed.aria" aria-label="Zeit">
+          <button type="button" data-sim="1" aria-pressed="true" data-i="map.sim">Zeitraffer</button>
+          <button type="button" data-sim="0" aria-pressed="false" data-i="map.today">Heute</button>
+        </div>
+        <div class="wdate"><small data-i="map.date">Datum in der Karte</small><span id="wdate"></span></div>
+      </div>
+      <div class="cv" id="cv"><canvas id="map" role="img" data-i-aria="map.aria" aria-label="Karte der Lagerhäuser mit Transportern"></canvas></div>
+      <div class="wkey"><span><i style="background:var(--inc)"></i><b data-i="map.k.in">Lieferung zum Lager</b></span><span><i style="background:var(--gold)"></i><b data-i="map.k.out">Auslieferung an Kunden (Beispiel)</b></span></div>
+      <div class="winfo" id="winfo" aria-live="polite"></div>
+      <div class="trucks" id="trucks" role="group" data-i-aria="map.trucks.aria" aria-label="Lieferungen"></div>
+    </div>
+  </section>
+
   <footer>
     <p data-i="footer">Beispieldaten: Bestände, Mindestmengen, Lieferzeiten und die Lieferungen unterwegs sind erfundene Startwerte. Die App zeigt nur an, bestellt wird hier nichts.</p>
   </footer>
@@ -207,7 +248,12 @@
   const PN_EN = { rf6: 'Curb Chain', rf9: 'Rare Form Clear Glasses (non-prescription)', rf13: 'Rare Form Zip Hoodie with Fur Trim' };
   const I18N = {
     de: {
-      'sub': 'Bestand & Lieferzeiten · Beispieldaten', 'tabs.aria': 'Bereich', 'tab.stock': 'Bestand', 'tab.orders': 'Unterwegs', 'shop': 'Zum Shop',
+      'sub': 'Bestand & Lieferzeiten · Beispieldaten', 'tabs.aria': 'Bereich', 'tab.stock': 'Bestand', 'tab.orders': 'Unterwegs', 'tab.map': 'Karte', 'shop': 'Zum Shop', 'shop.s': 'Shop',
+      'map.aria': 'Karte der Lagerhäuser mit Transportern', 'map.speed.aria': 'Zeit', 'map.sim': 'Zeitraffer', 'map.today': 'Heute', 'map.date': 'Datum in der Karte', 'map.trucks.aria': 'Lieferungen auswählen',
+      'map.k.in': 'Lieferung zum Lager', 'map.k.out': 'Auslieferung an Kunden (Beispiel)', 'map.hint': 'Tippe auf ein Lagerhaus oder einen Transporter. Im Zeitraffer vergeht ein Tag in etwa zwei Sekunden.',
+      'wh.a': 'Lager Kleidung', 'wh.b': 'Lager Schuhe & Accessoires', 'wh.c': 'Lager Pflege & Duft', 'sup.textil': 'Textilfabrik', 'sup.schuh': 'Schuh- & Schmuckhersteller', 'sup.duft': 'Duft-Labor', 'wh.a.s': 'Kleidung', 'wh.b.s': 'Schuhe, Acc.', 'wh.c.s': 'Pflege, Duft', 'sup.textil.s': 'Textil', 'sup.schuh.s': 'Schuhe', 'sup.duft.s': 'Duft', 'hub.s': 'Kunden', 'hub': 'Kunden & Paketdienst', 'in': 'Eingang',
+      'wh.line': '{n} Stück · {o} leer · {l} knapp', 'wh.none': 'Keine Lieferung unterwegs.', 'wh.inc': 'Unterwegs: {n} Stück',
+      'tr.line': '{name}: {q} Stück von {sup} zum {wh}.', 'tr.drive': 'Ankunft {d} ({r}). Die Fahrt ist zu {p} % geschafft.', 'tr.unload': 'Ist da und wird gerade entladen.', 'tr.late': 'Ist überfällig und wartet am Tor.',
       'theme.toLight': 'Heller Modus', 'theme.toDark': 'Dunkler Modus', 'lang.btn': 'DE', 'lang.aria': 'Sprache wechseln: Englisch',
       'stats.aria': 'Kennzahlen', 'search.ph': 'Suchen …', 'search.aria': 'Lager durchsuchen', 'cat.aria': 'Kategorie', 'cat.all': 'Alle Kategorien',
       'sort.aria': 'Sortierung', 'sort.urg': 'Dringend zuerst', 'sort.name': 'Name A–Z', 'sort.low': 'Kleinster Bestand', 'sort.high': 'Größter Bestand',
@@ -227,7 +273,12 @@
       'rel.today': 'heute', 'rel.tomorrow': 'morgen', 'rel.in': n => `in ${n} Tagen`, 'rel.late1': 'seit gestern überfällig', 'rel.late': n => `seit ${n} Tagen überfällig`,
     },
     en: {
-      'sub': 'Stock & delivery times · sample data', 'tabs.aria': 'Section', 'tab.stock': 'Stock', 'tab.orders': 'On the way', 'shop': 'To the shop',
+      'sub': 'Stock & delivery times · sample data', 'tabs.aria': 'Section', 'tab.stock': 'Stock', 'tab.orders': 'On the way', 'tab.map': 'Map', 'shop': 'To the shop', 'shop.s': 'Shop',
+      'map.aria': 'Map of the warehouses with trucks', 'map.speed.aria': 'Time', 'map.sim': 'Time lapse', 'map.today': 'Today', 'map.date': 'Date on the map', 'map.trucks.aria': 'Choose a delivery',
+      'map.k.in': 'Delivery to the warehouse', 'map.k.out': 'Delivery to customers (example)', 'map.hint': 'Tap a warehouse or a truck. In time lapse one day takes about two seconds.',
+      'wh.a': 'Clothing warehouse', 'wh.b': 'Shoes & accessories warehouse', 'wh.c': 'Care & fragrance warehouse', 'sup.textil': 'Textile factory', 'sup.schuh': 'Shoe & jewellery maker', 'sup.duft': 'Fragrance lab', 'wh.a.s': 'Clothing', 'wh.b.s': 'Shoes, acc.', 'wh.c.s': 'Care, scent', 'sup.textil.s': 'Textile', 'sup.schuh.s': 'Shoes', 'sup.duft.s': 'Scent', 'hub.s': 'Customers', 'hub': 'Customers & parcel service', 'in': 'Inbound',
+      'wh.line': '{n} pcs · {o} empty · {l} low', 'wh.none': 'No delivery on the way.', 'wh.inc': 'On the way: {n} pcs',
+      'tr.line': '{name}: {q} pcs from {sup} to the {wh}.', 'tr.drive': 'Arrives {d} ({r}). The trip is {p} % done.', 'tr.unload': 'Has arrived and is being unloaded.', 'tr.late': 'Is overdue and waits at the gate.',
       'theme.toLight': 'Light mode', 'theme.toDark': 'Dark mode', 'lang.btn': 'EN', 'lang.aria': 'Switch language: German',
       'stats.aria': 'Key figures', 'search.ph': 'Search …', 'search.aria': 'Search stock', 'cat.aria': 'Category', 'cat.all': 'All categories',
       'sort.aria': 'Sort', 'sort.urg': 'Most urgent first', 'sort.name': 'Name A–Z', 'sort.low': 'Lowest stock', 'sort.high': 'Highest stock',
@@ -414,9 +465,172 @@
 
   function render() {
     renderStats(); renderChips(); renderList(); renderOrders();
-    $('view-stock').hidden = tab !== 'stock'; $('view-orders').hidden = tab !== 'orders';
+    $('view-stock').hidden = tab !== 'stock'; $('view-orders').hidden = tab !== 'orders'; $('view-map').hidden = tab !== 'map';
+    if (tab === 'map') { mapUi(); startMap(); sizeMap(); } else stopMap();
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
   }
+
+
+  /* ---------- Lagerwelt (2D-Karte) ---------- */
+  const GROUPS = [
+    { id: 'a', types: ['tshirt', 'jacken', 'hose'], cx: 150, y: 250, w: 160, h: 104, sup: 'textil' },
+    { id: 'b', types: ['schuhe', 'zubehoer'], cx: 360, y: 250, w: 160, h: 104, sup: 'schuh' },
+    { id: 'c', types: ['haarpflege', 'parfum'], cx: 570, y: 250, w: 160, h: 104, sup: 'duft' },
+  ];
+  const SUPS = { textil: { x: 570, y: 22, w: 120, h: 68 }, schuh: { x: 150, y: 22, w: 120, h: 68 }, duft: { x: 360, y: 22, w: 120, h: 68 } };
+  const HWY = 170, BOT = 420, HUB = { x: 585, y: 484, w: 120, h: 70, rx: 640 };
+  const gOf = p => GROUPS.find(g => g.types.includes(p.type));
+  const TREES = [[30, 215], [40, 300], [262, 205], [460, 205], [690, 215], [684, 330], [92, 452], [58, 540], [300, 520], [420, 585], [236, 598], [520, 600], [30, 610]];
+  const HOUSES = [[60, 500], [128, 528], [196, 494], [262, 548], [330, 498], [398, 540], [466, 500]];
+  const PAL = {
+    dark: { ground: '#17171b', road: '#2a2a30', line: '#4a4a52', roof: '#2f2f37', wall: '#1d1d22', text: '#f1eee8', muted: '#9a958d', gold: '#e4d3a8', inc: '#6ea8e6', ok: '#4dbd86', low: '#e2a63a', out: '#f0706f', tree: '#1e3a2d', house: '#34343c', body: '#3b3b44', glass: '#9fc2e6' },
+    light: { ground: '#ece9e2', road: '#cdc8bd', line: '#f6f4ef', roof: '#fbfaf8', wall: '#d6d1c6', text: '#1a1a1c', muted: '#66625b', gold: '#8a6d1f', inc: '#245f9e', ok: '#23774b', low: '#9a6208', out: '#b9302f', tree: '#b5ccb0', house: '#e1ddd3', body: '#ffffff', glass: '#4f7fb3' },
+  };
+  const MAP = { sim: true, t0: performance.now(), sel: null, raf: 0, trucks: [], whHit: [], dayShown: '', cw: 0, ch: 0, dpr: 1 };
+  const polyLen = pts => pts.slice(1).reduce((n, p, i) => n + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
+  function polyAt(pts, f) {
+    const L = polyLen(pts); let d = Math.max(0, Math.min(1, f)) * L;
+    for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (d <= l || i === pts.length - 1) { const u = l ? Math.min(1, d / l) : 0; return { x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u, ang: Math.atan2(b[1] - a[1], b[0] - a[0]) }; } d -= l; }
+  }
+  const inPath = (o) => { const p = byId(o.pid), g = gOf(p), s = SUPS[g.sup]; const sx = s.x, sy = s.y + s.h; return [[sx, sy], [sx, HWY], [g.cx, HWY], [g.cx, g.y]]; };
+  const outPath = g => [[g.cx, g.y + g.h], [g.cx, BOT], [HUB.rx, BOT], [HUB.rx, HUB.y]];
+  const warn = g => { const ps = P.filter(p => g.types.includes(p.type)).map(prodInfo); const vs = ps.reduce((n, a) => n + a.info.length, 0), bad = ps.reduce((n, a) => n + a.out.length * 2 + a.low.length, 0); return bad / (vs * 2); };
+  const simSpan = () => Math.max(3, ...S.orders.map(o => diffDays(o.eta))) + 3;
+  function simDay(now) { if (!MAP.sim || reduceMotion()) return 0; const per = 2.2, T = simSpan() * per + 2; const el = ((now - MAP.t0) / 1000) % T; return Math.min(simSpan(), el / per); }
+  const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function rr(c, x, y, w, h, r) { c.beginPath(); if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h); }
+
+  function drawTruck(c, x, y, ang, col, pal, scale) {
+    c.save(); c.translate(x, y); c.rotate(ang); c.scale(scale, scale);
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(-10, -3.6, 22, 9);
+    c.fillStyle = col; rr(c, -11, -5, 15, 10, 2); c.fill();
+    c.fillStyle = pal.body; rr(c, 5, -4.2, 7, 8.4, 2); c.fill();
+    c.fillStyle = pal.glass; c.fillRect(9, -3.2, 2.6, 6.4);
+    c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(-8, -5.6, 4, 1.4); c.fillRect(-8, 4.2, 4, 1.4); c.fillRect(6, -5.6, 4, 1.4); c.fillRect(6, 4.2, 4, 1.4);
+    c.restore();
+  }
+
+  function drawWorld(now) {
+    const cv = $('map'); if (!cv || !MAP.cw) return;
+    const c = cv.getContext('2d'), pal = PAL[themeNow()], s = MAP.cw / 720, dpr = MAP.dpr, day = simDay(now);
+    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.fillStyle = pal.ground; c.fillRect(0, 0, MAP.cw, MAP.ch);
+    c.save(); c.scale(s, s);
+    const road = (pts, w = 22) => { c.strokeStyle = pal.road; c.lineWidth = w; c.lineCap = 'butt'; c.lineJoin = 'round'; c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.stroke(); };
+    const dash = pts => { c.strokeStyle = pal.line; c.lineWidth = 1.4; c.setLineDash([7, 7]); c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); c.stroke(); c.setLineDash([]); };
+    const roads = [[[24, HWY], [696, HWY]], [[150, BOT], [HUB.rx, BOT]], [[HUB.rx, BOT], [HUB.rx, HUB.y]]];
+    Object.values(SUPS).forEach(sp => roads.push([[sp.x, sp.y + sp.h], [sp.x, HWY]]));
+    GROUPS.forEach(g => { roads.push([[g.cx, HWY], [g.cx, g.y]]); roads.push([[g.cx, g.y + g.h], [g.cx, BOT]]); });
+    roads.forEach(r => road(r)); roads.forEach(r => dash(r));
+    // Bäume und Häuser
+    TREES.forEach(([x, y]) => { c.fillStyle = pal.tree; c.beginPath(); c.arc(x, y, 11, 0, 7); c.fill(); });
+    HOUSES.forEach(([x, y]) => { c.fillStyle = pal.house; rr(c, x - 15, y - 11, 30, 22, 3); c.fill(); c.fillStyle = pal.road; c.fillRect(x - 4, y - 1, 8, 12); });
+    // Hersteller
+    Object.entries(SUPS).forEach(([k, sp]) => {
+      c.fillStyle = pal.wall; rr(c, sp.x - sp.w / 2, sp.y + 10, sp.w, sp.h - 10, 4); c.fill();
+      c.fillStyle = pal.roof; rr(c, sp.x - sp.w / 2, sp.y, sp.w, sp.h - 18, 4); c.fill();
+      c.fillStyle = pal.road; for (let i = -1; i <= 1; i++) c.fillRect(sp.x + i * 30 - 8, sp.y + sp.h - 14, 16, 12);
+      c.fillStyle = pal.muted; c.fillRect(sp.x - sp.w / 2 + 8, sp.y + 8, 14, 22); c.fillRect(sp.x - sp.w / 2 + 28, sp.y + 8, 14, 22);
+    });
+    // Lagerhäuser
+    MAP.whHit = [];
+    GROUPS.forEach(g => {
+      const x = g.cx - g.w / 2, sel = MAP.sel && MAP.sel.type === 'wh' && MAP.sel.id === g.id, w = warn(g);
+      c.fillStyle = 'rgba(0,0,0,.22)'; rr(c, x + 5, g.y + 7, g.w, g.h, 6); c.fill();
+      c.fillStyle = pal.wall; rr(c, x, g.y + 14, g.w, g.h - 14, 6); c.fill();
+      c.fillStyle = pal.roof; rr(c, x, g.y, g.w, g.h - 22, 6); c.fill();
+      c.strokeStyle = pal.line; c.lineWidth = 1; for (let i = 1; i < 6; i++) { c.beginPath(); c.moveTo(x + i * g.w / 6, g.y + 4); c.lineTo(x + i * g.w / 6, g.y + g.h - 26); c.stroke(); }
+      c.fillStyle = pal.road; for (let i = 0; i < 3; i++) c.fillRect(x + 20 + i * 48, g.y + g.h - 20, 36, 18);
+      c.fillStyle = pal.ok; c.fillRect(g.cx - 14, g.y - 2, 28, 7);   // Wareneingang
+      // Füllstand
+      const infos = P.filter(p => g.types.includes(p.type)).map(prodInfo), tot = infos.reduce((n, a) => n + a.total, 0), nv = infos.reduce((n, a) => n + a.info.length, 0), fill = Math.min(1, tot / (nv * 30));
+      c.fillStyle = 'rgba(128,128,128,.25)'; rr(c, x + 10, g.y + g.h - 40, g.w - 52, 6, 3); c.fill();
+      c.fillStyle = pal.gold; rr(c, x + 10, g.y + g.h - 40, (g.w - 52) * fill, 6, 3); c.fill();
+      // Signalleuchte
+      const lc = w > .3 ? pal.out : w > .12 ? pal.low : pal.ok; c.fillStyle = lc; c.beginPath(); c.arc(x + g.w - 16, g.y + 16, 6, 0, 7); c.fill();
+      c.strokeStyle = lc; c.globalAlpha = .35 + .25 * Math.sin(now / 500 + g.cx); c.lineWidth = 2; c.beginPath(); c.arc(x + g.w - 16, g.y + 16, 10, 0, 7); c.stroke(); c.globalAlpha = 1;
+      if (sel) { c.strokeStyle = pal.gold; c.lineWidth = 3; rr(c, x - 4, g.y - 6, g.w + 8, g.h + 10, 9); c.stroke(); }
+      MAP.whHit.push({ id: g.id, x, y: g.y - 6, w: g.w, h: g.h + 10 });
+    });
+    // Kundenzentrum
+    c.fillStyle = pal.wall; rr(c, HUB.x, HUB.y + 8, HUB.w, HUB.h - 8, 5); c.fill(); c.fillStyle = pal.roof; rr(c, HUB.x, HUB.y, HUB.w, HUB.h - 16, 5); c.fill();
+    c.fillStyle = pal.gold; c.fillRect(HUB.x + 10, HUB.y + 10, 30, 8); c.fillRect(HUB.x + 46, HUB.y + 10, 30, 8);
+    // Lieferungen zum Lager
+    MAP.trucks = [];
+    S.orders.forEach(o => {
+      const c0 = diffDays(o.created), e0 = diffDays(o.eta), pr = Math.max(0, Math.min(1, (day - c0) / Math.max(1, e0 - c0)));
+      if (day >= e0 + 1.4 && MAP.sim) return;                    // entladen, Fahrzeug fährt weg (aus dem Bild)
+      const pts = inPath(o), f = polyAt(pts, pr), sel = MAP.sel && MAP.sel.type === 'tr' && MAP.sel.id === o.id;
+      const nx = -Math.sin(f.ang) * -5, ny = Math.cos(f.ang) * -5;
+      const x = f.x - Math.sin(f.ang) * 5, y = f.y + Math.cos(f.ang) * 5;
+      const unload = pr >= 1;
+      drawTruck(c, x, y + (unload ? 0 : Math.sin(now / 160 + o.pid.length) * .4), f.ang, pal.inc, pal, 1.5);
+      if (sel) { c.strokeStyle = pal.gold; c.lineWidth = 2.5; c.beginPath(); c.arc(x, y, 21, 0, 7); c.stroke(); }
+      MAP.trucks.push({ id: o.id, x, y, pr, unload });
+    });
+    // Auslieferungen (Beispiel): je Lager zwei Transporter, hin und zurück
+    if (!reduceMotion()) GROUPS.forEach((g, gi) => [0, 1].forEach(k => {
+      const per = [17, 24][k] + gi * 2, q = ((now / 1000) / per + (gi * 0.37 + k * 0.5)) % 1, fwd = q < .5, pts = outPath(g), f = polyAt(pts, fwd ? q * 2 : 1 - (q - .5) * 2);
+      const ang = fwd ? f.ang : f.ang + Math.PI;
+      drawTruck(c, f.x - Math.sin(ang) * 5, f.y + Math.cos(ang) * 5, ang, pal.gold, pal, 1.3);
+    }));
+    c.restore();
+    // Beschriftungen in Bildschirmgröße
+    const narrow = MAP.cw < 520, sfx = narrow ? '.s' : '', fs = Math.max(10.5, Math.min(15, MAP.cw / 52)); c.font = `600 ${fs}px Archivo, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    const label = (txt, x, y, col) => { c.lineWidth = 4; c.strokeStyle = pal.ground; c.lineJoin = 'round'; c.strokeText(txt, x * s, y * s); c.fillStyle = col || pal.text; c.fillText(txt, x * s, y * s); };
+    GROUPS.forEach(g => { const a = P.filter(p => g.types.includes(p.type)).map(prodInfo); label(t('wh.' + g.id + sfx), g.cx, g.y - 12); c.font = `500 ${fs - 1}px 'IBM Plex Mono', monospace`; label(narrow ? String(a.reduce((n, x) => n + x.total, 0)) : pcs(a.reduce((n, x) => n + x.total, 0)), g.cx, g.y + g.h + 14, pal.muted); c.font = `600 ${fs}px Archivo, sans-serif`; });
+    Object.entries(SUPS).forEach(([k, sp]) => label(t('sup.' + k + sfx), sp.x, sp.y - 6, pal.muted));
+    label(t(narrow ? 'hub.s' : 'hub'), HUB.x + HUB.w / 2, HUB.y + HUB.h + 16, pal.muted);
+    const sel = MAP.sel && MAP.sel.type === 'tr' && MAP.trucks.find(x => x.id === MAP.sel.id);
+    if (sel) label(sel.id, sel.x, sel.y - 15, pal.gold);
+    const dl = fmt(addDays(new Date(), Math.floor(day))); if (dl !== MAP.dayShown) { MAP.dayShown = dl; $('wdate').textContent = dl; }
+  }
+
+  function mapLoop(now) { drawWorld(now); MAP.raf = reduceMotion() ? 0 : requestAnimationFrame(mapLoop); }
+  function startMap() { if (MAP.raf) return; sizeMap(); MAP.raf = requestAnimationFrame(mapLoop); }
+  function stopMap() { if (MAP.raf) cancelAnimationFrame(MAP.raf); MAP.raf = 0; }
+  function sizeMap() {
+    const box = $('cv'), cv = $('map'); if (!box || box.clientWidth === 0) return;
+    MAP.dpr = Math.min(2, window.devicePixelRatio || 1); MAP.cw = box.clientWidth; MAP.ch = box.clientHeight;
+    cv.width = Math.round(MAP.cw * MAP.dpr); cv.height = Math.round(MAP.ch * MAP.dpr); drawWorld(performance.now());
+  }
+  function mapInfo() {
+    const sel = MAP.sel, el = $('winfo');
+    if (!sel) { el.innerHTML = `<p>${t('map.hint')}</p>`; }
+    else if (sel.type === 'wh') {
+      const g = GROUPS.find(x => x.id === sel.id), items = P.filter(p => g.types.includes(p.type)).map(p => ({ p, a: prodInfo(p) }));
+      const tot = items.reduce((n, x) => n + x.a.total, 0), o = items.reduce((n, x) => n + x.a.out.length, 0), l = items.reduce((n, x) => n + x.a.low.length, 0);
+      const inc = S.orders.filter(od => g.types.includes(byId(od.pid).type)).reduce((n, od) => n + od.lines.reduce((m, ln) => m + ln.qty, 0), 0);
+      el.innerHTML = `<h3>${t('wh.' + g.id)}</h3><p>${t('wh.line', { n: tot, o, l })} · ${inc ? t('wh.inc', { n: inc }) : t('wh.none')}</p><ul>${items.map(({ p, a }) => `<li><span>${esc(pname(p))}</span><b>${a.total}</b></li>`).join('')}</ul>`;
+    } else {
+      const od = S.orders.find(x => x.id === sel.id); if (!od) { el.innerHTML = `<p>${t('map.hint')}</p>`; return; }
+      const p = byId(od.pid), g = gOf(p), q = od.lines.reduce((m, ln) => m + ln.qty, 0), tr = MAP.trucks.find(x => x.id === od.id);
+      const pr = tr ? tr.pr : 0, st = pr >= 1 ? (diffDays(od.eta) < 0 ? t('tr.late') : t('tr.unload')) : t('tr.drive', { d: fmt(od.eta), r: rel(od.eta), p: Math.round(pr * 100) });
+      el.innerHTML = `<h3>${od.id} · ${esc(pname(p))}</h3><p>${t('tr.line', { name: esc(pname(p)), q, sup: t('sup.' + g.sup), wh: t('wh.' + g.id) })} ${st}</p>`;
+    }
+  }
+  function mapUi() {
+    $('trucks').innerHTML = S.orders.map(o => `<button type="button" data-truck="${o.id}" aria-pressed="${!!(MAP.sel && MAP.sel.type === 'tr' && MAP.sel.id === o.id)}">${o.id} · ${esc(pname(byId(o.pid)))}</button>`).join('');
+    document.querySelectorAll('[data-sim]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.sim === '1') === MAP.sim)));
+    mapInfo(); drawWorld(performance.now());
+  }
+  (function mapEvents() {
+    const cv = $('map');
+    const world = e => { const r = cv.getBoundingClientRect(), s = r.width / 720; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
+    const hit = e => {
+      const w = world(e), tr = MAP.trucks.map(x => ({ x, d: Math.hypot(x.x - w.x, x.y - w.y) })).filter(o => o.d < 22).sort((a, b) => a.d - b.d)[0];
+      if (tr) return { type: 'tr', id: tr.x.id };
+      const wh = MAP.whHit.find(h => w.x >= h.x && w.x <= h.x + h.w && w.y >= h.y && w.y <= h.y + h.h); return wh ? { type: 'wh', id: wh.id } : null;
+    };
+    cv.addEventListener('click', e => { MAP.sel = hit(e); mapUi(); });
+    cv.addEventListener('pointermove', e => { cv.style.cursor = hit(e) ? 'pointer' : 'default'; });
+    document.addEventListener('click', e => {
+      const b = e.target.closest('[data-truck],[data-sim]'); if (!b) return;
+      if (b.dataset.truck) { MAP.sel = { type: 'tr', id: b.dataset.truck }; }
+      else { MAP.sim = b.dataset.sim === '1'; MAP.t0 = performance.now(); }
+      mapUi();
+    });
+    if (window.ResizeObserver) new ResizeObserver(() => sizeMap()).observe($('cv'));
+  })();
 
   /* ---------- Sprache und Helligkeit ---------- */
   const themeNow = () => { const a = document.documentElement.getAttribute('data-theme'); return a || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); };

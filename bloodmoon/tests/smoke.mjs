@@ -166,7 +166,7 @@ try {
   await spawn('crawler', 1.2, 6);
   await waitGame(page, 0.3);
   await aim();
-  const hpSum = async () => (await info(page)).enemies.filter((e) => e.d < 12).reduce((s, e) => s + e.hp, 0);
+  const hpSum = async () => (await info(page)).enemies.filter((e) => e.id.startsWith('test_') && e.d < 16).reduce((s, e) => s + e.hp, 0);
   let before = await hpSum();
   await press('KeyQ', 1.5);
   i = await info(page);
@@ -344,9 +344,11 @@ try {
     else await waitGame(page, 0.1);
   }
   check('Boss reaches phase 2 below 50% health', (await g(() => window.__BLOODMOON__.flags.boss_defeated || (window.__BLOODMOON__.boss && window.__BLOODMOON__.boss.phase === 2))) === true);
-  await waitGame(page, 2.5);
+  // the defeat runs in slow motion, so wait for the dialogue itself rather than a fixed time
+  await page.waitForFunction(() => window.__BLOODMOON__.overlay === 'dialogue', null, { timeout: 180000 });
   await finishDialogue(1);
-  await wait(page, 1500);
+  await page.waitForFunction(() => window.__BLOODMOON__.overlay === 'victory', null, { timeout: 60000 }).catch(() => {});
+  await wait(page, 1000);
   check('Boss can be defeated; victory screen shows', (await flags()).boss_defeated === true && (await page.locator('#screen-victory.show').count()) === 1);
   await page.screenshot({ path: 'tests/screenshots/victory.png' });
   const savedBoss = await g(() => JSON.parse(localStorage.getItem('bloodmoon.save.v1')));
@@ -384,7 +386,7 @@ try {
   await page.click('[data-act="continue"]');
   await page.waitForFunction(() => window.__BLOODMOON__.state === 'play', null, { timeout: 90000 });
   check('Character switch applies to the continued journey', (await info(page)).char === 'kairo');
-  await tp(0, -60, Math.PI);
+  await tp(-2, -30, Math.PI);
   await g(() => { const P = window.__BLOODMOON__.player; P.blood = P.maxBlood; });
   await spawn('knight', 0, 5);
   await waitGame(page, 0.3);

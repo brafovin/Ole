@@ -22,7 +22,7 @@ export const G = (page, fn, arg) => page.evaluate(fn, arg);
 export const info = (page) => page.evaluate(() => window.__BLOODMOON__.debug.info());
 export const wait = (page, ms) => page.waitForTimeout(ms);
 /** Wait for game-simulated seconds (the software renderer is slow, so real time != game time). */
-export async function waitGame(page, seconds, timeout = 120000) {
+export async function waitGame(page, seconds, timeout = 600000) {
   await page.evaluate(() => (window.__t0 = window.__BLOODMOON__.stats.playTime));
   // returns early when an overlay (note, dialogue, death…) pauses the simulation
   await page.waitForFunction((s) => window.__BLOODMOON__.overlay || window.__BLOODMOON__.state !== 'play' || window.__BLOODMOON__.stats.playTime - window.__t0 >= s, seconds, { timeout, polling: 100 });

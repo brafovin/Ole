@@ -234,13 +234,14 @@ export class Effects {
   }
 
   pillar(pos, color, radius = 1, height = 14, dur = 0.8) {
-    const mat = this._mat(color, 0.4);
+    const mat = this._mat(color, 0.13);
+    mat.side = THREE.FrontSide;
     const m = this._mesh(GEO.cyl, mat);
     m.position.set(pos.x, 0, pos.z);
     return this._add(m, dur, (k) => {
       const r = radius * (k < 0.2 ? k / 0.2 : 1 - (k - 0.2) * 0.8);
       m.scale.set(Math.max(0.01, r), height, Math.max(0.01, r));
-      mat.opacity = 0.4 * (1 - k);
+      mat.opacity = 0.13 * (1 - k);
     });
   }
 

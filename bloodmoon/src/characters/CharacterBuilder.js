@@ -122,6 +122,46 @@ function bladeGeometry(len, width, thick, tipLen = 0.18) {
   return ng;
 }
 
+/** Black floral lace pattern (Seraphina's gloves), painted once and cached per colour. */
+const laceCache = new Map();
+function laceTexture(base) {
+  if (laceCache.has(base)) return laceCache.get(base);
+  const S = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.fillStyle = '#' + new THREE.Color(base).getHexString();
+  x.fillRect(0, 0, S, S);
+  x.strokeStyle = 'rgba(120,96,118,0.85)';
+  x.lineWidth = 1.4;
+  for (let j = 0; j < 4; j++) {
+    for (let i = 0; i < 4; i++) {
+      const cx = i * 32 + (j % 2) * 16 + 8, cy = j * 32 + 16;
+      for (let k = 0; k < 6; k++) {
+        const a = (k / 6) * Math.PI * 2;
+        x.beginPath();
+        x.ellipse(cx + Math.cos(a) * 6, cy + Math.sin(a) * 6, 5, 2.4, a, 0, Math.PI * 2);
+        x.stroke();
+      }
+      x.beginPath();
+      x.arc(cx, cy, 2.2, 0, Math.PI * 2);
+      x.stroke();
+    }
+  }
+  x.strokeStyle = 'rgba(90,70,90,0.6)';
+  x.lineWidth = 0.8;
+  for (let i = 0; i < S; i += 8) {
+    x.beginPath(); x.moveTo(i, 0); x.lineTo(i + S, S); x.stroke();
+    x.beginPath(); x.moveTo(i + S, 0); x.lineTo(i, S); x.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(3, 2);
+  laceCache.set(base, t);
+  return t;
+}
+
 // ------------------------------------------------------------------ builder
 class Builder {
   constructor(spec) {
@@ -238,6 +278,7 @@ export function buildCharacter(spec) {
 
   // --- arms
   const sleeveMat = B.mat('sleeve', P.sleeve ?? P.primary);
+  if (P.lace && !B.mats.foreSleeve) B.mats.foreSleeve = toon(0xffffff, { map: laceTexture(P.foreSleeve ?? 0x0b080c), rim: 1 });
   const handMat = P.gloves ? B.mat('gloves', P.gloves) : skin;
   const upperArmGeo = lathe([[0.001, 0.02], [0.046, 0.0], [0.05, -0.08], [0.044, -0.24], [0.04, -0.29], [0.001, -0.3]], 14);
   const foreArmGeo = lathe([[0.001, 0.01], [0.041, 0], [0.042, -0.08], [0.033, -0.24], [0.001, -0.25]], 14);

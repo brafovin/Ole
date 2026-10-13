@@ -150,9 +150,9 @@ input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 
 /* ---------------------------------------------------------------- character select */
 #screen-charselect { background: linear-gradient(90deg, rgba(5, 3, 7, .9) 0%, rgba(5, 3, 7, .35) 42%, transparent 58%, rgba(5, 3, 7, .7) 100%); }
 .cs-left { position: absolute; left: clamp(20px, 4vw, 60px); top: 6vh; bottom: 6vh; width: min(520px, 46vw); display: flex; flex-direction: column; }
-.cs-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+.cs-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
 .cs-card { pointer-events: auto; cursor: pointer; position: relative; border: 1px solid var(--silver-dim); background: rgba(10, 6, 12, .8); padding: 0; overflow: hidden; text-align: left; color: var(--text); transition: border-color .25s, transform .25s var(--ease), box-shadow .25s; }
-.cs-card img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: #120a10; filter: saturate(.9); transition: filter .3s, transform .5s var(--ease); }
+.cs-card img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #120a10; filter: saturate(.9); transition: filter .3s, transform .5s var(--ease); }
 .cs-card:hover img { transform: scale(1.04); filter: saturate(1.1); }
 .cs-card .nm { padding: 9px 10px 10px; font-family: var(--head); font-size: 13px; letter-spacing: .1em; }
 .cs-card .nm small { display: block; font-family: var(--body); font-style: italic; letter-spacing: 0; color: var(--muted); font-size: 14px; }
@@ -239,7 +239,7 @@ input[type=range]::-moz-range-thumb { width: 11px; height: 11px; border-radius: 
 .boss-bar { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); width: min(720px, 60vw); text-align: center; opacity: 0; transition: opacity .6s; }
 .boss-bar.show { opacity: 1; }
 .boss-bar .bn { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: .14em; color: #ffe8ec; text-shadow: 0 0 14px rgba(255, 30, 50, .6); }
-.boss-bar .bsub { font-family: var(--head); font-size: 10px; letter-spacing: .4em; color: var(--crimson-hi); margin-bottom: 6px; }
+.boss-bar .bsub { font-family: var(--head); font-size: 10px; letter-spacing: .4em; color: var(--silver); text-shadow: 0 1px 4px #000; margin-bottom: 6px; }
 .boss-bar .bar { height: 14px; border-color: rgba(255, 60, 80, .4); }
 .boss-bar .bar i.fill { background: linear-gradient(180deg, #ff2a46, #8a0a20); box-shadow: 0 0 14px rgba(255, 30, 50, .7); }
 .boss-bar .marker { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: #fff8; }

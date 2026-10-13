@@ -10,7 +10,8 @@ const _v = new THREE.Vector3();
 
 /** Furthest free point along dir up to maxDist. */
 function travelPoint(g, from, dir, maxDist, radius = 0.5) {
-  const hit = g.collision.raycast(from.x, from.z, dir.x, dir.z, maxDist, 'all', 0.5);
+  // passes over low obstacles (pews, crates) and ignores anything we are already standing inside
+  const hit = g.collision.raycast(from.x, from.z, dir.x, dir.z, maxDist, 'all', 1.3, true);
   let d = Math.max(0, hit - radius - 0.1);
   const p = new THREE.Vector3();
   for (; d > 0; d -= 0.5) {

@@ -661,7 +661,7 @@ export class UI {
     }
     // interaction prompt
     const it = g.currentInteractable;
-    const ptext = it ? (typeof it.prompt === 'function' ? it.prompt(g) : it.prompt) : '';
+    const ptext = it && !g.overlay ? (typeof it.prompt === 'function' ? it.prompt(g) : it.prompt) : '';
     this.set('prompt', ptext, (v) => { R.promptText.textContent = v; R.prompt.classList.toggle('show', !!v); });
     // boss
     if (g.boss && this.bossShown) {

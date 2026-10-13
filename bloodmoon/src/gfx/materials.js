@@ -143,5 +143,6 @@ export function buildEnvMaterials(tex) {
     paper: new THREE.MeshStandardMaterial({ map: tex.paper, roughness: 0.9, emissive: 0x201810 }),
     leaves: new THREE.MeshStandardMaterial({ color: 0x1a120e, roughness: 1, side: THREE.DoubleSide }),
   };
+  for (const [k, f] of Object.entries({ floor: 2, wall: 1.9, wallDark: 1.6, cobble: 1.8, wood: 1.6, darkwood: 1.7, plaster: 1.8, roof: 1.6, dirt: 1.9, forest: 2, bark: 1.6, stone: 1.9, statue: 1.6, marble: 1.3, cloth: 1.4, clothDark: 1.4 })) m[k].color.multiplyScalar(f);
   return m;
 }

@@ -1,0 +1,14 @@
+<!doctype html><html><body><script type="module">
+import { buildCharacter } from '../src/characters/CharacterBuilder.js';
+import { playerSpec, BOSS_SPEC } from '../src/characters/definitions.js';
+import { ENEMY_TYPES } from '../src/enemies/types.js';
+const out = {};
+const count = (root) => { let n = 0; root.traverse((o) => { if (o.isMesh || o.isSprite) n++; }); return n; };
+for (const id of ['lucien', 'seraphina', 'kairo']) {
+  out[id] = [count(buildCharacter({ ...playerSpec(id, 'default'), optimize: false }).root), count(buildCharacter(playerSpec(id, 'default')).root)];
+}
+for (const t of ['knight', 'stalker', 'mage']) out[t] = [count(buildCharacter({ ...ENEMY_TYPES[t].spec, optimize: false }).root), count(buildCharacter(ENEMY_TYPES[t].spec).root)];
+out.countess = [count(buildCharacter({ ...BOSS_SPEC, optimize: false }).root), count(buildCharacter(BOSS_SPEC).root)];
+document.title = JSON.stringify(out);
+window.__done = true;
+</script></body></html>

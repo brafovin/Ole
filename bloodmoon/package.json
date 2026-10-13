@@ -1,0 +1,17 @@
+{
+  "name": "blood-moon-eternal-night",
+  "private": true,
+  "version": "1.0.0",
+  "description": "BLOOD MOON: ETERNAL NIGHT — a 3D anime vampire action-horror game built with Three.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve-static": "npx --yes serve -l 5173 .",
+    "test": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "vite": "6.4.3"
+  }
+}

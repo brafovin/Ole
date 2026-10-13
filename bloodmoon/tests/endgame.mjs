@@ -94,6 +94,8 @@ try {
 
   // Lucien abilities (current character)
   await tp(-2, -30, Math.PI);
+  // clear the nave's own enemies so the abilities are measured against the test targets only
+  await g(() => window.__BLOODMOON__.debug.killNear(25));
   await g(() => { const G = window.__BLOODMOON__; G.debug.god(true); G.player.blood = G.player.maxBlood; G.player.hp = 60; });
   await spawn('knight', 0, 4);
   await waitGame(page, 0.3);

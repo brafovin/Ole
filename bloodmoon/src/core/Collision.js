@@ -105,7 +105,8 @@ export class CollisionWorld {
           const rr = radius + c.r;
           const d2 = dx * dx + dz * dz;
           if (d2 < rr * rr) {
-            const d = Math.sqrt(d2) || 1e-4;
+            const d = Math.sqrt(d2);
+            if (d < 1e-4) { pos.x += rr; moved = hit = true; continue; } // exactly centred: pick a side
             const push = rr - d;
             pos.x += (dx / d) * push;
             pos.z += (dz / d) * push;
@@ -165,7 +166,7 @@ export class CollisionWorld {
    * Cast a 2D ray. Returns distance to the first hit (or maxDist).
    * filter: 'camera' | 'projectiles' | 'all'
    */
-  raycast(ox, oz, dx, dz, maxDist, filter = 'all', minHeight = 0) {
+  raycast(ox, oz, dx, dz, maxDist, filter = 'all', minHeight = 0, skipInside = false) {
     const len = Math.hypot(dx, dz) || 1;
     dx /= len; dz /= len;
     const ex = ox + dx * maxDist, ez = oz + dz * maxDist;
@@ -183,6 +184,7 @@ export class CollisionWorld {
         const cc = fx * fx + fz * fz - c.r * c.r;
         const disc = b * b - cc;
         if (disc < 0) continue;
+        if (cc < 0 && skipInside) continue;
         t = -b - Math.sqrt(disc);
         if (t < 0) t = cc < 0 ? 0 : -1;
       } else {
@@ -203,6 +205,7 @@ export class CollisionWorld {
           tmin = Math.max(tmin, t1); tmax = Math.min(tmax, t2);
         }
         if (tmax < tmin || tmax < 0) continue;
+        if (tmin < 0 && skipInside) continue;
         t = tmin < 0 ? 0 : tmin;
       }
       if (t >= 0 && t < best) best = t;

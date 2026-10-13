@@ -164,13 +164,21 @@ bloodmoon/
 The tests drive the real game in headless Chromium (software WebGL) through Playwright:
 
 ```bash
-npx http-server -p 5199 -c-1 .     # serve the folder on port 5199
-node tests/smoke.mjs               # full acceptance run (menus → combat → quests → save/load → boss → death)
+npx http-server -p 5199 -c-1 .     # serve the folder on port 5199 (separate terminal)
+npm test                           # tests/smoke.mjs   — menus, settings, character select, movement, combat,
+                                   #   abilities, enemies hurting you, quests, inventory, pause, save → reload →
+                                   #   continue, survivors & dialogue choices, clues, secret room, forest ambush,
+                                   #   Blood Seal, boss fight, victory, death & respawn
+npm run test:endgame               # tests/endgame.mjs — boss fight in depth, ending choice, save, death/respawn,
+                                   #   and every character's Q/E/R/right-click
 ```
 
-`tests/smoke.mjs` uses real keyboard/mouse input for interactions and combat, and the debug API
+The tests use real keyboard/mouse input for interactions and combat, and the debug API
 (`window.__BLOODMOON__.debug`: `teleport`, `god`, `killNear`, `give`, `info`) to travel between
-areas quickly. The `?nolock` URL parameter disables pointer lock for automated testing.
+areas quickly. URL parameters used by the tests: `?nolock` (no pointer lock) and `&maxdt=0.1`
+(larger simulation steps for the slow CPU renderer). Other helpers: `tests/areas.mjs` (screenshots
+of every area), `tests/screens.mjs` (UI screenshots), `tests/char-preview.html` (model viewer:
+`?view=all|npc|enemies|lucien&close=1&pose=sword1`), `tests/count.mjs` (draw-call count per model).
 
 ---
 

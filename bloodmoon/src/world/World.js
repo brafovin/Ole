@@ -20,7 +20,7 @@ import { ITEMS } from '../systems/items.js';
 export const AREAS = [
   {
     id: 'cathedral', name: 'The Forgotten Cathedral', sub: 'Area I', seed: 101, zMin: -17,
-    fog: 0x0b0710, density: 0.03, hemiSky: 0x7a6a94, hemiGround: 0x2a161a, hemi: 1.55, moon: 0.2, fill: 0.35,
+    fog: 0x0b0710, density: 0.03, hemiSky: 0x7a6a94, hemiGround: 0x2a161a, hemi: 2.0, moon: 0.2, fill: 0.35,
     rim: 0x9a8aff, rimK: 0.55, music: 'cathedral', amb: { wind: 0.05, drone: 0.75, forest: 0 }, moonScale: 1, particles: 'dust',
   },
   {

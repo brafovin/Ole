@@ -87,6 +87,16 @@ export class Player {
     this.anim = new Animator(this.model, this.style);
     this.abilities = ABILITIES[id];
     this.colors = COLORS[id];
+    // combat state belongs to the previous body/session: cooldowns, actions and guards start fresh
+    this.cooldowns = { q: 0, e: 0, r: 0 };
+    this.action = null;
+    this.combo = 0;
+    this.comboTimer = 0;
+    this.buffered = false;
+    this.blocking = false;
+    this.parryT = 0;
+    this.guardT = 0;
+    this.levitate = 0;
     this.recompute();
     this.model.root.position.copy(this.pos);
   }
